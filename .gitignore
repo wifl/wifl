@@ -1,5 +1,6 @@
-# Ignore the build directory
-build/
+# Ignore the target directories
+dist/
+site/
 
 # Ignore emacs backup files
 *~

@@ -1,0 +1,32 @@
+<project name="Web InterFace Language" default="all">
+
+  <!-- Source directories -->
+  <property name="src" location="src"/>
+  <property name="doc" location="doc"/>
+
+  <!-- Target directories -->
+  <property name="dist" location="dist"/>
+  <property name="site"  location="site"/>
+
+  <target name="dist">
+    <mkdir dir="${dist}"/>
+    <copy todir="${dist}">
+      <fileset dir="${src}"/>
+    </copy>
+  </target>
+
+  <target name="site">
+    <mkdir dir="${site}"/>
+    <copy todir="${site}">
+      <fileset dir="${doc}"/>
+    </copy>
+  </target>
+
+  <target name="all" depends="dist,site"/>
+
+  <target name="clean">
+    <delete dir="${dist}"/>
+    <delete dir="${site}"/>
+  </target>
+
+</project>
