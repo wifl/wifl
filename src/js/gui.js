@@ -189,32 +189,26 @@ define(["jquery","jquery-ui","uri-template"],function($,jqueryUI,uriTemplate) {
         }
         return $result;
       }
-      var $sel = $select(
-        representations.map($opt)
-      ).addClass("request-repr-type").change(function () {
-        req.contentType = $sel.val();
-      });
-      var $ta = $textarea().addClass("request-repr-body").change(function () {
+      var $ta = $textarea().addClass("request-repr-body");
+      var $sel = $select(representations.map($opt)).addClass("request-repr-type");
+      return $div($sel,$ta).change(function () {
         req.body = $ta.val();
+	if ($ta.val()) {
+          req.contentType = $sel.val();
+	} else {
+	  delete req.contentType;
+	}
       });
-      $sel.change();
-      $ta.change();
-      return $div($sel,$ta);
     }
   }
 
   // Display a request.
   // When the submit button is pressed, it creates an HTTP request,
   // and displays the result.
-  function $request(path,request) {
-    if (request.queryParams.length) {
-      function name(param) { return param.name; }
-      var names = request.queryParams.map(name).sort();
-      path = path + "{?" + names.join(",") + "}";
-    }
+  function $request(request) {
     var req = {
       method: request.method,
-      uriTemplate: uriTemplate.create(path),
+      uriTemplate: uriTemplate.create(request.uriTemplate),
       uriParams: {},
       headerParams: {},
       body: ""
@@ -272,7 +266,7 @@ define(["jquery","jquery-ui","uri-template"],function($,jqueryUI,uriTemplate) {
       return $li($a(request.method).attr("href","#"+request.method+tabId));
     }
     function $requestBody(request) {
-      return $request(resource.path,request).attr("id",request.method+tabId)
+      return $request(request).attr("id",request.method+tabId)
     }
     return $div(
       $ul($aboutLink,resource.requests.map($requestLink)),

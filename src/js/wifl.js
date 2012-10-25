@@ -114,14 +114,26 @@ define(["rdfa-ld"], function (rdfaLD) {
       resource.requests = resource.requests.concat(supers[i].requests);
       resource.responses = resource.responses.concat(supers[i].responses);
     }
+    resource.uriTemplate = this.uriTemplate(resource);
     for (var j=0; j<resource.requests.length; j++) {
       var request = resource.requests[j];
+      request.path = resource.path;
       request.pathParams = request.myPathParams.concat(resource.pathParams);
       request.queryParams = request.myQueryParams.concat(resource.queryParams);
       request.headerParams = request.myHeaderParams.concat(resource.headerParams);
       request.responses = request.myResponses.concat(resource.responses);
+      request.uriTemplate = this.uriTemplate(request);
     }
     return resource;
+  };
+  Wifl.prototype.uriTemplate = function(obj) {
+    if (obj.queryParams.length) {
+      function name(param) { return param.name; }
+      var names = obj.queryParams.map(name).sort();
+      return obj.path + "{?" + names.join(",") + "}";
+    } else {
+      return obj.path;
+    }
   };
 
   // To create a WIFL object we resolve wrt all the properties
