@@ -1,1 +1,7 @@
 Copyright 2012 Alcatel-Lucent, All Rights Reserved.
+
+Includes code from:
+
+JQuery (MIT licensed) http://jquery.org/
+JQuery UI (MIT licensed) http://jqueryui.com/
+Green Turtle (BSD3 licensed) http://code.google.com/p/green-turtle/
