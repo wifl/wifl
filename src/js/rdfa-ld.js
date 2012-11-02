@@ -50,13 +50,11 @@ define(["rdfa"], function (rdfa) {
     }
     return doc.URL;
   }
-  // Set the URI of a document, if it doesn't already have one.
+  // Set the URI of a document
   function setURI(doc,uri) {
-    if (!getURI(doc)) {
-      var base = doc.createElement("base");
-      base.setAttribute("href",uri);
-      doc.documentElement.children[0].appendChild(base);
-    }
+    var base = doc.createElement("base");
+    base.setAttribute("href",uri);
+    doc.documentElement.children[0].appendChild(base);
   }
 
   // Flatten an array of arrays to an array
@@ -108,22 +106,25 @@ define(["rdfa"], function (rdfa) {
       if (!docs.uris[uri]) {
         var xhr = new XMLHttpRequest();
         var doc = document.implementation.createHTMLDocument(uri);
-        setURI(doc,uri);
-	docs.uris[uri] = doc;
-	xhrs++;
+        docs.uris[uri] = doc;
+        xhrs++;
         xhr.onloadend = function() {
-	  try {
-	    xhrs--;
-	    if (xhr.resposeXML) {
-	      doc.documentElement.innerHTML = xhr.responseXML;
-	      rdfa.attach(doc);
+          try {
+            xhrs--;
+            if (xhr.responseText) {
+              doc.documentElement.innerHTML = xhr.responseText;
+              setURI(doc,uri);
+              rdfa.attach(doc);
               docs.docs.push(doc);
-	    }
-	  } finally {
-	    if (xhrs == 0) { result.set(docs); }
-	  }
-	}
+            }
+          } catch (e) {
+        	  console.log(e);
+          } finally {
+            if (xhrs == 0) { result.set(docs); }
+          }
+        }
         xhr.open("GET",uri);
+        xhr.send();
       }
     }
     if (xhrs == 0) { result.set(this); }
@@ -157,7 +158,7 @@ define(["rdfa"], function (rdfa) {
   }
   // Get all targets of the given properties.
   Documents.prototype.getTargets = function() {
-    var properties = Array.prototype.splice(arguments);
+    var properties = Array.prototype.slice.call(arguments);
     return flatten(properties.map(function (property) {
       return this.getValues(null,property);
     },this));
@@ -175,6 +176,7 @@ define(["rdfa"], function (rdfa) {
     this.docs.forEach(function(doc) {
       doc.data.setMapping(from,to);
     });
+    return this;
   };
 
   var empty = new Documents();

@@ -109,10 +109,10 @@ define(["rdfa-ld"], function (rdfaLD) {
     resource.requests = resource.myRequests;
     resource.responses = resource.myResponses;
     for (var i=0; i<resource.supers.length; i++) {
-      resource.queryParams = resource.queryParams.concat(supers[i].queryParams);
-      resource.headerParams = resource.headerParams.concat(supers[i].headerParams);
-      resource.requests = resource.requests.concat(supers[i].requests);
-      resource.responses = resource.responses.concat(supers[i].responses);
+      resource.queryParams = resource.queryParams.concat(resource.supers[i].queryParams);
+      resource.headerParams = resource.headerParams.concat(resource.supers[i].headerParams);
+      resource.requests = resource.requests.concat(resource.supers[i].requests);
+      resource.responses = resource.responses.concat(resource.supers[i].responses);
     }
     resource.uriTemplate = this.uriTemplate(resource);
     for (var j=0; j<resource.requests.length; j++) {
@@ -140,7 +140,7 @@ define(["rdfa-ld"], function (rdfaLD) {
   // which can refer from one WIFL object to another.
   return {
     create: function(doc) {
-      return rdfaLD.create(doc).resolveTargets(
+      return rdfaLD.create(doc).setMapping("wifl","http://wifl.org/spec/#").resolveTargets(
 	"wifl:parent",
 	"wifl:super",
 	"wifl:pathParam",
