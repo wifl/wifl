@@ -1,0 +1,175 @@
+<div prefix="wifl: http://wifl.org/spec/#" vocab="http://wifl.org/spec/#">
+ 
+<p>This section outlines a fictional online store application which has a RESTful API.
+The application supports listing the products it offers, adding new products, 
+getting detailed product information, updating products, and deleting products.
+The description is marked up with <a href="http://www.w3.org/TR/rdfa-core/">RDFa</a>
+using the <a href="http://wifl.org/spec/">WIFL vocabulary</a>.</p>
+
+<div about="#Store" typeof="Resource">
+<h3>Store Resource</h3>
+<p>The application's API is found at 
+<span property="path">http://store.example.com/rest</span>.
+It has a container resource of all products at
+<span class="uri">http://store.example.com/rest/products</span> and it has
+an item resource for each product at 
+<span class="uri">http://store.example.com/rest/products/{id}</span>, where
+<span class="pathParam">{id}</span> is the product's identifier.
+These are abbreviated to <span class="uri">/rest/products</span> and
+<span class="uri">/rest/products/{id}</span> below.</p>
+
+<div about="#Products" typeof="Resource">
+<h3>Products Resource</h3>
+<p>The <span rel="parent super" resource="#Store">store's</span> container 
+resource at the <span property="path">/rest/products</span> URI
+supports the GET and POST methods.</p>
+
+<div rel="request" resource="#Products_GET" typeof="Request">
+<p>To get a listing of all the products in the store, a client sends a 
+<span property="method">GET</span> request to the resource.
+<span rel="response" resource="#Products_GET_200" typeof="Response">
+The application returns an HTTP response with a status code of 
+<span property="status">200</span>
+and 
+<span rel="representation" resource="#Product_List" typeof="Representation">
+a listing of all the products' URIs in the form of a
+<span property="contentType">text/uri-list</span></span></span>.</p>
+
+<div class="appl exchange" typeof="Example"><span rel="exampleRequest" typeof="ExampleRequest"><span property="method">GET</span> <span property="uri">/rest/products</span></span>
+<span rel="exampleResponse" typeof="ExampleResponse"><span property="status">200</span> OK
+<span rel="exampleHeader" typeof="ExampleHeader"><span property="name">Content-Type</span>: <span property="value">text/uri-list</span></span>
+<span property="body">http://store.example.com/rest/products/1
+..
+http://store.example.com/rest/products/10
+</span></span></div>
+
+<p>Because the returned list could be quite long, the application offers
+the ability to paginate the results using the 
+<span rel="queryParam" resource="#Start_index" typeof="Parameter"><span property="name">start-index</span></span> and 
+<span rel="queryParam" resource="#Max_results" typeof="Parameter"><span property="name">max-results</span></span> 
+query parameters, which default to 
+<span resource="#Start_index"><span property="defaultValue">1</span></span> and
+<span resource="#Max_results"><span property="defaultValue">10</span></span>, respectively.
+To get 50 products starting at the 100th product product, the exchange
+would look like:</p>
+
+<div class="appl exchange" typeof="Example"><span rel="exampleRequest" typeof="ExampleRequest"><span property="method">GET</span> <span property="uri">/rest/products?start-index=100&amp;max-results=50</span></span>
+<span rel="exampleResponse" typeof="ExampleResponse"><span property="status">200</span> OK
+<span rel="exampleHeader" typeof="ExampleHeader"><span property="name">Content-Type</span>: <span property="value">text/uri-list</span></span>
+<span property="body">http://store.example.com/rest/products/100
+..
+http://store.example.com/rest/products/149
+</span></span></div>
+</div>
+
+<div rel="request" resource="#Products_POST" typeof="Request">
+<p>To add a new product to the store, a client sends a 
+<span property="method">POST</span> request to
+the <span class="uri">/rest/products</span> URI.  The POST body includes a
+representation of the new product.
+<span rel="response" resource="#Products_POST_201" typeof="Response">
+The application returns an HTTP
+response with status <span property="status">201</span> to indicate the
+resource has been created, a <span class="header">Location</span> header
+with the new resource's URI, and a
+<span rel="representation" resource="#Product_JSON">representation</span> of the 
+resource in the body.
+</span></p>
+
+<div class="appl exchange" typeof="Example"><span rel="exampleRequest" typeof="ExampleRequest"><span property="method">POST</span> <span property="uri">/rest/products</span>
+<span rel="exampleHeader" typeof="ExampleHeader"><span property="name">Content-Type</span>: <span property="value">application/json</span></span>
+<span property="body">{ manufacturer: "ACME", name: "Anvil", weight: "2000" }</span></span>
+<span rel="exampleResponse" typeof="ExampleResponse"><span property="status">201</span> Created
+<span rel="exampleHeader" typeof="ExampleHeader"><span property="name">Location</span>: <span property="value">http://store.example.com/rest/products/662</span></span>
+<span rel="exampleHeader" typeof="ExampleHeader"><span property="name">Content-Type</span>: <span property="value">application/json</span></span>
+<span property="body">{ manufacturer: "ACME", name: "Anvil", weight: "2000"}</span></span></div>
+
+<p><span rel="representation" resource="#Product_JSON" typeof="Representation">
+The submitted representation has a media type of
+<span property="contentType">application/json</span> and 
+must conform to the schema at 
+<span property="representationType">http://store.example.com/rest/schema</span>.</span>
+<span rel="response" resource="#Products_POST_400" typeof="Response">
+If it does not, the application returns an HTTP response with status 
+<span property="status">400</span>.</span></p>
+
+<div class="appl exchange" typeof="Example"><span rel="exampleRequest" typeof="ExampleRequest"><span property="method">POST</span> <span property="uri">/rest/products</span>
+<span rel="exampleHeader" typeof="ExampleHeader"><span property="name">Content-Type</span>: <span property="value">application/json</span></span>
+<span property="body">manufacturer=ACME&amp;name=Anvil&amp;weight=2000</span></span>
+<span rel="exampleResponse" typeof="ExampleResponse"><span property="status">400</span> Bad Request</span>
+</div>
+
+<p>The products container resource does not support the PUT or DELETE methods.</p>
+</div>
+</div>
+
+<div about="#Product" typeof="Resource">
+<h3>Product Resource</h3>
+<link rel="parent" resource="#Products"/>
+<link rel="super" resource="#Store"/>
+<p>Each product in the store is represented by an item resource at
+<span class="uri">/rest/products<span property="path">/{id}</span></span>.
+The product resource has a 
+<span rel="pathParam" resource="#Product_ID" typeof="Parameter">
+<meta property="required" content="true"/>required path parameter
+of <span property="name">id</span></span>. 
+</p>
+
+<div rel="request" resource="#Product_GET" typeof="Request">
+<p>To get a detailed listing of a product, a client sends a 
+<span property="method">GET</span> to the product's URI.  
+To access the listing for product 675, the product
+identifier is substituted into <span class="uri">/rest/products/{id}</span>
+to get the product's URI:</p>
+
+<div class="appl exchange" typeof="Example"><span rel="exampleRequest" typeof="ExampleRequest"><span property="method">GET</span> <span property="uri">/rest/products/675</span></span>
+<span rel="exampleResponse" typeof="ExampleResponse"><span property="status">200</span> OK
+<span rel="exampleHeader" typeof="ExampleHeader"><span property="name">Content-Type</span>: <span property="value">application/json</span></span>
+<span property="body">{ manufacturer: "ACME", name: "Instant Hole" }</span></span>
+</div>
+
+<p rel="response" resource="#Product_GET_200" typeof="Response">
+If the product exists, the server returns a <span property="status">200</span>
+containing its <span rel="representation" resource="#Product_JSON">JSON 
+representation</span>.</p>
+</div>
+
+<div rel="request" resource="#Product_PUT" typeof="Request">
+<p>To update an existing product's description, a client sends a 
+<span property="method">PUT</span> request to the
+product's URI with the body containing the new description and returns
+<span rel="response" resource="#Product_PUT_204" typeof="Response">a 
+<span property="status">204</span> response indicating that the 
+representation now matches that which was uploaded</span>.</p>
+
+<div class="appl exchange" typeof="Example"><span rel="exampleRequest" typeof="ExampleRequest"><span property="method">PUT</span> <span property="uri">/rest/products/662</span>
+<span rel="exampleHeader" typeof="ExampleHeader"><span property="name">Content-Type</span>: <span property="value">application/json</span></span>
+<span property="body">{ manufacturer: "ACME", name: "Anvil", weight: "10000" }</span></span>
+<span rel="exampleResponse" typeof="ExampleResponse"><span property="status">204</span> No Content</span>
+</div>
+</div>
+
+<div rel="request" resource="#Product_DELETE" typeof="Request">
+<p>When a client wishes to delete a product from the store, it sends a
+<span property="method">DELETE</span> request to the product's URI.  
+<span rel="response" resource="#Product_DELETE_204" typeof="Response">The store returns a 
+<span property="status">204</span> if the product was deleted.</span></p>
+
+<div class="appl exchange" typeof="Example"><span rel="exampleRequest" typeof="ExampleRequest"><span property="method">DELETE</span> <span property="uri">/rest/products/662</span></span>
+<span rel="exampleResponse" typeof="ExampleResponse"><span property="status">204</span> No Content</span>
+</div>
+</div>
+
+<p rel="response" resource="#Product_404" typeof="Response">
+A <span property="status">404</span> Not Found response is returned
+if the product id was not found, regardless of the request method.</p>
+
+<p>The product item resources do not support the POST method.</p>
+</div>
+
+<p>As a (weak) authentication measure, the store developer decides to 
+require clients to identify themselves with a query parameter, 
+<span rel="queryParam" resource="#API_key" typeof="Parameter">
+<span property="name">apikey</span></span>, on each request.</p>
+</div>
+</div>

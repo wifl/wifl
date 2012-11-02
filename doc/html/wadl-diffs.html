@@ -1,0 +1,222 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN" "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-2.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Web InterFace Language: Differences from WADL</title>
+<link rel="stylesheet" type="text/css" href="spec/spec.css">
+</head>
+
+<body>
+<h1>WIFL is not WADL</h1>
+
+<div>
+<p>While WIFL adopts some of the concepts of 
+<a href="http://www.w3.org/Submission/wadl/">WADL</a>, it is not a 
+model of WADL.  This document discusses the differences.</p>
+
+<h2>A Model of WADL</h2>
+
+<p>This UML class diagram is based on the WADL specification.</p>
+
+<img id="wadlpng" class="umlgraph" src="images/Wadl.png" width="90%" />
+
+<h2>The Differences</h2>
+
+<p>The following WADL features are either not present in WIFL or are
+provided differently.  References are provided to the WADL specification.</p>
+
+<h3>Cross-referencing (<a href="http://www.w3.org/Submission/wadl/#x3-60002.1">2.1</a>)</h3>
+
+<p>Because WADL is XML-based, 
+it must explicitly add <span class="attr">id</span> and
+<span class="attr">href</span> attributes to the 
+<span class="elt">method</span>, <span class="elt">param</span>, and
+<span class="elt">representation</span> elements to allow cross-referencing
+between them.</p>
+
+<p>These attributes are not part of the WIFL model because RDFa 
+provides its own attributes for identification and linking and it 
+leverages the existing HTML linking mechanisms.</p>
+
+<h3>Grammars (<a href="http://www.w3.org/Submission/wadl/#x3-90002.4">2.4</a>)</h3>
+
+<p>In WADL, an XML-based <span class="elt">representation</span>'s 
+<span class="attr">element</span> attribute
+specifies the qualified name of its root element, which is described in a
+<span class="elt">grammars</span> element.  
+The <span class="elt">grammars</span> element may contain the
+schema inline or refer to it from a child <span class="elt">include</span>
+element.
+WADL is silent about representations that are not XML-based.</p>
+
+<p>A WIFL <span class="rclass">Representation</span>'s type is specified by 
+the URI of a schema.
+WIFL does not require a specific set of schema types, allowing representations 
+based on XML and those that are not.</p>
+
+<h3>Resources collection (<a href="http://www.w3.org/Submission/wadl/#x3-110002.5">2.5</a>)</h3>
+
+<p>WADL has a <span class="elt">resources</span> element, 
+which is a collection of <span class="elt">resource</span>
+instances that have a common base URI.</p>
+
+<p>WIFL does not have a dedicated class for a collection of resources.
+The base URI for a set of resources may be specified by creating a
+"base" <span class="rclass">Resource</span> whose <span class="rprop">path</span>
+is the base URI template and setting the 
+<span class="assoc">parent</span> of each set member to the "base" 
+<span class="rclass">Resource</span>.</p>
+
+<h3>Sub-Resources (<a href="http://www.w3.org/Submission/wadl/#x3-120002.6">2.6</a>)</h3>
+
+<p>In WADL, a <span class="elt">resource</span> may have 
+<span class="elt">resource</span> children.  The children are
+referred to as sub-resources.  A sub-resource's path is constructed by 
+concatenating the paths of its XML ancestors.  
+This allows path components and parameters that are common to 
+several resources to be factored out to a common ancestor resource.
+A sub-resource inherits its ancestors' matrix and path parameters, but not
+its ancestors' query or header parameters.</p>
+
+<p>WIFL accomplishes WADL's sub-resource concept using a 
+<span class="rclass">resource</span>'s <span class="assoc">parent</span>
+relationship.  A <span class="rclass">resource</span>'s URI template is 
+constructed by concatenating its <span class="assoc">parent</span>'s 
+constructed URI template and its own <span class="rprop">path</span> property.  
+A <span class="rclass">resource</span> inherits its 
+<span class="assoc">parent</span>'s path parameters.</p>
+
+<h3>Matrix parameters (<a href="http://www.w3.org/Submission/wadl/#x3-120002.6">2.6</a>)</h3>
+
+<p>WADL supports matrix parameters for a resource and its sub-resources.</p>
+
+<p>Matrix parameters are not supported in WIFL.</p>
+
+<h3>URI templates (<a href="http://www.w3.org/Submission/wadl/#x3-130002.6.1">2.6.1</a>)</h3>
+
+<p>WIFL uses <a href="http://tools.ietf.org/html/rfc6570">RFC 6570</a> 
+URI templates for resources rather than WADL URI templates.
+WADL authors contributed to RFC 6570, which was published after WADL.</p>
+
+<h3>Resource types (<a href="http://www.w3.org/Submission/wadl/#x3-140002.7">2.7</a>).</h3>
+<p>A WADL <span class="elt">resource_type</span> is a collection of 
+WADL <span class="elt">method</span> and WADL <span class="elt">resource</span>s.
+Setting a WADL <span class="elt">resource</span> R's 
+<span class="attr">type</span> attribute to a WADL 
+<span class="elt">resource_type</span> RT is equivalent
+to saying that R has the same methods and sub-resources as RT.
+A WADL <span class="elt">resource</span> has a URI template but a 
+WADL <span class="elt">resource_type</span> does not.
+The WADL <span class="elt">resource_type</span> is useful for 
+factoring out methods and sub-resources that are common to several 
+<span class="elt">resource</span>s which differ only in their path.</p>
+
+<p>A WIFL <span class="rclass">resource</span> inherits another 
+<span class="rclass">resource</span>'s <span class="rclass">request</span>s and 
+<span class="rclass">response</span>s by 
+specifying that resource as the object of its 
+<span class="assoc">super</span> relationship.
+It also inherits its <span class="assoc">super</span>'s query and header 
+parameters.
+(To inherit that <span class="rclass">resource</span>'s URI template and 
+path parameters, it must be designated as the 
+resource's <span class="assoc">parent</span>.)</p>
+
+<h3>Method (<a href="http://www.w3.org/Submission/wadl/#x3-150002.8">2.8</a>)</h3>
+
+<p>A WADL <span class="elt">method</span> element
+indicates an HTTP method (e.g. GET, POST) supported by a <span class="elt">resource</span>. 
+It may contain a <span class="elt">request</span> and possible 
+<span class="elt">response</span>s.  
+A WADL <span class="elt">resource</span> may have several
+<span class="elt">method</span> elements for the same HTTP method
+with the difference being the input data in the 
+<span class="elt">request</span>.</p>
+
+<p>In WIFL, instead of a method having a request and several responses,
+a <span class="rclass">request</span> has a <span class="rprop">method</span>
+and several <span class="rclass">response</span>s.  
+The <span class="rclass">request</span> may
+have several different, logically equivalent <span class="rclass">representation</span>s.</p>
+
+<h3>Representation Parameters (<a href="http://www.w3.org/Submission/wadl/#x3-240002.11.3">2.11.3</a>)</h3>
+
+<p>A WADL <span class="elt">representation</span> may have zero or 
+more WADL <span class="elt">param</span>s, which
+are referred to as WADL representation parameters.
+A WADL Representation parameter serves one of two purposes:</p>
+<ol>
+<li>It defines the content of a representation. From the WADL spec, 
+section 2.11.3:
+<blockquote cite="http://www.w3.org/Submission/wadl/#x3-240002.11.3">For 
+<span class="elt">representation</span> elements 
+with a <span class="attr">mediaType</span>
+of <code>application/x-www-form-urlencoded</code> or
+<code>multipart/form-data</code> the representation parameters define
+the content of the representation which is formatted according to the 
+media type.</blockquote></li>
+<li>It provides information about an item within the representation in
+two parts:
+<ol type="a">
+<li>The <span class="attr">path</span> attribute in the WADL <span class="elt">param</span>
+indicates where the item is in the representation.  If the representation
+contains XML, the <span class="attr">path</span> is an 
+<a href="http://www.w3.org/TR/xpath/">XPath</a> expression.</li>
+<li>The WADL parameter element may contain a <span class="elt">link</span>
+element that specifies the item's relationship to the resource with this 
+representation.  The <span class="elt">link</span>'s 
+<span class="attr">rel</span> and <span class="attr">rev</span>
+attributes indicate the relationship.  The relationships are defined
+by the <span class="elt">representation</span>'s 
+<span class="attr">profile</span> attribute.</li>
+</ol>
+</li>
+</ol>
+
+<p>WIFL does not support representation parameters.</p>
+
+<h3>Parameters (<a href="http://www.w3.org/Submission/wadl/#x3-250002.12">2.12</a>)</h3>
+
+<p>A WADL <span class="elt">param</span>'s <span class="attr">style</span> 
+attribute specifies where the parameter appears in a request or response.</p>
+
+<p>In WIFL, the parameter's location is specified by its relationship with the request or
+response: <span class="assoc">pathParam</span>, <span class="assoc">queryParam</span>,
+or <span class="assoc">headerParam</span>.</p>
+
+<p>A WADL <span class="elt">param</span>'s <span class="attr">repeating</span> attribute 
+indicates whether the parameter takes a single value or may have multiple
+values.</p>
+
+<p>In WIFL, a <span class="rclass">parameter</span>'s 
+<span class="rprop">dataType</span> property
+contains the URI of a specification of the parameter's possible values.
+That specification can indicate whether the parameter allows multiple values.</p>
+<!-- But do we need uriTemplate fragment in parameter to indicate 
+separator or explode? -->
+
+<h3>Parameter Values and Representation Expectations (<a href="http://www.w3.org/Submission/wadl/#x3-280002.12.3">2.12.3</a>)</h3>
+
+<p>In WADL, it is possible to enumerate the possible values of a parameter using
+<span class="elt">option</span> children.  
+Each <span class="elt">option</span> indicates a single value, and optionally,
+the expected media type of the response if the value is used.</p>
+
+<p>In WIFL, a <span class="rclass">parameter</span>'s 
+<span class="rprop">dataType</span> attribute 
+contains the URI of a specification of the parameter's possible values.
+WIFL does not provide a means of indicating the expected media type of a
+response for a particular parameter value.</p>
+<!-- WIFL would need Parameter -option-> Option(@value) -repn-> Representation -->
+
+<h3>Examples</h3>
+
+<p>WIFL provides a means of annotating examples of an API's message exchanges,
+identifying its requests and responses and their relevant components 
+(method, URI, headers, body, status).</p>
+
+<p>WADL does not specify a means for documenting examples.</p>
+
+</div>
+</body>
+</html>

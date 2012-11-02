@@ -4,3 +4,6 @@ site/
 
 # Ignore emacs backup files
 *~
+/build
+.project
+/zip
