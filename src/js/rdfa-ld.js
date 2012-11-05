@@ -113,7 +113,7 @@ define(["rdfa"], function (rdfa) {
       } catch (e) {
         console.log(e);
       } finally {
-        if (docs.xhrs === 0) { result.set(docs); }
+        if (docs.xhrs === 0) { future.set(docs); }
       }
     }
     xhr.open("GET",uri);
