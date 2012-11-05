@@ -93,41 +93,46 @@ define(["rdfa"], function (rdfa) {
     }
     return result;
   };
+  // Build an XHR to fetch a document from a given URI.
+  // When all XHRs are finished, set the future to be this.
+  Documents.prototype.xhr = function(uri,future) {
+    var xhr = new XMLHttpRequest();
+    var doc = document.implementation.createHTMLDocument(uri);
+    var docs = this;
+    this.xhrs = this.xhrs+1 || 1;
+    this.uris[uri] = doc;
+    xhr.onloadend = function() {
+      try {
+        docs.xhrs--;
+        if (xhr.responseText) {
+          doc.documentElement.innerHTML = xhr.responseText;
+          setURI(doc,uri);
+          rdfa.attach(doc);
+          docs.docs.push(doc);
+        }
+      } catch (e) {
+        console.log(e);
+      } finally {
+        if (docs.xhrs === 0) { result.set(docs); }
+      }
+    }
+    xhr.open("GET",uri);
+    xhr.send();
+  }
   // Returns a future new collection given by adding URIs.
   // Returns a future whose value is 
   // this if all the URIs were already present.
   // We strip any #values off the URI.
   Documents.prototype.resolve = function() {
-    var xhrs = 0;
     var docs = this.clone();
     var result = new Future();
     for (var i=0; i<arguments.length; i++) {
       var uri = arguments[i].split("#")[0];
-      if (!docs.uris[uri]) {
-        var xhr = new XMLHttpRequest();
-        var doc = document.implementation.createHTMLDocument(uri);
-        docs.uris[uri] = doc;
-        xhrs++;
-        xhr.onloadend = function() {
-          try {
-            xhrs--;
-            if (xhr.responseText) {
-              doc.documentElement.innerHTML = xhr.responseText;
-              setURI(doc,uri);
-              rdfa.attach(doc);
-              docs.docs.push(doc);
-            }
-          } catch (e) {
-        	  console.log(e);
-          } finally {
-            if (xhrs == 0) { result.set(docs); }
-          }
-        }
-        xhr.open("GET",uri);
-        xhr.send();
+      if (uri.charAt(0) !== "_" && !docs.uris[uri]) {
+        docs.xhr(uri,result);
       }
     }
-    if (xhrs == 0) { result.set(this); }
+    if (!docs.xhrs) { result.set(this); }
     return result;
   }
   // Find the fixed point of a function f
