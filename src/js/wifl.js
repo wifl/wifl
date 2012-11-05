@@ -7,15 +7,29 @@ define(["rdfa-ld"], function (rdfaLD) {
     this.docs = docs;
     docs.setMapping("wifl","http://wifl.org/spec/#");
   }
+  // Remove any duplicate entries from an array of strings
+  Wifl.prototype.uniquify = function(arr) {
+    var cache = {};
+    return arr.filter(function (str) {
+      if (cache[str]) {
+        return false;
+      } else {
+        cache[str] = true;
+        return true;
+      }
+    });
+  }
   // Extract all sources, and apply a function to them
   Wifl.prototype.sources = function(rel,uri,fun) {
     var result = this.docs.getSubjects(rel,uri);
+    result = this.uniquify(result);
     if (fun) { result = result.map(fun,this); }
     return result;
   };
   // Extract all targets, and apply a function to them
   Wifl.prototype.targets = function(uri,rel,fun) {
     var result = this.docs.getValues(uri,rel);
+    result = this.uniquify(result);
     if (fun) { result = result.map(fun,this); }
     return result;
   };
