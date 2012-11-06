@@ -169,8 +169,7 @@ define(function () {
 			return EXPRESSION_SETTINGS[operator];
 		}
 		function encodeLiteral(s) {
-			// TODO
-			return escape(s);
+		        return encodeURIComponent(decodeURIComponent(s));
 		}
 		function unicodeLength(s) {
 			// TODO
@@ -240,13 +239,30 @@ define(function () {
 							f(n, o[i]);
 						}
 					}
-				} else {
+				} else if (isObject(o)) {
 					for (var p in o) {
 						if (o.hasOwnProperty(p) && o[p]) {
 							f(p, o[p]);
 						}
 					}
+				} else {
+				    f(n, o);
 				}
+			}
+			
+			function isEmpty(o) {
+			    for (var p in o) {
+			        if (o.hasOwnProperty(p) && o[p]) {
+			        	return false;
+			        }
+			    }
+			    return true;
+			}
+			
+			function isUndefined(value) {
+				return value == undefined ||
+					(isArray(value) && value.length == 0) ||
+					(isObject(value) && isEmpty(value));
 			}
 			
 			this.expand = function(binding) {
@@ -255,12 +271,14 @@ define(function () {
 				}
 				var expansion = "";
 				var exprSettings = expressionSettings(operator);
+				var isFirst = true;
 				for (var i=0; i<varSpecs.length; i++) {
 					var varSpec = varSpecs[i];
 					var value = binding.get(varSpec.name, varSpec.explode);
-					if (value == undefined) { continue }
-					if (i == 0) {
+					if (isUndefined(value)) { continue }
+					if (isFirst) {
 						expansion += exprSettings.first;
+						isFirst = false;
 					} else {
 						expansion += exprSettings.sep;
 					}
@@ -278,6 +296,11 @@ define(function () {
 						} else {
 							expansion += pctEncodeDisallowed(value, exprSettings.allow);
 						}
+					} else if (varSpec.prefix) {
+					    throw {
+						message: "Prefix modifiers are not applicable to variables that have composite values.",
+						varSpec: varSpec
+					    }
 					} else if (!varSpec.explode) {
 						if (exprSettings.named) {
 							expansion += encodeLiteral(varSpec.name);
@@ -286,6 +309,10 @@ define(function () {
 								continue;
 							}
 							expansion += "=";
+						}
+						if (!isObject(value)) {
+						    expansion += pctEncodeDisallowed(value.toString(), exprSettings.allow);
+						    continue;
 						}
 						var isList = isArray(value);
 						var sep = "";
@@ -367,6 +394,12 @@ define(function () {
 						} else if (isPrefixChar(c)) {
 							varSpec.modifier = c;
 							mode = PREFIX;
+						} else {
+						    throw {
+							message: "Unexpected expression character",
+							    index: exprScanner.lastScannedCharIndex(),
+							    varSpec: varSpec
+							    }
 						}
 					} else if (mode == PREFIX && isDigit(c) && 
 							(varSpec.prefix||0) < 1000) {
@@ -404,7 +437,7 @@ define(function () {
 			}
 			return result.expansion;
 		}
-		
+
 		var components = [];
 		var templateScanner = new Scanner(template);
 		var c;
@@ -448,7 +481,7 @@ define(function () {
 		}
 		if (literal) {
 			components.push(new Literal(literal))
-		}
+		}	
 	};
 	
 	return {
