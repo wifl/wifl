@@ -14,14 +14,20 @@
   <!-- Source directories -->
   <property name="src" location="src"/>
   <property name="doc" location="doc"/>
-	<property name="lib" location="lib"/>
-	<property name="htmldoc" location="${doc}/html"/>
+  <property name="htmldoc" location="${doc}/html"/>
   <property name="exampledoc" location="${htmldoc}/example"/>
   <property name="umlgraph" location="${doc}/umlgraph"/>
-	<property name="specdoc" location="${htmldoc}/spec"/>
-	<property name="storedoc" location="${htmldoc}/store"/>
-	<property name="xsl" location="${doc}/xsl"/>
+  <property name="specdoc" location="${htmldoc}/spec"/>
+  <property name="storedoc" location="${htmldoc}/store"/>
+  <property name="xsl" location="${doc}/xsl"/>
 
+	<!-- Library directories -->
+  <property name="lib" location="lib"/>
+  <property name="javalib" location="${lib}/java"/>
+  <property name="jslib" location="${lib}/js"/>
+  <property name="requirejs" location="${jslib}/requirejs"/>
+  <property name="qunit" location="${jslib}/qunit"/>
+	
   <!-- Target directories -->
   <property name="build" location="build"/>
   <property name="htmlbuild" value="${build}/html" />
@@ -29,10 +35,11 @@
 	<property name="specbuild" value="${htmlbuild}/spec" />
   <property name="dist" location="dist"/>
   <property name="site" location="site"/>
-	<property name="zip" location="zip"/>
+  <property name="test" location="test"/>
+  <property name="zip" location="zip"/>
 
   <path id="rdfsgen-docletpath">
-  	<fileset dir="${lib}">
+  	<fileset dir="${javalib}">
   		<include name="*.jar" />
   	</fileset>
   </path>
@@ -195,7 +202,10 @@
   <target name="dist">
     <mkdir dir="${dist}"/>
     <copy todir="${dist}">
-      <fileset dir="${src}"/>
+      <fileset dir="${src}/main"/>
+    </copy>
+  	<copy todir="${dist}/js">
+      <fileset file="${requirejs}/require-jquery.js"/>
     </copy>
   </target>
 
@@ -206,13 +216,28 @@
     </copy>
   </target>
 
-	<target name="zip" depends="init, dist, site">
+  <target name="uri-template-test">
+    <mkdir dir="${test}/uriTemplate"/>
+    <copy todir="${test}/uriTemplate">
+      <fileset dir="${src}/test/uriTemplate"/>
+      <fileset dir="${qunit}"/>
+      <fileset dir="${requirejs}"/>
+      <fileset file="${src}/main/js/uri-template.js"/>
+    </copy>
+  </target>
+	
+  <target name="test" depends="uri-template-test">
+  </target>
+	
+  <target name="zip" depends="init, dist, site, test">
 		<mkdir dir="${zip}"/>
     <zip destfile="${zip}/wifl-dist-${rundate}.zip" 
        basedir="${dist}" />
     <zip destfile="${zip}/wifl-site-${rundate}.zip" 
        basedir="${site}" />
-	</target>
+    <zip destfile="${zip}/wifl-test-${rundate}.zip"
+       basedir="${test}" />
+  </target>
 	
   <target name="all" depends="zip"/>
 
@@ -220,7 +245,8 @@
   	<delete dir="${build}"/>
     <delete dir="${dist}"/>
     <delete dir="${site}"/>
-  	<delete dir="${zip}"/>
+    <delete dir="${test}"/>
+    <delete dir="${zip}"/>
   </target>
 
 </project>
