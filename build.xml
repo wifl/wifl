@@ -222,7 +222,8 @@
       <fileset dir="${src}/test/uriTemplate"/>
       <fileset dir="${qunit}"/>
       <fileset dir="${requirejs}"/>
-      <fileset file="${src}/main/js/uri-template.js"/>
+      <fileset file="${src}/main/js/nfa.js"/>
+      <fileset file="${src}/main/js/uri-template2.js"/>
     </copy>
   </target>
 	
