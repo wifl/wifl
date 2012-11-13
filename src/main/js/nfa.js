@@ -171,6 +171,88 @@ define(function() {
     return this.transitions.dfault.map(token).filter(defined)
       .concat(Object.keys(this.transitions.values));
   };
+  // Is an NFA nondeterministic?
+  // Sets a flag this.nondet to be:
+  // true: if this has more than one acceptor
+  // token: if this has more than one transition for token,
+  //   or if this has one transition for token, to a nondeterministic NFA.
+  // false: if this is deterministic
+  Automaton.prototype.isNondet = function() {
+    if (this.nondet !== undefined) { return !!this.nondet; }
+    this.nondet = false;
+    if (this.acceptors.length > 1) {
+      this.nondet = true;
+      return true;
+    }
+    var dfaultToken = 1;
+    while (this.transitions.values[dfaultToken]) { dfaultToken++; }
+    for (var token in this.transitions.values) {
+      if (this.transitions.values[token].length > 1) {
+        return this.nondet = token;
+      }
+    }
+    if (this.transitions.dfault.length > 1) {
+      return this.nondet = dfaultToken;
+    }
+    for (var token in this.transitions.values) {
+      var target = this.transitions.values[token][0];
+      if (target && target.isNondet()) {
+        return this.nondet = token;
+      }
+    }
+    var target = this.transitions.dfault[0];
+    if (target && target.isNondet()) {
+      return this.nondet = token;
+    }
+    return false;
+  };
+  // Returns the path for a nondeterministic NFA
+  Automaton.prototype.nondetPath = function() {
+    if (this.isNondet()) {
+      if (this.nondet === true) {
+        return [];
+      } else if (this.transitions.get(this.nondet).length > 1) {
+        return [this.nondet];
+      } else {
+        var result = this.transitions.get(this.nondet)[0].nondetPath();
+        result.unshift(this.nondet);
+        return result;
+      }
+    }
+  }
+  // Determinize an NFA, if possible.
+  // Removes any transforms from the NFA.
+  // May still be nondeterministic, due to multiple acceptors.
+  function uids(nfas) {
+    return nfas
+      .map(function(nfa) { return nfa.uid; })
+      .sort()
+      .filter(function(uid,idx,uids) { return uid !== uids[idx-1]; })
+      .join();
+  }
+  function determinize(nfas,cache) {
+    if (nfas.length === 0) { return nfas; }
+    if (nfas.length === 1 && !nfas[0].isNondet()) { return nfas; }
+    var key = uids(nfas);
+    if (cache[key]) { return cache[key]; }
+    var result = new Automaton();
+    cache[key] = result;
+    for (var i=0; i<nfas.length; i++) {
+      var nfa = nfas[i];
+      if (nfa.acceptors.length) {
+        result.acceptors = result.acceptors.concat(nfa.acceptors);
+      }
+      nfa.transitions.clone(result.transitions);
+    }
+    result.transitions.dfault = determinize(result.transitions.dfault,cache);
+    for (var token in result.transitions.values) {
+      result.transitions.values[token] = determinize(result.transitions.values[token],cache);
+    }
+    return [result];
+  }
+  Automaton.prototype.determinize = function() {
+    return determinize([this],{})[0];
+  }
   // A failing automaton
   var fail = new Automaton();
   fail.text = "fail";
