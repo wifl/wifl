@@ -4,9 +4,9 @@ require.config({
 
 require(["wifl","gui"],function(wifl,gui) {
   $(function() {
-    wifl.create(document).wait(function(api) {
-      api.resources().forEach(function(resource) {
-        document.getElementsBySubject(resource.uri).forEach(function (node) {
+    wifl.build(document).wait(function(api) {
+      api.resources.forEach(function(resource) {
+        document.getElementsBySubject(resource.about).forEach(function (node) {
           $(node).append(gui.resource(resource));
         });
       });

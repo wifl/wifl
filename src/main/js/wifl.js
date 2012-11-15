@@ -33,17 +33,28 @@ define(["rdfa-ld"], function (rdfaLD) {
     if (fun) { result = result.map(fun,this); }
     return result;
   };
-  // Extract all resource descriptions
-  Wifl.prototype.resources = function() {
-    return this.sources("rdf:type","wifl:Resource",this.resource);
+  // Extract an API description document
+  Wifl.prototype.document = function(uri) {
+    uri = uri || this.docs.getURI();
+    return this.imports({
+      about: uri,
+      toString: this.constant(uri),
+      descriptions: this.targets(uri,"dc:description",this.trim),
+      seeAlso: this.targets(uri,"wifl:seeAlso",this.api)
+        .concat(this.targets(uri,"rdfs:seeAlso",this.api)),
+      myResources: this.targets(uri,"wifl:resource",this.resource),
+      myExamples: this.targets(uri,"wifl:example",this.example),
+    });
   }
   // Extract a resource description
   Wifl.prototype.resource = function(uri) {
     return this.inherit({
-      uri: uri,
+      about: uri,
+      toString: this.constant(uri),
       descriptions: this.targets(uri,"dc:description",this.trim),
       supers: this.targets(uri,"wifl:super",this.resource),
       parent: this.targets(uri,"wifl:parent",this.resource)[0],
+      examples: this.targets(uri,"wifl:example",this.example),
       myRequests: this.targets(uri,"wifl:request",this.request),
       myResponses: this.targets(uri,"wifl:response",this.request),
       myHeaderParams: this.targets(uri,"wifl:headerParam",this.parameter),
@@ -55,7 +66,8 @@ define(["rdfa-ld"], function (rdfaLD) {
   // Extract a request description
   Wifl.prototype.request = function(uri) {
     return {
-      uri: uri,
+      about: uri,
+      toString: this.constant(uri),
       descriptions: this.targets(uri,"dc:description",this.trim),
       myResponses: this.targets(uri,"wifl:response",this.response),
       myHeaderParams: this.targets(uri,"wifl:headerParam",this.parameter),
@@ -68,7 +80,8 @@ define(["rdfa-ld"], function (rdfaLD) {
   // Extract a response description
   Wifl.prototype.response = function(uri) {
     return {
-      uri: uri,
+      about: uri,
+      toString: this.constant(uri),
       descriptions: this.targets(uri,"dc:description",this.trim),
       headerParams: this.targets(uri,"wifl:headerParam",this.parameter),
       statuses: this.targets(uri,"wifl:status",this.trim),
@@ -78,7 +91,8 @@ define(["rdfa-ld"], function (rdfaLD) {
   // Extract a parameter
   Wifl.prototype.parameter = function(uri) {
     return {
-      uri: uri,
+      about: uri,
+      toString: this.constant(uri),
       descriptions: this.targets(uri,"dc:description",this.trim),
       name: this.targets(uri,"wifl:name",this.trim)[0],
       required: this.targets(uri,"wifl:required",this.trim)[0],
@@ -90,16 +104,65 @@ define(["rdfa-ld"], function (rdfaLD) {
   // Extract a representation
   Wifl.prototype.representation = function(uri) {
     return {
-      uri: uri,
+      about: uri,
+      toString: this.constant(uri),
       descriptions: this.targets(uri,"dc:description",this.trim),
       contentType: this.targets(uri,"wifl:contentType",this.trim)[0],
       type: this.targets(uri,"wifl:type",this.trim)[0]
+    };
+  };
+  // Extract an example
+  Wifl.prototype.example = function(uri) {
+    return {
+      about: uri,
+      toString: this.constant(uri),
+      descriptions: this.targets(uri,"dc:description",this.trim),
+      request: this.targets(uri,"wifl:exampleRequest",this.exRequest)[0],
+      response: this.targets(uri,"wifl:exampleResponse",this.exResponse)[0]
+    };
+  };
+  // Extract an example request
+  Wifl.prototype.exRequest = function(uri) {
+    return {
+      about: uri,
+      toString: this.constant(uri),
+      descriptions: this.targets(uri,"dc:description",this.trim),
+      headerParams: this.targets(uri,"wifl:exampleHeader",this.exHeader),
+      method: this.targets(uri,"wifl:method",this.trim)[0],
+      verb: this.targets(uri,"wifl:verb",this.trim)[0],
+      uri: this.targets(uri,"wifl:uri",this.trim)[0],
+      body: this.targets(uri,"wifl:body",this.trim)[0]
+    };
+  };
+  // Extract an example response
+  Wifl.prototype.exResponse = function(uri) {
+    return {
+      about: uri,
+      toString: this.constant(uri),
+      descriptions: this.targets(uri,"dc:description",this.trim),
+      headerParams: this.targets(uri,"wifl:exampleHeader",this.exHeader),
+      status: this.targets(uri,"wifl:status",this.trim)[0],
+      body: this.targets(uri,"wifl:body",this.trim)[0]
+    };
+  };
+  // Extract an example header
+  Wifl.prototype.exHeader = function(uri) {
+    return {
+      about: uri,
+      toString: this.constant(uri),
+      descriptions: this.targets(uri,"dc:description",this.trim),
+      name: this.targets(uri,"wifl:name",this.trim)[0],
+      value: this.targets(uri,"wifl:value",this.trim)[0]
     };
   };
   // Trim a string
   Wifl.prototype.trim = function(str) {
     return str.trim();
   }
+  // A constant function
+  Wifl.prototype.constant = function(result) { return function() {
+    return result;
+  }; };
 
   // Perform inheritance on a resource
   Wifl.prototype.inherit = function (resource) {
@@ -138,6 +201,9 @@ define(["rdfa-ld"], function (rdfaLD) {
       request.responses = request.myResponses.concat(resource.responses);
       request.uriTemplate = this.uriTemplate(request);
     }
+    for (var k=0; k<resource.examples.length; k++) {
+      resource.examples[k].resource = resource;
+    }
     return resource;
   };
   Wifl.prototype.uriTemplate = function(obj) {
@@ -150,21 +216,46 @@ define(["rdfa-ld"], function (rdfaLD) {
     }
   };
 
+  // Resolve the seeAlsos of an API
+  Wifl.prototype.imports = function (doc) {
+    doc.resources = doc.myResources;
+    doc.examples = doc.myExamples;
+    for (var i=0; i<doc.seeAlso.length; i++) {
+      this.imports(doc.seeAlso[i],cache);
+      doc.resources = doc.resources.concat(doc.seeAlso[i].resources);
+      doc.examples = doc.examples.concat(doc.seeAlso[i].examples);
+    }
+    for (var i=0; i<doc.myResources.length; i++) {
+      doc.myResources[i].document = doc;
+      doc.examples = doc.examples.concat(doc.myResources[i].examples);
+    }
+    for (var i=0; i<doc.myExamples.length; i++) {
+      doc.myExamples[i].document = doc;
+    }
+    doc.resources = this.uniquify(doc.resources);
+    doc.examples = this.uniquify(doc.examples);
+    return doc;
+  };
+
   // To create a WIFL object we resolve wrt all the properties
   // which can refer from one WIFL object to another.
   return {
-    create: function(doc) {
+    build: function(doc) {
       return rdfaLD.create(doc).setMapping("wifl","http://wifl.org/spec/#").resolveTargets(
 	"wifl:parent",
 	"wifl:super",
 	"wifl:pathParam",
 	"wifl:queryParam",
 	"wifl:headerParam",
+        "wifl:example",
+        "wifl:resource",
 	"wifl:request",
 	"wifl:response",
-	"wifl:representation"
+	"wifl:representation",
+	"wifl:seeAlso",
+	"rdfs:seeAlso"
       ).map(function(docs) {
-	return new Wifl(docs);
+	return new Wifl(docs).document();
       });
     }
   };
