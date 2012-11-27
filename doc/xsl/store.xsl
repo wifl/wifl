@@ -9,10 +9,9 @@
 ]>
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-	<xsl:output method="html" version="1.0" encoding="ISO-8859-1"
-		doctype-public="-//W3C//DTD XHTML+RDFa 1.0//EN"
-		doctype-system="http://www.w3.org/MarkUp/DTD/xhtml-rdfa-2.dtd"
-		indent="yes" />
+	<xsl:output method="html" version="1.0" encoding="UTF-8"
+                    doctype-system="about:legacy-compat"
+                    indent="yes" />
   <xsl:param name="docdir" select="." />
 
 	<xsl:variable name="navbar">
@@ -26,13 +25,15 @@
 	</xsl:variable>
 	
 	<xsl:template match="/">
-		<html xmlns="http://www.w3.org/1999/xhtml">
+		<html>
 			<head>
 				<title>&Title;</title>
 				<link rel="stylesheet" type="text/css" href="spec/spec.css" />
+                                <link rel="stylesheet" type="text/css" href="css/console.css" />
+                                <link rel="stylesheet" type="text/css" href="css/jquery-ui.css" />
+                                <script type="text/javascript" data-main="js/main.js" src="js/require-jquery.js" />
 			</head>
-			<body prefix="rdfs: http://www.w3.org/2000/01/rdf-schema#
-			  &VocabularyPrefix;: &VocabularyReference;">
+			<body prefix="&VocabularyPrefix;: &VocabularyReference;">
 				<h1>&Title;</h1>
 				<div id="intro" class="intro">
 					<h2>&Intro;</h2>

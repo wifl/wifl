@@ -6,6 +6,7 @@ define(["nfa"],function(nfa) {
   function URITemplate() {
     this.nfa = nfa.succ;
     this.vars = [];
+    this.text = "";
   }
   URITemplate.prototype.expand = function(bindings) {
     var state = {};
@@ -22,11 +23,14 @@ define(["nfa"],function(nfa) {
     }
     var tokens = this.nfa.walk(state);
     return untokenize(tokens);
-  }
+  };
   URITemplate.prototype.parse = function(string) {
     var tokens = tokenize(string);
     return this.nfa.exec(tokens);
-  }
+  };
+  URITemplate.prototype.toString = function() {
+    return this.text;
+  };
   // Tokenizer.
   // Recognizes special characters (&.=#{?};+*/) and lumps everything else together.
   // This is possibly too generous, as it allows malformed URIs, for example
@@ -197,6 +201,7 @@ define(["nfa"],function(nfa) {
   // Exports
   return {
     regex: uritRegex,
+    tokenize: tokenize,
     parse: function(string) { 
       var result = uritRegex.exec(tokenize(string));
       if (result) {

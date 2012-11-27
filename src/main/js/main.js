@@ -10,6 +10,14 @@ require(["wifl","gui"],function(wifl,gui) {
           $(node).append(gui.resource(resource));
         });
       });
+      api.examples.forEach(function(example) {
+        document.getElementsBySubject(example.about).forEach(function (node) {
+          var $example = gui.example(example,api).hide();
+          $(node).click(function () { 
+            $example.slideToggle();
+          }).css("cursor","pointer").after($example);
+        });
+      });
     });
   }); 
 });

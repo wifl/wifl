@@ -1,4 +1,4 @@
-define(["jquery","jquery-ui","uri-template"],function($,jqueryUI,uriTemplate) {
+define(["jquery","jquery-ui"],function($,jqueryUI) {
 
   // A recursive version of append that iterates through arrays.
   // This is a work-around for http://bugs.jquery.com/ticket/8897
@@ -94,8 +94,7 @@ define(["jquery","jquery-ui","uri-template"],function($,jqueryUI,uriTemplate) {
     var node = document.createElement("a");
     node.href = uri;
     return {
-      hostname: node.hostname,
-      port: node.port,
+      host: node.host,
       relative: node.pathname + node.search + node.hash
     };
   }
@@ -105,8 +104,7 @@ define(["jquery","jquery-ui","uri-template"],function($,jqueryUI,uriTemplate) {
     var parsed = parseURI(req.uri);
     function header(name) { return name + ": " + req.headerParams[name] }
     var headers = Object.keys(req.headerParams).sort().map(header);
-    if (parsed.port) { headers.push("Port: " + parsed.port); }
-    if (parsed.host) { headers.push("Host: " + parsed.hostname); }
+    if (parsed.host) { headers.push("Host: " + parsed.host); }
     if (req.contentType) { headers.push("Content-Type: " + req.contentType); }
     if (req.body) { headers.push("Content-Length: " + req.body.length); }
     return $div(
@@ -149,12 +147,18 @@ define(["jquery","jquery-ui","uri-template"],function($,jqueryUI,uriTemplate) {
     var $pvalue = $input().attr("name",parameter.name).attr("type","text").addClass("pvalue");
     var $result = $div($pname,$pvalue).addClass("parameter");
     var pdefault = parameter.default;
+    var pinit = params[parameter.name];
     if (pdefault === undefined) { pdefault = ""; }
-    $pvalue.attr("value",pdefault);
-    $pvalue.addClass("default-value");
+    if (pinit === undefined) { pinit = pdefault; }
+    $pvalue.attr("value",pinit);
+    if (pinit === pdefault) {
+      $pvalue.addClass("default-value");
+    }
     if (parameter.required) {
       $result.addClass("required");
-      $result.addClass("invalid");
+      if (pinit === "") {
+        $result.addClass("invalid");
+      }
     }
     if (parameter.descriptions.length) {
       $result.attr("title",parameter.descriptions.join("\n"));
@@ -189,7 +193,7 @@ define(["jquery","jquery-ui","uri-template"],function($,jqueryUI,uriTemplate) {
         }
         return $result;
       }
-      var $ta = $textarea().addClass("request-repr-body");
+      var $ta = $textarea(req.body).addClass("request-repr-body");
       var $sel = $select(representations.map($opt)).addClass("request-repr-type");
       return $div($sel,$ta).change(function () {
         req.body = $ta.val();
@@ -205,31 +209,30 @@ define(["jquery","jquery-ui","uri-template"],function($,jqueryUI,uriTemplate) {
   // Display a request.
   // When the submit button is pressed, it creates an HTTP request,
   // and displays the result.
-  function $request(request) {
+  function $request(request,uriParams,headerParams,body) {
+    uriParams = uriParams || {};
+    headerParams = headerParams || {};
+    body = body || "";
     var req = {
       method: request.method,
-      uriTemplate: uriTemplate.create(request.uriTemplate),
-      uriParams: {},
-      headerParams: {},
-      body: ""
+      uriTemplate: request.uriTemplate,
+      uriParams: uriParams,
+      headerParams: headerParams,
+      body: body
     }
     var $httpReq = $div();
     var $httpResp = $div();
     var $resetButton = $input("Reset").attr("type","reset").button().addClass("reset-button");
     var $submitButton = $button(req.method).button().addClass("submit-button");
     var $requestForm = $form(
-      $div(request.pathParams.map($parameter(req.uriParams))).addClass("path-params"),
-      $div(request.queryParams.map($parameter(req.uriParams))).addClass("query-params"),
-      $div(request.headerParams.map($parameter(req.headerParams))).addClass("header-params"),
+      $div(request.pathParams.map($parameter(uriParams))).addClass("path-params"),
+      $div(request.queryParams.map($parameter(uriParams))).addClass("query-params"),
+      $div(request.headerParams.map($parameter(headerParams))).addClass("header-params"),
       $representations(req,request.representations),
       $div($resetButton,$submitButton).addClass("request-buttons")
     ).submit(function() {
       try {
-        req.uri = req.uriTemplate.expand({ 
-          get: function(name) {
-            return req.uriParams[name];
-          } 
-        });
+        req.uri = req.uriTemplate.expand(req.uriParams);
 	$httpReq = $httpRequest(req).replaceAll($httpReq);
 	$httpResp = $div().addClass("in-progress").replaceAll($httpResp);
 	var xhr = httpRequest(req);
@@ -274,8 +277,27 @@ define(["jquery","jquery-ui","uri-template"],function($,jqueryUI,uriTemplate) {
     ).tabs().addClass("resource");
   }
 
+  // Display an example
+  function $example(example,api) {
+    var request = api.lookup(example.request.method,example.request.uri);
+    if (request) {
+      var uriParams = request.uriTemplate.parse(example.request.uri);
+      var headerParams = {};
+      for (var i=0; i<request.headerParams.length; i++) {
+        var name = request.headerParams[i].name;
+        if (example.request.headers.hasOwnProperty(name)) {
+          headerParams[name] = example.request.headers[name]
+        }
+      }
+      return $request(request,uriParams,headerParams,example.request.body);
+    } else {
+      return $div(example.request.uri + " not found").addClass("ui-state-error");
+    }
+  }
+
   return {
-    resource: $resource
+    resource: $resource,
+    example: $example
   };
 
 });

@@ -428,6 +428,31 @@ define(function() {
   // Apply a transform on initialization
   Automaton.prototype.onInit = function(tr) {
     return succ.onAccept(tr).then(this);
+  };
+  // An NFA which accepts the same strings, but
+  // always returns a constant result.
+  Automaton.prototype.constant = function(val) {
+    var cache = {};
+    var result = this.deepClone(cache);
+    var tr = constant(val);
+    for (var uid in cache) {
+      cache[uid].transform = noop;
+      if (cache[uid].acceptors.length) {
+        cache[uid].acceptors = [tr];
+      }
+    }
+    return result;
+  };
+  // Constant transform
+  function constant(x) {
+    var result = new Transform();
+    result.apply = function (state) {
+      if (isEmpty(state)) { return x; }
+    };
+    result.undo = function (state) {
+      if (state === x) { return {}; }
+    };
+    return result;
   }
   // Transform to initalize a variable
   function varInit(x) { 
@@ -448,7 +473,7 @@ define(function() {
       }
     };
     return result;
-  }
+  };
   // Transform to store a token in a variable
   function varStore(x) { 
     var result = new Transform();
