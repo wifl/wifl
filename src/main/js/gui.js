@@ -191,6 +191,9 @@ define(["jquery","jquery-ui"],function($,jqueryUI) {
         if (representation.descriptions.length) {
           $result.attr("title",representation.descriptions.join("\n"));
         }
+        if (representation.contentType && representation.contentType === req.contentType) {
+          $result.attr("selected",true);
+        }
         return $result;
       }
       var $ta = $textarea(req.body).addClass("request-repr-body");
@@ -209,7 +212,7 @@ define(["jquery","jquery-ui"],function($,jqueryUI) {
   // Display a request.
   // When the submit button is pressed, it creates an HTTP request,
   // and displays the result.
-  function $request(request,uriParams,headerParams,body) {
+  function $request(request,uriParams,headerParams,contentType,body) {
     uriParams = uriParams || {};
     headerParams = headerParams || {};
     body = body || "";
@@ -219,6 +222,9 @@ define(["jquery","jquery-ui"],function($,jqueryUI) {
       uriParams: uriParams,
       headerParams: headerParams,
       body: body
+    }
+    if (contentType) {
+      req.contentType = contentType;
     }
     var $httpReq = $div();
     var $httpResp = $div();
@@ -280,6 +286,8 @@ define(["jquery","jquery-ui"],function($,jqueryUI) {
   // Display an example
   function $example(example,api) {
     var request = api.lookup(example.request.method,example.request.uri);
+    var body = example.request.body;
+    var contentType = example.request.headers["Content-Type"];
     if (request) {
       var uriParams = request.uriTemplate.parse(example.request.uri);
       var headerParams = {};
@@ -289,7 +297,7 @@ define(["jquery","jquery-ui"],function($,jqueryUI) {
           headerParams[name] = example.request.headers[name]
         }
       }
-      return $request(request,uriParams,headerParams,example.request.body);
+      return $request(request,uriParams,headerParams,contentType,body);
     } else {
       return $div(example.request.uri + " not found").addClass("ui-state-error");
     }
