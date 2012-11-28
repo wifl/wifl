@@ -19,6 +19,7 @@
   <property name="umlgraph" location="${doc}/umlgraph"/>
   <property name="specdoc" location="${htmldoc}/spec"/>
   <property name="storedoc" location="${htmldoc}/store"/>
+  <property name="wadl" location="${doc}/wadl"/>
   <property name="xsl" location="${doc}/xsl"/>
 
 	<!-- Library directories -->
@@ -27,6 +28,15 @@
   <property name="jslib" location="${lib}/js"/>
   <property name="requirejs" location="${jslib}/requirejs"/>
   <property name="qunit" location="${jslib}/qunit"/>
+	
+	<!-- XSpec properties -->
+  <property name="xspec.properties" location="xspec.properties" /> 
+  <property name="xspec.project.dir" location="${env.XSPEC_HOME}" />
+  <property name="saxon.jar" location="${javalib}/saxon9he.jar" />
+  <condition property="xspec.program" value="${env.XSPEC_HOME}/bin/xspec.bat" 
+  	else="${env.XSPEC_HOME}/bin/xspec.sh">
+		<os family="windows"/>
+  </condition>
 	
   <!-- Target directories -->
   <property name="build" location="build"/>
@@ -169,6 +179,30 @@
       style="${xsl}/store.xsl"
       out="${htmlbuild}/store.html">
       <param name="docdir" expression="${storedoc}"/>
+    </xslt>
+    <copy file="${specdoc}/spec.css" todir="${specbuild}" />
+  </target>
+	
+  <target name="xslt-test" depends="init"
+    description="Test XSLT stylesheets">
+  	<exec executable="${xspec.program}">
+  		<arg value="${src}/test/xsl/wadl-html.xspec"/>
+  	</exec>
+  <!--		<antcall target="xspec.xspec" inheritall="false">
+  		  <param name="xspec.xml" location="${src}/test/xsl/flatten.xspec"/>
+  			<param name="xspec.base.dir" location="${xspec.project.dir}"/>
+  			<param name="xspec.dir" location=""/>
+  			<param name="xspec.base" value=""/> 
+  		</antcall> -->
+  </target>
+	
+  <target name="store-wadl.html" depends="init"
+    description="Create HTML documentation of Store example from its WADL" >
+    <xslt
+      in="${wadl}/store.wadl"
+      style="${xsl}/wadl-wifl.xsl"
+      out="${htmlbuild}/store-wadl.html">
+    	<classpath location="${javalib}/saxon9he.jar"/>
     </xslt>
     <copy file="${specdoc}/spec.css" todir="${specbuild}" />
   </target>

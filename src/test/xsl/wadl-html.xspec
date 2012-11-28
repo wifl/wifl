@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<x:description xmlns:x="http://www.jenitennison.com/xslt/xspec"
+  xmlns:functx="http://www.functx.com"
+  xmlns:h="http://www.w3.org/1999/xhtml"
+  xmlns:wadl="http://wadl.dev.java.net/2009/02"
+  xmlns:wh="http://wadl-html.com"
+  stylesheet="../../../doc/xsl/wadl-html.xsl">
+
+  <x:scenario label="When a wadl:application's first wadl:doc has @title">
+    <x:context>
+      <wadl:application>
+        <wadl:doc title="Title">This is the doc.</wadl:doc>
+      </wadl:application>
+    </x:context>
+    <x:expect label="put custom title in the head" 
+    test="h:html/h:head/h:title='Title'"/>
+    <x:expect label="put custom title in the h1" 
+    test="h:html/h:body/h:h1='Title'"/>
+    <x:expect label="preserve the text content" 
+    test="h:html/h:body/h:h1/following-sibling::h:div[1]='This is the doc.'"/>
+  </x:scenario>
+
+  <x:scenario label="When a wadl:application's first wadl:doc has no @title">
+    <x:context>
+      <wadl:application>
+        <wadl:doc>This is the doc.</wadl:doc>
+      </wadl:application>
+    </x:context>
+    <x:expect label="put common title in the head" 
+    test="h:html/h:head/h:title='Web Application'"/>
+    <x:expect label="put common title in the h1" 
+    test="h:html/h:body/h:h1='Web Application'"/>
+  </x:scenario>
+  
+  <x:scenario label="When handling a wadl:doc">
+    <x:context>
+      <wadl:doc>This is <span class="em">some</span> documentation.</wadl:doc>
+    </x:context>
+    <x:expect label="wrap its text in a div with @class='doc'">
+      <h:div class="doc">This is some documentation.</h:div>
+    </x:expect>
+  </x:scenario>
+  
+  <x:scenario label="When summarizing a wadl:resources">
+    <x:context>
+      <wadl:application>
+	      <wadl:resources base="http://store.example.com">
+	        <wadl:resource id="Products" path="products">
+	          <wadl:method name="GET">
+	            <wadl:doc>The Products GET request.</wadl:doc>
+	          </wadl:method>
+	          <wadl:method name="POST">
+	            <wadl:doc>The Products POST request.</wadl:doc>
+	          </wadl:method>
+	          <!--  sub-resource -->
+	          <wadl:resource id="Product" path="product"> <!-- xspec stripped everything in {} -->
+	            <wadl:method name="GET">
+	              <wadl:doc>The Product GET request.</wadl:doc>
+	            </wadl:method>
+	            <wadl:method name="PUT">
+	              <wadl:doc>The Product PUT request.</wadl:doc>
+	            </wadl:method>
+	            <wadl:method href="#m1"/>
+	          </wadl:resource>
+	        </wadl:resource>
+	      </wadl:resources>
+	      <wadl:method id="m1" name="DELETE">
+	        <wadl:doc>The common DELETE request.</wadl:doc>
+	      </wadl:method>
+      </wadl:application>
+    </x:context>
+    <x:expect label="create one tr per request per resource" 
+      test="count(//h:tr[h:td[@class='summary']])=5"/>
+    <x:expect label="expect full path in first column" 
+      test="//h:table[1]/h:tr[2]/h:td[1]='http://store.example.com/products' and
+    //h:table[1]/h:tr[4]/h:td[1]='http://store.example.com/products/product'"/>
+    <x:expect label="expect method name in second column" 
+      test="//h:table[1]/h:tr[2]/h:td[2]='GET' and
+    //h:table[1]/h:tr[3]/h:td[1]='POST' and //h:table[1]/h:tr[4]/h:td[2]='GET' 
+    and //h:table[1]/h:tr[5]/h:td[1]='PUT'"/>
+    <x:expect label="expect doc in third column" 
+      test="//h:table[1]/h:tr[2]/h:td[3]='The Products GET request.' and
+    //h:table[1]/h:tr[3]/h:td[2]='The Products POST request.' and 
+    //h:table[1]/h:tr[4]/h:td[3]='The Product GET request.' and
+    //h:table[1]/h:tr[5]/h:td[2]='The Product PUT request.'"/>
+    <x:expect label="expect referenced methods to be present"
+      test="//h:table[1]/h:tr[6]/h:td[1]='DELETE' and
+      //h:table[1]/h:tr[6]/h:td[2]='The common DELETE request.'"/>
+  </x:scenario>
+  
+  <x:scenario label="When detailing a wadl:resources">
+    <x:context>
+      <wadl:resources base="http://store.example.com">
+        <wadl:resource id="r1" />
+        <wadl:resource id="r2" type="#rt"/>
+      </wadl:resources>
+    </x:context>
+    <x:expect label="create a div for it"
+      test="count(h:div)=1"/>
+    <x:expect label="set the div's @class='resources'"
+      test="h:div/@class='resources'"/>
+    <x:expect label="give the div an @id"
+      test="h:div/@id!=''"/>
+    <x:expect label="give the div a meta child with @property='base' and @content=resources/@base"
+      test="h:div/h:meta[1]/@property='base' and
+      h:div/h:meta[1]/@content='http://store.example.com'"/>
+    <x:scenario label="with resources">
+      <x:expect label="add a div for each resource"
+        test="count(h:div/h:div[@class='resource'])=2"/>
+    </x:scenario>
+  </x:scenario>
+  
+  <x:scenario label="When detailing a wadl:resource_type">
+    <x:context>
+      <wadl:resource_type id="rt1">
+        <wadl:doc>Resource type rt1.</wadl:doc>
+        <wadl:param name="ignored" style="template"/>
+        <wadl:param name="q1" style="query"/>
+        <wadl:param name="h1" style="header"/>
+        <wadl:method name="GET">
+        </wadl:method>
+        <wadl:method name="DELETE">
+        </wadl:method>
+        <wadl:resource id="r1" path="/r1">
+		      <wadl:doc>A sub-resource of this type of resource.</wadl:doc>
+		      <wadl:method name="GET"></wadl:method>
+        </wadl:resource>
+      </wadl:resource_type>
+    </x:context>
+    <x:expect label="create a div for it"
+      test="count(h:div)=1"/>
+    <x:expect label="set the div's @class='resource_type'"
+      test="h:div/@class='resource_type'"/>
+    <x:expect label="give the div an @id=resource_type/@id"
+      test="h:div/@id='rt1'"/>
+    <x:expect label="include the doc"
+      test="h:div/h:div[@class='doc']='Resource type rt1.'"/>
+    <x:scenario label="with methods">
+	    <x:expect label="include each method"
+	      test="count(h:div/*[@class='methods']/*[@class='method'])=2"/>
+	    <x:expect label="which contains a meta with @property='name' and @content=method/@name"
+	      test="//*[@class='method'][1]/*[@class='request']/h:meta[@property='name']/@content='GET' 
+	      and //*[@class='method'][2]/*[@class='request']/h:meta[@property='name']/@content='DELETE'"/>
+	    <x:expect label="which contains the type's query and header params"
+	      test="//*[@class='method'][1]//h:tr[@class='query']/h:td[@class='name']='q1'
+	      and //*[@class='method'][1]//h:tr[@class='header']/h:td[@class='name']='h1'
+	      and //*[@class='method'][2]//h:tr[@class='query']/h:td[@class='name']='q1'
+	      and //*[@class='method'][2]//h:tr[@class='header']/h:td[@class='name']='h1'"/>
+    </x:scenario>
+    <x:scenario label="with sub-resources">
+	    <x:expect label="include each sub-resource"
+	      test="h:div/*[@class='resource']/@id='r1'"/>
+	    <x:expect label="whose path is preserved in a meta"
+	      test="//*[@id='r1']/h:meta[@property='path']/@content='/r1'"/>
+	    <x:expect label="whose methods do not inherit params from resource type"
+	      test="not(//*[@id='r1']//h:td[@class='name'])"/>
+    </x:scenario>
+  </x:scenario>
+  
+  <x:scenario label="When generating a resource's full path">
+    <x:scenario label="where base doesn't have trailing / and path doesn't have leading /">
+	    <x:call function="wh:getFullResourcePath">
+	      <x:param name="base" select="'http://store.example.com'"/>
+	      <x:param name="path" select="'products'"/>
+	    </x:call>
+	    <x:expect label="expect the full path to be base/path" 
+	    select="'http://store.example.com/products'"/>
+    </x:scenario>
+    <x:scenario label="where base has trailing / and path doesn't have leading /">
+      <x:call function="wh:getFullResourcePath">
+        <x:param name="base" select="'http://store.example.com/'"/>
+        <x:param name="path" select="'products'"/>
+      </x:call>
+      <x:expect label="expect full path to have single / between base and path" 
+      select="'http://store.example.com/products'"/>
+    </x:scenario>
+    <x:scenario label="where base doesn't have trailing / and path has leading /">
+      <x:call function="wh:getFullResourcePath">
+        <x:param name="base" select="'http://store.example.com'"/>
+        <x:param name="path" select="'/products'"/>
+      </x:call>
+      <x:expect label="expect full path to have single / between base and path" 
+      select="'http://store.example.com/products'"/>
+    </x:scenario>
+    <x:scenario label="where base has trailing / and path has leading /">
+      <x:call function="wh:getFullResourcePath">
+        <x:param name="base" select="'http://store.example.com/'"/>
+        <x:param name="path" select="'/products'"/>
+      </x:call>
+      <x:expect label="expect full path to have single / between base and path" 
+      select="'http://store.example.com/products'"/>
+    </x:scenario>
+  </x:scenario>
+  
+  <x:scenario label="When detailing a wadl:resource">
+    <x:context>
+      <wadl:resources base="http://store.example.com"/>
+        <wadl:resource id="Products" path="products" type="#collection #addable">
+          <wadl:method name="GET">
+            <wadl:doc>The Products GET request.</wadl:doc>
+          </wadl:method>
+          <wadl:method name="POST">
+            <wadl:doc>The Products POST request.</wadl:doc>
+          </wadl:method>
+          <!-- sub-resource -->          
+          <wadl:resource id="Product" path="product"> <!-- xspec stripped everything in {} -->
+            <wadl:method name="GET">
+              <wadl:doc>The Product GET request.</wadl:doc>
+            </wadl:method>
+            <wadl:method name="PUT">
+              <wadl:doc>The Product PUT request.</wadl:doc>
+            </wadl:method>
+          </wadl:resource>
+        </wadl:resource>
+    </x:context>
+    <x:expect label="create a div for each resource with @class='resource'"
+      test="count(//h:div[@class='resource'])=2"/>
+    <x:expect label="with each div's @id=resource/@id"
+      test="//h:div[@class='resource'][1]/@id='Products' and //h:div[@class='resource'][2]/@id='Product'"/>
+    <x:expect label="with each div containing a meta with @property='path' and @content= resource's @path"
+      test="//h:div[@class='resource'][1]/h:meta[@property='path']/@content='products' and
+      //h:div[@class='resource'][2]/h:meta[@property='path']/@content='product'"/>
+    <x:expect label="with each div containing a list of resource types, if present"
+      test="//*[@class='resource'][1]/*[@class='types']/*[@class='type'][1]/h:a/@href='#collection' and
+      //*[@class='resource'][1]/*[@class='types']/*[@class='type'][2]/h:a/@href='#addable' and
+      not(//*[@class='resource'][2]/*[@class='types'])"/>
+    <x:scenario label="with sub-resources">
+	    <x:expect label="with a sub-resource's div having a meta with @property='parent' and @content= parent resource's id"
+	      test="//h:div[@class='resource'][2]/h:meta[@property='parent']/@content='Products'"/>
+	    <x:expect label="with each resource div having its full path as an anchor"
+	      test="//h:a[@name='Products']='http://store.example.com/products' and
+	      //h:a[@name='Product']='http://store.example.com/products/product'"/>
+	    <x:expect label="with each resource div having a div for its methods"
+	      test="count(//h:div[@id='Products']/h:div[@class='methods'])=1 and
+	      count(//h:div[@id='Product']/h:div[@class='methods'])=1"/>
+	    <x:expect label="with each methods div having a div for each method"
+	      test="count(//*[@id='Products']/*[@class='methods']/*[@class='method'])=2 and
+	      count(//*[@id='Products']/*[@class='methods']/*[@class='method'])=2"/>
+    </x:scenario>
+  </x:scenario>
+  
+  <x:scenario label="When detailing a wadl:method">
+    <x:context>
+      <wadl:resource id='r1'>
+	      <wadl:method name="GET">
+	      </wadl:method>
+	      <wadl:method name="POST" id="post">
+	        <wadl:request>
+	          <wadl:param id='postp1' style='query'/>
+	        </wadl:request>
+	        <wadl:response status='201'/>
+	        <wadl:response status='400'/>
+	      </wadl:method>
+	      <wadl:param id='r1p1' style='template'/>
+      </wadl:resource>
+    </x:context>
+    <x:expect label="create a div with @class='method'"
+      test="count(//h:div[@class='method'])=2"/>
+    <x:expect label="with @id=method/@id, if present"
+      test="not(//h:div[@class='method'][1][@id]) and 
+      //h:div[@class='method'][2]/@id='post'"/>
+    <x:expect label="with a table with the method name"
+      test="//h:div[@class='method'][1]/h:table[@class='methodNameTable']/h:tr/h:td[@class='methodNameTd']='GET'
+      and //h:div[@class='method'][2]/h:table[@class='methodNameTable']/h:tr/h:td[@class='methodNameTd']='POST'"/>
+    <x:expect label="with a div with @class='request'"
+      test="count(//h:div[@class='method'][1]/h:div[@class='request'])=1
+      and count(//h:div[@class='method'][2]/h:div[@class='request'])=1"/>
+    <x:expect label="containing a meta with @property='name' and @content=method/@name"
+      test="//h:div[@class='method'][1]/h:div[@class='request']/h:meta[@property='name']/@content='GET' 
+      and //h:div[@class='method'][2]/h:div[@class='request']/h:meta[@property='name']/@content='POST'"/>
+    <x:expect label="whose input table template params include those at resource level"
+      test="//h:div[@class='method'][1]//h:div[@class='input']/h:table[1]/h:tr[@class='template']/@id='r1p1'
+      and //h:div[@class='method'][2]//h:div[@class='input']/h:table[1]/h:tr[@class='template']/@id='r1p1'"/>
+    <x:expect label="whose input table query params include those at request level"
+      test="//h:div[@class='method'][2]//h:div[@class='input']/h:table[2]/h:tr[@class='query']/@id='postp1'"/>
+    <x:expect label="whose output div contains a div for each response"
+      test="count(//h:div[@class='method'][1]//h:div[@class='output']/h:div)=0 and
+      count(//h:div[@class='method'][2]//h:div[@class='output']/h:div)=2"/>
+  </x:scenario>
+  
+  <x:scenario label="When detailing a wadl:response">
+    <x:context>
+      <wadl:response status="200">
+        <wadl:doc>This is status 200.</wadl:doc>
+        <wadl:representation id="Product_JSON" />
+      </wadl:response>
+    </x:context>
+    <x:expect label="create a div with @class='response'"
+      test="count(//h:div[@class='response'])=1"/>
+    <x:expect label="create a span @class='status' that wraps @status"
+      test="//h:span[@class='status']='200'"/>
+    <x:expect label="include any wadl:doc"
+      test="//h:div[@class='doc']='This is status 200.'"/>
+    <x:expect label="include any wadl:representation"
+      test="//h:div[@class='h7']='representations' and count(//h:table/h:tr)=1"/>
+  </x:scenario>
+  
+  <x:scenario label="When detailing a wadl:representation">
+    <x:context>
+      <wadl:representation id="Product_JSON" mediaType="application/json">
+		    <wadl:doc>The representation doc.</wadl:doc>
+		  </wadl:representation>
+    </x:context>
+    <x:expect label="create a tr whose @class='representation'"
+      test="count(//h:tr[@class='representation'])=1"/>
+    <x:expect label="that has a td with @class='mediaType' containing representation's @mediaType"
+      test="//h:tr[@class='representation']/h:td[@class='mediaType']='application/json'"/>
+    <x:expect label="that has a td with the representation's wadl:doc"
+      test="count(//h:tr[@class='representation']/h:td/h:div[@class='doc'])=1"/>
+  </x:scenario>
+
+  <x:scenario label="When detailing a wadl:param">
+    <x:context>
+      <wadl:param name="start-index" style="query"
+        type="xsd:int" default="1">
+        <wadl:doc>The starting index.</wadl:doc>
+      </wadl:param>
+      <wadl:param id="Product_ID" name="productId" style="template"
+        required="true">
+        <wadl:doc>The product identifier.</wadl:doc>
+      </wadl:param>
+      <wadl:param id="version" name="version" style="template" fixed="1.0"
+        required="true"/>
+    </x:context>
+    <x:expect label="create a tr for each param"
+      test="count(/h:tr)=3"/>
+    <x:expect label="with @class=param/@style"
+      test="/h:tr[1]/@class='query' and /h:tr[2]/@class='template'"/>
+    <x:expect label="with an @id=param/@id if param had an @id"
+      test="not(/h:tr[1][@id]) and /h:tr[2][@id='Product_ID']"/>
+    <x:expect label="with a descendant span whose @class='required' if param had @required=true"
+      test="not(/h:tr[1]//h:span[@class='required']) and /h:tr[2]//h:span/@class='required'"/>
+    <x:expect label="with a descendant [@class='default'] contains @default if param had @default"
+      test="/h:tr[1]//*[@class='default']='1' and not(/h:tr[2]//*[@class='default'])"/>
+    <x:expect label="with a descendant meta with @property='type' and @content=param/@type"
+      test="/h:tr[1]//h:meta[@property='type']/@content='xsd:int' and
+      /h:tr[2]//h:meta[@property='type']/@content=''"/> 
+    <x:expect label="with a descendant [@class='fixed'] contains @fixed if param had @fixed"
+      test="not(/h:tr[1]//*[@class='fixed']) and 
+      not(/h:tr[2]//*[@class='fixed']) and /h:tr[3]//*[@class='fixed']='1.0'"/>
+    <x:expect label="with documentation, when present"
+      test="/h:tr[1]/h:td[@class='doc']='The starting index.' and
+      /h:tr[2]/h:td[@class='doc']='The product identifier.' and
+      not(/h:tr[3]/h:td[@class='doc'])"/>
+  </x:scenario>  
+</x:description>
