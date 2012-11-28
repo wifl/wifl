@@ -23,7 +23,7 @@ define(["rdfa"], function (rdfa) {
     return this;
   };
   // Wait for the value to be set.
-  // Calls the callbacks immediately
+  // Calls the callbacks immediately if the value has already been set.
   Future.prototype.wait = function() {
     if (this.value === undefined) {
       Array.prototype.push.apply(this.callbacks,arguments);
@@ -182,6 +182,17 @@ define(["rdfa"], function (rdfa) {
       doc.data.setMapping(from,to);
     });
     return this;
+  };
+  // Get the base URIs of each docment
+  Documents.prototype.getURIs = function() {
+    return this.docs.map(getURI);
+  };
+  // Get the base URI of the document used to create this
+  // document collection.
+  Documents.prototype.getURI = function() {
+    if (this.docs.length) {
+      return getURI(this.docs[0]);
+    }
   };
 
   var empty = new Documents();

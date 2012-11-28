@@ -8,8 +8,8 @@
   <!-- Provide access to user's environment variables -->
   <property environment="env" />
 
-	<property name="specURI" value="http://wifl.org/spec/"/>
-	<property name="rdfsURI" value="${specURI}wifl.xml"/>
+  <property name="specURI" value="http://wifl.org/spec/"/>
+  <property name="rdfsURI" value="${specURI}wifl.xml"/>
 
   <!-- Source directories -->
   <property name="src" location="src"/>
@@ -22,7 +22,7 @@
   <property name="wadl" location="${doc}/wadl"/>
   <property name="xsl" location="${doc}/xsl"/>
 
-	<!-- Library directories -->
+  <!-- Library directories -->
   <property name="lib" location="lib"/>
   <property name="javalib" location="${lib}/java"/>
   <property name="jslib" location="${lib}/js"/>
@@ -42,16 +42,16 @@
   <property name="build" location="build"/>
   <property name="htmlbuild" value="${build}/html" />
   <property name="imgbuild" value="${htmlbuild}/images" />
-	<property name="specbuild" value="${htmlbuild}/spec" />
+  <property name="specbuild" value="${htmlbuild}/spec" />
   <property name="dist" location="dist"/>
   <property name="site" location="site"/>
   <property name="test" location="test"/>
   <property name="zip" location="zip"/>
 
   <path id="rdfsgen-docletpath">
-  	<fileset dir="${javalib}">
-  		<include name="*.jar" />
-  	</fileset>
+    <fileset dir="${javalib}">
+      <include name="*.jar" />
+    </fileset>
   </path>
 
   <path id="umlgraph-docletpath">
@@ -218,27 +218,27 @@
     <copy file="${specdoc}/spec.css" todir="${specbuild}" />
   </target>
 
-	<target name="builddir" >
-	  <mkdir dir="${htmlbuild}"/>
+  <target name="builddir" >
+    <mkdir dir="${htmlbuild}"/>
   </target>
 	
-	<target name="doc" depends="builddir, spec.html, store.html, wifl.xml"
+  <target name="doc" depends="builddir, spec.html, store.html, wifl.xml"
     description="Build documentation" >
-		<mkdir dir="${htmlbuild}"/>
-		<copy todir="${htmlbuild}">
-		  <fileset dir="${htmldoc}">
-		  	<include name="*.html"/>
-		  	<include name="*.css"/>
-		  </fileset>
-		</copy>
-	</target>
+    <mkdir dir="${htmlbuild}"/>
+    <copy todir="${htmlbuild}">
+      <fileset dir="${htmldoc}">
+        <include name="*.html"/>
+        <include name="*.css"/>
+      </fileset>
+    </copy>
+  </target>
 	
   <target name="dist">
     <mkdir dir="${dist}"/>
     <copy todir="${dist}">
       <fileset dir="${src}/main"/>
     </copy>
-  	<copy todir="${dist}/js">
+    <copy todir="${dist}/js">
       <fileset file="${requirejs}/require-jquery.js"/>
     </copy>
   </target>
@@ -247,6 +247,10 @@
     <mkdir dir="${site}"/>
     <copy todir="${site}">
       <fileset dir="${htmlbuild}"/>
+      <fileset dir="${src}/main"/>
+    </copy>
+    <copy todir="${site}/js">
+      <fileset file="${requirejs}/require-jquery.js"/>
     </copy>
   </target>
 
@@ -256,7 +260,8 @@
       <fileset dir="${src}/test/uriTemplate"/>
       <fileset dir="${qunit}"/>
       <fileset dir="${requirejs}"/>
-      <fileset file="${src}/main/js/uri-template.js"/>
+      <fileset file="${src}/main/js/nfa.js"/>
+      <fileset file="${src}/main/js/uri-template2.js"/>
     </copy>
   </target>
 	

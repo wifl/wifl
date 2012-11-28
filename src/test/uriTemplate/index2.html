@@ -1,0 +1,19 @@
+<html>
+<head>
+<meta charset="utf-8">
+<title>URI Template Tests</title>
+<link rel="stylesheet" href="qunit.css" />
+<script type="text/javascript" src="require-jquery.js"></script>
+<script type="text/javascript">
+  var nfa, urit;
+  require(["nfa","uri-template2","qtests2"], function(X,Y,qtests) {
+    nfa = X; urit = Y;
+    qtests.run();
+  })
+</script>
+</head>
+
+<body>
+  <div id="qunit"></div>
+</body>
+</html>
