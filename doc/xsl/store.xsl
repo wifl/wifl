@@ -29,6 +29,7 @@
     <html>
       <head>
         <title>&Title;</title>
+        <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />
         <link rel="stylesheet" type="text/css" href="spec/spec.css" />
         <link rel="stylesheet" type="text/css" href="css/console.css" />
         <link rel="stylesheet" type="text/css" href="css/jquery-ui.css" />
