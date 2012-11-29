@@ -222,7 +222,7 @@
     <mkdir dir="${htmlbuild}"/>
   </target>
 	
-  <target name="doc" depends="builddir, spec.html, store.html, wifl.xml"
+  <target name="doc" depends="builddir, spec.html, store.html, store-wadl.html, wifl.xml"
     description="Build documentation" >
     <mkdir dir="${htmlbuild}"/>
     <copy todir="${htmlbuild}">
