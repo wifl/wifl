@@ -116,10 +116,8 @@ If it does not, the application returns an HTTP response with status
 
 <div resource="#Product" typeof="Resource">
 <h3>Product Resource</h3>
-<link rel="parent" href="#Products"/>
-<link rel="super" href="#Store"/>
-<p>Each product in the store is represented by an item resource at
-<span class="uri">/rest/products<span property="path">/{id}</span></span>.
+<p>Each product in the <span rel="super" href="#Store">store</span> is represented by an item resource at
+<span class="uri"><span rel="parent" href="#Products">/rest/products</span><span property="path">/{id}</span></span>.
 The product resource has a 
 <span rel="pathParam" resource="#Product_ID" typeof="Parameter">
 <span property="required" content="true">required</span> path parameter

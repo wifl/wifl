@@ -9,8 +9,9 @@
 ]>
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-	<xsl:output method="html" version="1.0" encoding="UTF-8"
-                    doctype-system="about:legacy-compat"
+	<xsl:output method="xhtml" encoding="UTF-8"
+                    doctype-public="-//W3C//DTD XHTML+RDFa 1.1//EN"
+                    doctype-system="http://www.w3.org/MarkUp/DTD/xhtml-rdfa-2.dtd"
                     indent="yes" />
   <xsl:param name="docdir" select="." />
 
@@ -31,7 +32,8 @@
 				<link rel="stylesheet" type="text/css" href="spec/spec.css" />
                                 <link rel="stylesheet" type="text/css" href="css/console.css" />
                                 <link rel="stylesheet" type="text/css" href="css/jquery-ui.css" />
-                                <script type="text/javascript" data-main="js/main.js" src="js/require-jquery.js" />
+                                <script type="text/javascript" src="js/require-jquery.js" />
+                                <script type="text/javascript">require(["main"])</script>
 			</head>
 			<body prefix="&VocabularyPrefix;: &VocabularyReference;">
 				<h1>&Title;</h1>

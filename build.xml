@@ -179,6 +179,7 @@
       style="${xsl}/store.xsl"
       out="${htmlbuild}/store.html">
       <param name="docdir" expression="${storedoc}"/>
+      <classpath location="${javalib}/saxon9he.jar"/>
     </xslt>
     <copy file="${specdoc}/spec.css" todir="${specbuild}" />
   </target>
