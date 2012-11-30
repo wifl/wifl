@@ -1,4 +1,4 @@
-define(["jquery","jquery-ui","validator"],function($,jqueryUI,validate) {
+define(["jquery","jquery-ui","validator"],function($,jqueryUI,validator) {
 
   // A recursive version of append that iterates through arrays.
   // This is a work-around for http://bugs.jquery.com/ticket/8897
@@ -299,15 +299,27 @@ define(["jquery","jquery-ui","validator"],function($,jqueryUI,validate) {
           headerParams[name] = example.request.headers[name]
         }
       }
-      $example = $request(request,uriParams,headerParams,contentType,body);
+      $example = $request(request,uriParams,headerParams,contentType,body).hide();
+      $node
+        .click(function () { $example.slideToggle(); })
+        .css("cursor","pointer")
+        .addClass("validating")
+        .after($example);
+      validator.checkExample({
+        example: example,
+        request: request,
+        valid: function() { 
+          $node.removeClass("validating").addClass("valid");
+        },
+        invalid: function(error) {
+          $node.removeClass("validating").addClass("invalid").title(error);
+        }
+      });
     } else {
-      $example = $div(example.request.uri + " not found").addClass("ui-state-error");
+      $node
+        .addClass("invalid")
+        .tite(example.request.uri + " not found");
     }
-    $example.hide();
-    $node
-      .click(function () { $example.slideToggle(); })
-      .css("cursor","pointer")
-      .after($example);
   }
 
   return {

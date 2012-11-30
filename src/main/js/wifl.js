@@ -210,6 +210,7 @@ define(["rdfa-ld","uri-template2"], function (rdfaLD,uriTemplate) {
       resource.requests = resource.requests.concat(resource.supers[i].requests);
       resource.responses = resource.responses.concat(resource.supers[i].responses);
     }
+    resource.uriParams = resource.pathParams.concat(resource.queryParams);
     resource.uriTemplate = this.uriTemplate(resource);
     for (var j=0; j<resource.requests.length; j++) {
       var request = resource.requests[j];
@@ -218,6 +219,7 @@ define(["rdfa-ld","uri-template2"], function (rdfaLD,uriTemplate) {
       request.queryParams = request.myQueryParams.concat(resource.queryParams);
       request.headerParams = request.myHeaderParams.concat(resource.headerParams);
       request.responses = request.myResponses.concat(resource.responses);
+      request.uriParams = request.pathParams.concat(request.queryParams);
       request.uriTemplate = this.uriTemplate(request);
     }
     return resource;

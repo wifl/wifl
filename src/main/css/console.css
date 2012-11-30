@@ -97,3 +97,15 @@
     background-color: red;
     color: white;
 }
+
+.validating {
+    background-color: orange;
+}
+
+.valid {
+    background-color: green;
+}
+
+.invalid {
+    background-color: red;
+}
