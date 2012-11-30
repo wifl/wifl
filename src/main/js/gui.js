@@ -1,4 +1,4 @@
-define(["jquery","jquery-ui"],function($,jqueryUI) {
+define(["jquery","jquery-ui","validator"],function($,jqueryUI,validate) {
 
   // A recursive version of append that iterates through arrays.
   // This is a work-around for http://bugs.jquery.com/ticket/8897
@@ -266,7 +266,7 @@ define(["jquery","jquery-ui"],function($,jqueryUI) {
   // Display a resource.
   // This is a series of jQuery tabs, displaying each of its methods.
   var tabIds = 0;
-  function $resource(resource) {
+  function $resource(resource,$node) {
     var tabId = tabIds++;
     var $aboutLink = $li($a(resource.path).attr("href","#descr"+tabId));
     var $aboutBody = $div(resource.descriptions)
@@ -277,17 +277,19 @@ define(["jquery","jquery-ui"],function($,jqueryUI) {
     function $requestBody(request) {
       return $request(request).attr("id",request.method+tabId)
     }
-    return $div(
+    var $res = $div(
       $ul($aboutLink,resource.requests.map($requestLink)),
       $aboutBody,resource.requests.map($requestBody)
     ).tabs().addClass("resource");
+    $node.after($res);
   }
 
   // Display an example
-  function $example(example,api) {
+  function $example(example,api,$node) {
     var request = api.lookup(example.request.method,example.request.uri);
     var body = example.request.body;
     var contentType = example.request.headers["Content-Type"];
+    var $example;
     if (request) {
       var uriParams = request.uriTemplate.parse(example.request.uri);
       var headerParams = {};
@@ -297,10 +299,15 @@ define(["jquery","jquery-ui"],function($,jqueryUI) {
           headerParams[name] = example.request.headers[name]
         }
       }
-      return $request(request,uriParams,headerParams,contentType,body);
+      $example = $request(request,uriParams,headerParams,contentType,body);
     } else {
-      return $div(example.request.uri + " not found").addClass("ui-state-error");
+      $example = $div(example.request.uri + " not found").addClass("ui-state-error");
     }
+    $example.hide();
+    $node
+      .click(function () { $example.slideToggle(); })
+      .css("cursor","pointer")
+      .after($example);
   }
 
   return {
