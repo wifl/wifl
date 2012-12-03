@@ -85,15 +85,53 @@ define(function() {
   }
 
   function checkRepresentation(query) {
-    query.valid();
+    return query.valid();
   }
 
   function checkParam(query) {
-    query.valid();
+    for (var i=0; i<paramValidators.length; i++) {
+      if (query.param.dataType == paramValidators[i].dataType) {
+        if (!paramValidators[i].regex.test(query.value)) {
+          return query.invalid
+          (query.param.name + ': "' + 
+           query.value + '" is not of type <' +
+           query.param.dataType + '>');
+        }
+      }
+    }
+    return query.valid();
   }
 
+  var paramValidators = [];
+
+  function addValidator(validator) {
+    if (validator.dataType && validator.regex) {
+      paramValidators.push(validator);
+    }
+  }
+
+  addValidator({ 
+    dataType: "http://www.w3.org/2001/XMLSchema#integer",
+    regex: /^[+-]?\d+$/
+  });
+
+  addValidator({ 
+    dataType: "http://www.w3.org/2001/XMLSchema#nonNegativeInteger",
+    regex: /^[+]?\d+$/
+  });
+
+  addValidator({ 
+    dataType: "http://www.w3.org/2001/XMLSchema#positiveInteger",
+    regex: /^[+]?0*[1-9]\d*$/
+  });
+
   return {
-    checkExample: checkExample,
-    checkParam: checkParam
+    checkExample: function(query) { setTimeout(function() {
+      checkExample(query);
+    },0); },
+    checkParam: function(query) { setTimeout(function() {
+      checkParam(query);
+    },0); }
   };
+
 });
