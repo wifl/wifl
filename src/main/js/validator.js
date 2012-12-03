@@ -23,13 +23,17 @@ define(function() {
         values: query.request.uriTemplate.parse(query.message.uri),
         params: query.request.uriParams,
         invalid: query.invalid,
-        valid: function() { return checkRepresentation({
-          body: query.message.body,
-          contentType: query.message.headers["Content-Type"],
-          representations: query.request.representations,
-          invalid: query.invalid,
-          valid: query.valid
-        }); }
+        valid: function() { 
+          if (query.message.body === undefined) {
+            query.valid();
+          } else { return checkRepresentation({
+            body: query.message.body,
+            contentType: query.message.headers["Content-Type"],
+            representations: query.request.representations,
+            invalid: query.invalid,
+            valid: query.valid
+          }); }
+        }
       }); }
     });
   }
@@ -37,18 +41,22 @@ define(function() {
   function checkResponse(query) {
     for (var i=0; i<query.responses.length; i++) {
       var response = query.responses[i];
-      if (response.statuses.indexOf(query.message.status) !== undefined) {
+      if (response.statuses.indexOf(query.message.status) !== -1) {
         return checkParams({
           values: query.message.headers,
           params: response.headerParams,
           invalid: query.invalid,
-          valid: function() { return checkRepresentation({
-            body: query.message.body,
-            contentType: query.message.headers["Content-Type"],
-            representations: response.representations,
-            invalid: query.invalid,
-            valid: query.valid
-          }); }
+          valid: function() { 
+            if (query.message.body === undefined) {
+              query.valid();
+            } else { return checkRepresentation({
+              body: query.message.body,
+              contentType: query.message.headers["Content-Type"],
+              representations: response.representations,
+              invalid: query.invalid,
+              valid: query.valid
+            }); }
+          }
         });
       }
     }
@@ -66,7 +74,7 @@ define(function() {
             value: value,
             param: param,
             invalid: query.invalid,
-            valid: function() { checkParameters(query,offset); }
+            valid: function() { checkParams(query,offset); }
           });
         }
       } else if (param.required) {

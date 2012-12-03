@@ -54,9 +54,12 @@ http://store.example.com/rest/products/10
 the ability to paginate the results using the 
 <span rel="queryParam" resource="#Start_index" typeof="Parameter"><span property="name">start-index</span></span> and 
 <span rel="queryParam" resource="#Max_results" typeof="Parameter"><span property="name">max-results</span></span> 
-query parameters, which default to 
-<span resource="#Start_index"><span property="defaultValue">1</span></span> and
-<span resource="#Max_results"><span property="defaultValue">10</span></span>, respectively.
+query parameters, which are
+<span about="#Start_index" rel="dataType" resource="xsd:nonNegativeInteger">both</span>
+<span about="#Max_results" rel="dataType" resource="xsd:nonNegativeInteger">both</span>
+and default to 
+<span about="#Start_index" property="default">1</span> and
+<span about="#Max_results" property="default">10</span>, respectively.
 To get 50 products starting at the 100th product product, the exchange
 would look like:</p>
 

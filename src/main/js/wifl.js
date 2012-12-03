@@ -75,7 +75,7 @@ define(["rdfa-ld","uri-template2"], function (rdfaLD,uriTemplate) {
       supers: this.targets(uri,"wifl:super",this.resource),
       parent: this.targets(uri,"wifl:parent",this.resource)[0],
       myRequests: this.targets(uri,"wifl:request",this.request),
-      myResponses: this.targets(uri,"wifl:response",this.request),
+      myResponses: this.targets(uri,"wifl:response",this.response),
       myHeaderParams: this.targets(uri,"wifl:headerParam",this.parameter),
       myPathParams: this.targets(uri,"wifl:pathParam",this.parameter),
       myQueryParams: this.targets(uri,"wifl:queryParam",this.parameter),

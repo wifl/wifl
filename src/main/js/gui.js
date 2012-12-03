@@ -312,7 +312,7 @@ define(["jquery","jquery-ui","validator"],function($,jqueryUI,validator) {
           $node.removeClass("validating").addClass("valid");
         },
         invalid: function(error) {
-          $node.removeClass("validating").addClass("invalid").title(error);
+          $node.removeClass("validating").addClass("invalid").attr("title",error);
         }
       });
     } else {
