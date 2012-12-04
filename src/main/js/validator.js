@@ -1,4 +1,4 @@
-define(function() {
+define(["jquery"],function(jQuery) {
 
   function checkExample(query) {
     return checkRequest({
@@ -23,17 +23,13 @@ define(function() {
         values: query.request.uriTemplate.parse(query.message.uri),
         params: query.request.uriParams,
         invalid: query.invalid,
-        valid: function() { 
-          if (query.message.body === undefined) {
-            query.valid();
-          } else { return checkRepresentation({
-            body: query.message.body,
-            contentType: query.message.headers["Content-Type"],
-            representations: query.request.representations,
-            invalid: query.invalid,
-            valid: query.valid
-          }); }
-        }
+        valid: function() { return checkRepresentation({
+          body: query.message.body,
+          contentType: query.message.headers["Content-Type"],
+          representations: query.request.representations,
+          invalid: query.invalid,
+          valid: query.valid
+        }); }
       }); }
     });
   }
@@ -46,17 +42,13 @@ define(function() {
           values: query.message.headers,
           params: response.headerParams,
           invalid: query.invalid,
-          valid: function() { 
-            if (query.message.body === undefined) {
-              query.valid();
-            } else { return checkRepresentation({
-              body: query.message.body,
-              contentType: query.message.headers["Content-Type"],
-              representations: response.representations,
-              invalid: query.invalid,
-              valid: query.valid
-            }); }
-          }
+          valid: function() { return checkRepresentation({
+            body: query.message.body,
+            contentType: query.message.headers["Content-Type"],
+            representations: response.representations,
+            invalid: query.invalid,
+            valid: query.valid
+          }); }
         });
       }
     }
@@ -84,23 +76,66 @@ define(function() {
     return query.valid();
   }
 
+  var reprValidators = [];
+
+  // TODO: Support subtyping (e.g. application/foo+xml <: application/xml <: application/*)
+  // TODO: Better error reporting from representation validators
   function checkRepresentation(query) {
-    return query.valid();
+    if (query.body === undefined) {
+      return query.valid();
+    } else if (query.contentType === undefined) {
+      return query.invalid("Missing content type.")
+    } else {
+      for (var i=0; i<query.representations.length; i++) {
+        var representation = query.representations[i];
+        if (representation.contentType === query.contentType) {
+          for (var j=0; j<reprValidators.length; j++) {
+            try { if (reprValidators[j].contentType(query.contentType)) {
+              try { if (reprValidators[j].values(query.body,representation.type)) {
+                return query.valid();
+              } else {
+                return query.invalid
+                ("Representation is not of type " + query.contentType);
+              } } catch (exn) {
+                return query.invalid
+                ("Representation is not of type " + query.contentType +
+                 "\n" + exn);
+              }
+            } } catch (exn) {}
+          }
+          return query.invalid
+          ("No validator found for content type " + query.contentType);
+        }
+      }
+      return query.invalid
+      ("Unrecognized content type " + query.contentType);
+    }
   }
+
+  var paramValidators = [];
 
   function checkParam(query) {
     for (var i=0; i<paramValidators.length; i++) {
       var validator = paramValidators[i];
-      if (paramValidators[i].dataType(query.param.dataType)) {
-        if (!paramValidators[i].values(query.value)) {
+      try { if (paramValidators[i].dataType(query.param.dataType)) {
+        try { if (paramValidators[i].values(query.value)) {
+          return query.valid();
+        } else {
           return query.invalid
           (query.param.name + ': "' + 
            query.value + '" is not of type <' +
            query.param.dataType + '>');
+        } } catch (exn) {
+          return query.invalid
+          (query.param.name + ': "' + 
+           query.value + '" is not of type <' +
+           query.param.dataType + '>\n' + 
+           exn);
         }
-      }
+      } } catch (exn) {}
     }
-    return query.valid();
+    return query.invalid
+    ("No validator found for data type <" + query.param.dataType + ">");
   }
 
   function isMember(values) {
@@ -117,16 +152,38 @@ define(function() {
     }
   }
 
-  var paramValidators = [];
-
   function addValidator(validator) {
     if (validator.dataType && validator.values) {
       paramValidators.push({
         dataType: isMember(validator.dataType),
         values: isMember(validator.values)
       });
+    } else if (validator.contentType && validator.values) {
+      reprValidators.push({
+        contentType: isMember(validator.contentType),
+        values: isMember(validator.values)
+      });
     }
   }
+
+  // Validators for text/uri-list, application/json and application/xml
+
+  addValidator({
+    contentType: "text/uri-list",
+    values: /^([#][^\r\n]*)?([a-zA-Z0-9-_.!~*'();?:@&=+$,#\/]|[%][a-fA-F0-9]{2}|[\r\n]([#][^\r\n]*)?)*$/
+  });
+
+  addValidator({
+    contentType: /^application\/(\S[+])?json\b/,
+    values: function(value) { jQuery.parseJSON(value); return true; }
+  });
+
+  addValidator({
+    contentType: /^(application|text)\/(\S[+])?xml\b/,
+    values: function(value) { jQuery.parseXML(value); return true; }
+  });
+
+  // Validators for built-in XML Schema datatypes
 
   addValidator({ 
     dataType: "http://www.w3.org/2001/XMLSchema#string",
@@ -210,7 +267,7 @@ define(function() {
   // TODO: Validate URIs properly
   addValidator({ 
     dataType: "http://www.w3.org/2001/XMLSchema#anyURI",
-    values: true
+    values: /^([a-zA-Z0-9-_.!~*'();?:@&=+$,#\/]|[%][a-fA-F0-9]{2})+$/
   });
 
   // TODO: Unicode QNames
