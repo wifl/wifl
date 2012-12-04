@@ -14,9 +14,11 @@
         * Ignores queryType attributes of resource element.
         * Ignores profile attribute of representation element.
         * Ignores path attribute and child link elements of param element.
-        * Does not resolve hrefs outside source document.
+    
+    The generated HTML preserves WADL element heritage with class, property,
+    or content attribute values for subsequent transformations.
 
-    Parts of this work are adapted from Mark Notingham's wadl_documentation.xsl, at
+    Parts of this work are adapted from Mark Nottingham's wadl_documentation.xsl, at
         https://github.com/mnot/wadl_stylesheets.
     and from Mark Sawers <mark.sawers@ipc.com> wadl.xsl at
         https://github.com/ipcsystems/wadl-stylesheet/blob/master/wadl.xsl
@@ -26,35 +28,36 @@
  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
  xmlns:wadl="http://wadl.dev.java.net/2009/02"
  xmlns:xs="http://www.w3.org/2001/XMLSchema"
- xmlns:functx="http://www.functx.com"
  xmlns:wh="http://wadl-html.com"
  xmlns:html="http://www.w3.org/1999/xhtml"
- exclude-result-prefixes="html wadl wh xs functx"
+ exclude-result-prefixes="html wadl wh xs"
 >
- <xsl:output method="html" encoding="ISO-8859-1"
-   indent="yes" />
 
-<!-- Global variables -->
-<xsl:variable name="top-level-ids" select="/wadl:application/*[@id]/@id"/>
+<xsl:output method="xhtml" encoding="UTF-8" indent="yes" />
 
-<!-- Template for top-level application element -->
+<xsl:include href="expand-wadl.xsl"/>
+  
 <xsl:template match="wadl:application">
+  <!-- Replace hrefs and resource type references in source wadl document
+    with their target's content. -->
+  <xsl:variable name="expansion">
+    <xsl:apply-templates select="." mode="expand"/>
+  </xsl:variable>
+  <!-- Transform the expanded document. -->
+  <xsl:apply-templates select="$expansion" mode="expanded"/>
+</xsl:template>
+
+<xsl:template mode="expanded" match="wadl:application">
   <xsl:variable name="title" select="if (wadl:doc/@title) then wadl:doc/@title 
   else 'Web Application'"/>
-  <xsl:variable name="preprocessed-ids" as="node()*">
-    <xsl:apply-templates select="//wadl:param[@id]|//wadl:representation[@id]|//wadl:method[@id]"/>
-  </xsl:variable>
   <html>
 	  <head>
-      <meta charset="UTF-8" />
-      <xsl:call-template name="getStyle"/>
       <title><xsl:value-of select="$title"/></title>
+      <xsl:call-template name="getStyle"/>
 	  </head>
 	  <body>
 		  <h1><xsl:value-of select="$title"/></h1>
-		  <xsl:call-template name="getDoc">
-	      <xsl:with-param name="base" select="wadl:application/wadl:resources[1]/@base"/>
-		  </xsl:call-template>
+		  <xsl:apply-templates select="wadl:doc"/>
 		  
 		  <!-- Summary -->
 		  <h2>Summary</h2>
@@ -70,28 +73,20 @@
 		  <!-- Grammars -->
 		  <xsl:if test="wadl:grammars/wadl:include">
 	      <h2>Grammars</h2>
-	      <p>
+	      <ul class="grammars">
+	        <xsl:apply-templates select="wadl:grammars/wadl:doc"/>
 	        <xsl:for-each select="wadl:grammars/wadl:include">
 	          <xsl:variable name="href" select="@href"/>
-	          <a href="{$href}"><xsl:value-of select="$href"/></a>
-	          <xsl:if test="position() != last()"><br/></xsl:if>  <!-- Add a spacer -->
+	          <li class="grammar">
+	            <a href="{$href}"><xsl:value-of select="$href"/></a>
+	          </li>
 	        </xsl:for-each>
-	      </p>
-		  </xsl:if>
-		
-		  <!-- Resource Types -->
-		  <xsl:if test="wadl:resource_type">
-		    <h2>Resource Types</h2>
-		    <xsl:apply-templates select="wadl:resource_type">
-          <xsl:with-param name="preprocessed-ids" select="$preprocessed-ids" as="node()*" tunnel="yes"/>
-		    </xsl:apply-templates>
+	      </ul>
 		  </xsl:if>
 		  
 		  <!-- Detail -->
 		  <h2>Resources</h2>
-		  <xsl:apply-templates select="wadl:resources">
-		    <xsl:with-param name="preprocessed-ids" select="$preprocessed-ids" as="node()*" tunnel="yes"/>
-		  </xsl:apply-templates>
+		  <xsl:apply-templates select="wadl:resources"/>
 	
 	  </body>
   </html>
@@ -99,7 +94,7 @@
 
 <xsl:template match="wadl:doc">
   <xsl:param name="resourceBase" tunnel="yes"/>
-  <div class="doc"> <!--  RDFa -->
+  <div class="doc">
     <xsl:if test="@title and local-name(..) != 'application'">
         <xsl:value-of select="@title"/>:
     </xsl:if>
@@ -127,9 +122,9 @@
 </xsl:template>
 
 <xsl:template match="wadl:resources">
-  <xsl:variable name="id" select="wh:getId(.)"/><!--  RDFa -->
-  <div class="resources" id="{$id}"> <!-- RDFa -->
-    <meta property="base" content="{@base}"/> <!--  RDFa -->
+  <xsl:variable name="id" select="wh:getId(.)"/>
+  <div class="resources" id="{$id}">
+    <span property="base" content="{@base}"/>
     <xsl:apply-templates>
       <xsl:with-param name="resourceBase" select="@base" tunnel="yes"/>
       <xsl:with-param name="resourceParent" select="$id" tunnel="yes"/>
@@ -137,52 +132,23 @@
   </div>
 </xsl:template>
 
-<xsl:template match="wadl:resource_type">
-  <div class="resource_type" id="{@id}">
-    <h3><xsl:value-of select="@id"/></h3>
-    <xsl:apply-templates select="wadl:doc"/>
-	  <xsl:if test="wadl:method">
-	    <h5>Methods</h5>
-	    <div class="methods">
-	      <xsl:apply-templates select="wadl:method"/>
-	    </div>
-	  </xsl:if>
-	  <xsl:apply-templates select="wadl:resource"/>
-  </div>
-</xsl:template>
-
 <xsl:template match="wadl:resource">
   <xsl:param name="resourceBase" tunnel="yes"/>
-  <xsl:param name="resourceParent" tunnel="yes"/> <!--  RDFa -->
+  <xsl:param name="resourceParent" tunnel="yes"/>
 
   <xsl:variable name="resourceId" select="wh:getId(.)"/>
-  <div class="resource" id="{$resourceId}"> <!-- RDFa -->
-   <meta property="path" content="{@path}"/> <!-- RDFa -->
-   <xsl:if test="$resourceParent"> <!-- RDFa -->
-     <meta property="parent" content="{$resourceParent}"/>
+  <div class="resource" id="{$resourceId}">
+   <span property="path" content="{@path}"/>
+   <xsl:if test="$resourceParent">
+     <span property="parent" content="{$resourceParent}"/>
    </xsl:if>
    
-	 <xsl:variable name="types" select="tokenize(@type, '\s+')"/>
-	 <xsl:if test="count($types)>0 or wadl:method">
-     <h3>
+	 <xsl:if test="wadl:method">
+     <h3 class="fullPath">
        <xsl:value-of select="if (@path) then 
        wh:getFullResourcePath($resourceBase,@path) else @id"/>
      </h3>
      <xsl:apply-templates select="wadl:doc"/>
-	 </xsl:if>
-	 
-	 <xsl:if test="count($types)>0">
-	   <h5>Types</h5>
-	   <ul class="types">
-	     <xsl:for-each select="$types">
-	       <li class="type">
-	         <a href="{.}"><xsl:value-of select="."/></a>
-	       </li>
-	     </xsl:for-each>
-	   </ul>
-	 </xsl:if>
-	 
-   <xsl:if test="wadl:method">
      <h5>Methods</h5>
      <div class="methods">
        <xsl:apply-templates select="wadl:method"/>
@@ -193,30 +159,28 @@
   <!-- Call recursively for child resources -->
   <xsl:apply-templates select="wadl:resource">
     <xsl:with-param name="resourceBase" select="wh:getFullResourcePath($resourceBase,@path)" tunnel="yes"/>
-    <xsl:with-param name="resourceParent" select="$resourceId" tunnel="yes"/> <!--  RDFa -->
+    <xsl:with-param name="resourceParent" select="$resourceId" tunnel="yes"/>
   </xsl:apply-templates>
 </xsl:template>
 
 <xsl:template match="wadl:method">
   <div class="method">
-    <xsl:if test="@id"><xsl:attribute name="id" select="@id"/></xsl:if>
+    <xsl:if test="@id"><xsl:attribute name="id" select="wh:getId(.)"/></xsl:if>
     <table class="methodNameTable">
       <tr>
         <td class="methodNameTd">
-          <xsl:variable name="name" select="@name"/>
-          <xsl:variable name="id2" select="wh:getId(.)"/>
-          <a name="{$id2}"><xsl:value-of select="$name"/></a>
+          <xsl:value-of select="@name"/>
         </td>
         <td class="methodIdTd">
           <xsl:if test="@id">
-            <span class="id"><xsl:value-of select="@id"/></span>() <!-- RDFa --> 
+            <span class="id"><xsl:value-of select="wadl:clean-id(wh:getId(.))"/></span>()
           </xsl:if>
         </td>
       </tr>
     </table>
 
-    <div class="request"> <!-- RDFa -->
-	    <meta property="name" content="{@name}"/> <!--  RDFa -->
+    <div class="request">
+	    <span property="name" content="{@name}"/>
 	    <xsl:apply-templates select="wadl:doc"/>
 	
 	    <!-- Request -->
@@ -228,7 +192,7 @@
               <xsl:call-template name="getRequestInputBlock" />
             </xsl:for-each>
           </xsl:when>
-          <xsl:when test="ancestor::wadl:resource/wadl:param | ancestor::wadl:resource_type/wadl:param">
+          <xsl:when test="ancestor::wadl:resource/wadl:param">
             <xsl:call-template name="getRequestInputBlock" />
           </xsl:when>
           <xsl:otherwise>
@@ -255,7 +219,7 @@
 
 <xsl:template match="wadl:param">
   <tr class="{@style}">
-    <xsl:if test="@id"><xsl:attribute name="id" select="@id"/></xsl:if>
+    <xsl:if test="@id"><xsl:attribute name="id" select="wh:getId(.)"/></xsl:if>
     <td class="name"><xsl:value-of select="@name"/></td>
     <td>
       <xsl:if test="not(@type) and not(@fixed)">
@@ -264,13 +228,13 @@
       <xsl:call-template name="getHyperlinkedElement">
         <xsl:with-param name="qname" select="@type"/>
       </xsl:call-template>
-      <xsl:if test="@required = 'true'"><br/><span class="required">(required)</span></xsl:if> <!--  RDFa -->
+      <xsl:if test="@required = 'true'"><br/><span class="required">(required)</span></xsl:if>
       <xsl:if test="@repeating = 'true'"><br/><span class="repeating">(repeating)</span></xsl:if>
-      <xsl:if test="@default"><br/>default: <tt class="default"><xsl:value-of select="@default"/></tt></xsl:if> <!--  RDFa -->
+      <xsl:if test="@default"><br/>default: <tt class="default"><xsl:value-of select="@default"/></tt></xsl:if>
       <xsl:if test="@type and @fixed"><br/></xsl:if>
-      <meta property="type" content="{@type}"/> <!--  RDFa -->
-      <!--  WIFL says @fixed is boolean that uses defaultValue, WADL says @fixed is the value and default is ignored. --> <!--  RDFa -->
-      <xsl:if test="@fixed">fixed: <tt class="fixed"><xsl:value-of select="@fixed"/></tt></xsl:if> <!--  RDFa -->
+      <span property="type" content="{@type}"/>
+      <!--  WIFL says @fixed is boolean that uses defaultValue, WADL says @fixed is the value and default is ignored. -->
+      <xsl:if test="@fixed">fixed: <tt class="fixed"><xsl:value-of select="@fixed"/></tt></xsl:if>
       <xsl:if test="wadl:option">
         <br/>options:
         <xsl:for-each select="wadl:option">
@@ -287,20 +251,20 @@
       </xsl:if>
     </td>
     <xsl:if test="wadl:doc">
-        <td class="doc"><xsl:value-of select="wadl:doc"/></td> <!--  RDFa -->
+        <td class="doc"><xsl:value-of select="wadl:doc"/></td>
     </xsl:if>
   </tr>
 </xsl:template>
 
 <xsl:template match="wadl:response">
-	<div class="response"> <!-- RDFa -->
+	<div class="response">
 	  <div class="h8">status:
 	   <xsl:choose>
        <xsl:when test="@status">
-           <span class="status"><xsl:value-of select="@status"/></span>  <!--  RDFa -->
+           <span class="status"><xsl:value-of select="@status"/></span>
        </xsl:when>
        <xsl:otherwise>
-           <span class="status">200</span> - OK  <!--  RDFa -->
+           <span class="status">200</span> - OK
        </xsl:otherwise>
 	   </xsl:choose>
 	  </div>
@@ -313,7 +277,7 @@
 			<xsl:text> </xsl:text>
 			<div class="doc">
 				<xsl:value-of select="." />
-			</div>  <!-- RDFa --><!-- PJD -->
+			</div>
 	  </xsl:for-each>
 	  
 	  <!-- Get response headers/representations -->
@@ -322,7 +286,6 @@
        <xsl:if test="wadl:param">
          <div class="h7">headers</div>
          <table>
-           <!-- TODO: This isn't following @href -->
            <xsl:apply-templates select="wadl:param[@style='header']"/>
          </table>
        </xsl:if>
@@ -333,8 +296,8 @@
 </xsl:template>
 
 <xsl:template match="wadl:representation">
-  <tr class="representation"> <!--  RDFa -->
-    <xsl:if test="@id"><xsl:attribute name="id" select="@id"/></xsl:if>
+  <tr class="representation">
+    <xsl:if test="@id"><xsl:attribute name="id" select="wh:getId(.)"/></xsl:if>
     <td class="mediaType">
       <xsl:value-of select="@mediaType"/>
     </td>
@@ -344,15 +307,14 @@
           <xsl:variable name="href" select="@href" />
           <xsl:choose>
             <xsl:when test="@href">
-              <meta property="representation-href" content="{@href}"/> <!-- RDFa -->
-              <xsl:variable name="localname" select="substring-after($href, '#')" /> <!-- PJD -->
+              <span property="representation-href" content="{@href}"/>
+              <xsl:variable name="localname" select="substring-after($href, '#')" />
               <a href="{$href}">
                 <xsl:value-of select="$localname" />
               </a>
             </xsl:when>
             <xsl:otherwise>
-              <!-- TODO: Is meta needed or already handled by getHyperlinkedElement? -->
-              <meta property="element" content="{@element}"/> <!-- RDFa -->
+              <span property="element" content="{@element}"/>
               <xsl:call-template name="getHyperlinkedElement">
                 <xsl:with-param name="qname" select="@element" />
               </xsl:call-template>
@@ -388,30 +350,6 @@
   </xsl:call-template>
 </xsl:template>
 
-<xsl:template match="wadl:param[@href]|wadl:method[@href]|wadl:representation[@href]">
-  <xsl:param name="preprocessed-ids" as="node()*" tunnel="yes"/>
-  <xsl:variable name="href" select="@href"/>
-  <xsl:variable name="targetId" select="substring(@href,2)"/>
-  <xsl:choose>
-    <xsl:when test="($top-level-ids=$targetId) and
-    functx:index-of-node(//wadl:*[@href=$href],.)=1">
-      <xsl:copy-of select="$preprocessed-ids[@id=$targetId]"/>
-    </xsl:when>
-    <xsl:otherwise>
-      <xsl:apply-templates select="$preprocessed-ids[@id=$targetId]" mode="ref"/>
-    </xsl:otherwise>
-  </xsl:choose> 
-</xsl:template>
-
-<xsl:template mode="ref" match="*">
-  <xsl:variable name="id" select="@id"/>
-  <xsl:copy>
-    <xsl:copy-of select="@*[name()!='id']"/>
-    <meta property="ref" content="{concat('#',@id)}"/>
-    <xsl:copy-of select="node()"/>
-  </xsl:copy>
-</xsl:template>
-
 <xsl:template mode="summarize" match="wadl:resources">
   <xsl:apply-templates select="wadl:resource" mode="summarize">
     <xsl:with-param name="resourceBase" select="@base" tunnel="yes"/>
@@ -428,28 +366,9 @@
   </xsl:apply-templates>
 </xsl:template>
 
-<xsl:template mode="summarize" match="wadl:resource[@type]">
-  <xsl:param name="resourceBase" tunnel="yes"/>
-  <xsl:variable name="types" select="tokenize(@type, '\s+')"/>
-  <xsl:variable name="root" select="ancestor::wadl:application"/>
-  <xsl:variable name="node" select="."/>
-  <xsl:for-each select="$types">
-	  <xsl:variable name="href" select="substring(.,2)"/>
-	  <xsl:apply-templates select="$root/wadl:resource_type[@id=$href]/wadl:method" mode="summarize">
-	    <xsl:with-param name="resourcePath" select="$node/@path" tunnel="yes"/>
-	  </xsl:apply-templates>
-	  <xsl:apply-templates select="$root/wadl:resource_type[@id=$href]/wadl:resource" mode="summarize">
-	    <xsl:with-param name="resourceBase" select="wh:getFullResourcePath($resourceBase,$node/@path)" tunnel="yes"/>
-	  </xsl:apply-templates>
-  </xsl:for-each>
-</xsl:template>
-
 <xsl:template mode="summarize" match="wadl:method">
   <xsl:param name="resourceBase" tunnel="yes"/>
   <xsl:param name="resourcePath" tunnel="yes"/>
-  <xsl:param name="lastResource" tunnel="yes"/>
-  <xsl:variable name="href" select="@href"/>
-  <xsl:variable name="methodNode" select="if ($href) then //wadl:method[@id=substring($href,2)] else ."/> 
   <tr>
     <!-- Resource -->
     <xsl:if test="position() = 1">
@@ -462,13 +381,13 @@
     </xsl:if>
     <!-- Method -->
     <td class="summary">
-      <xsl:variable name="name" select="$methodNode/@name"/>
-      <xsl:variable name="id2" select="wh:getId($methodNode)"/>
+      <xsl:variable name="name" select="@name"/>
+      <xsl:variable name="id2" select="wh:getId(.)"/>
       <a href="#{$id2}"><xsl:value-of select="$name"/></a>
     </td>
     <!-- Description -->
     <td class="summary">
-      <xsl:apply-templates select="$methodNode/wadl:doc"/>
+      <xsl:apply-templates select="wadl:doc"/>
     </td>
   </tr>
 </xsl:template>
@@ -502,17 +421,10 @@
 
 <xsl:template name="getParamBlock">
   <xsl:param name="style"/>
-  <xsl:variable name="refs" select="if ($style='query' or $style='header') then 
-  wadl:param[@href] | ancestor::wadl:resource[1]/wadl:param[@href]
-  | self::wadl:method/parent::wadl:resource_type/wadl:param[@href]
-  else wadl:param[@href] | ancestor::wadl:resource/wadl:param[@href]"/>
-  <xsl:variable name="inherited" select="if ($style='query' or $style='header') then
-  ancestor::wadl:resource[1]/wadl:param[@style=$style] |
-  self::wadl:method/parent::wadl:resource_type/wadl:param[@style=$style]
+  <xsl:variable name="inherited" select="if ($style='query' or $style='header') 
+  then ancestor::wadl:resource[1]/wadl:param[@style=$style]
   else ancestor::wadl:resource/wadl:param[@style=$style]"/>
-  <xsl:variable name="params" select="wadl:param[@style=$style] | 
-  $inherited | 
-  $refs[some $node in //wadl:param[@id and @style=$style] satisfies @href=concat('#', $node/@id)]"/>
+  <xsl:variable name="params" select="$inherited | wadl:param[@style=$style]"/> 
   <xsl:if test="$params">
     <div class="h7"><xsl:value-of select="$style"/> params</div>
     <table>
@@ -551,9 +463,7 @@
 
 <xsl:template name="getRepresentationParamBlock">
   <xsl:param name="style"/>
-  <xsl:variable name="refs" select="wadl:param[@href]"/>
-  <xsl:variable name="params" select="wadl:param[@style=$style] | 
-  $refs[some $node in //wadl:param[@id and @style=$style] satisfies @href=concat('#', $node/@id)]"/>
+  <xsl:variable name="params" select="wadl:param[@style=$style]"/>
   <xsl:if test="$params">
     <tr>
       <td class="representationParams">
@@ -604,7 +514,7 @@
             margin-left: 2em;
         }
         .representationParams {
-            padding: 0em, 0em, 0em, 2em;
+            padding: 0em 0em 0em 2em;
         }
         .example {
             white-space:pre-wrap;
@@ -615,11 +525,11 @@
         .mediaType {
             font-weight: bold;
         }
-        .types {
+        .grammars {
             margin-left: -1em; 
             margin-bottom: 2em;
         }
-        .type {
+        .grammar {
             background-color: #ffffdd;
             border: 1px solid #DDDDE6;
             padding: .5em;
@@ -628,7 +538,7 @@
             width: 50em
         }
         h1 {
-            font-size: 2m;
+            font-size: 2em;
             margin-bottom: 0em;
         }
         h2 {
@@ -702,10 +612,6 @@
     </style>
 </xsl:template>
 
-<!-- TODO:
-  1. Inline top-level elements at first use by @href and give an @id
--->
-
 <xsl:function name="wh:getId" as="xs:string">
   <xsl:param name="node" as="node()"/>
   <xsl:value-of select="if ($node/@id) then $node/@id else generate-id($node)"/>
@@ -735,15 +641,6 @@
      </xsl:choose>
    </xsl:variable>
    <xsl:value-of select="concat($basePart,$pathPart)"/>
-</xsl:function>
-
-<xsl:function name="functx:index-of-node" as="xs:integer*" >
-  <xsl:param name="nodes" as="node()*"/> 
-  <xsl:param name="nodeToFind" as="node()"/> 
-  <xsl:sequence select=" 
-  for $seq in (1 to count($nodes))
-  return $seq[$nodes[$seq] is $nodeToFind]
- "/>
 </xsl:function>
 
 </xsl:stylesheet>
