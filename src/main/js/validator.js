@@ -1,4 +1,4 @@
-define(function() {
+define(["jquery"],function(jQuery) {
 
   function checkExample(query) {
     return checkRequest({
@@ -23,17 +23,13 @@ define(function() {
         values: query.request.uriTemplate.parse(query.message.uri),
         params: query.request.uriParams,
         invalid: query.invalid,
-        valid: function() { 
-          if (query.message.body === undefined) {
-            query.valid();
-          } else { return checkRepresentation({
-            body: query.message.body,
-            contentType: query.message.headers["Content-Type"],
-            representations: query.request.representations,
-            invalid: query.invalid,
-            valid: query.valid
-          }); }
-        }
+        valid: function() { return checkRepresentation({
+          body: query.message.body,
+          contentType: query.message.headers["Content-Type"],
+          representations: query.request.representations,
+          invalid: query.invalid,
+          valid: query.valid
+        }); }
       }); }
     });
   }
@@ -46,17 +42,13 @@ define(function() {
           values: query.message.headers,
           params: response.headerParams,
           invalid: query.invalid,
-          valid: function() { 
-            if (query.message.body === undefined) {
-              query.valid();
-            } else { return checkRepresentation({
-              body: query.message.body,
-              contentType: query.message.headers["Content-Type"],
-              representations: response.representations,
-              invalid: query.invalid,
-              valid: query.valid
-            }); }
-          }
+          valid: function() { return checkRepresentation({
+            body: query.message.body,
+            contentType: query.message.headers["Content-Type"],
+            representations: response.representations,
+            invalid: query.invalid,
+            valid: query.valid
+          }); }
         });
       }
     }
@@ -84,45 +76,299 @@ define(function() {
     return query.valid();
   }
 
-  function checkRepresentation(query) {
-    return query.valid();
-  }
+  var reprValidators = [];
 
-  function checkParam(query) {
-    for (var i=0; i<paramValidators.length; i++) {
-      if (query.param.dataType == paramValidators[i].dataType) {
-        if (!paramValidators[i].regex.test(query.value)) {
+  // TODO: Support subtyping (e.g. application/foo+xml <: application/xml <: application/*)
+  // TODO: Better error reporting from representation validators
+  function checkRepresentation(query) {
+    if (query.body === undefined) {
+      return query.valid();
+    } else if (query.contentType === undefined) {
+      return query.invalid("Missing content type.")
+    } else {
+      for (var i=0; i<query.representations.length; i++) {
+        var representation = query.representations[i];
+        if (representation.contentType === query.contentType) {
+          for (var j=0; j<reprValidators.length; j++) {
+            try { if (reprValidators[j].contentType(query.contentType)) {
+              try { if (reprValidators[j].values(query.body,representation.type)) {
+                return query.valid();
+              } else {
+                return query.invalid
+                ("Representation is not of type " + query.contentType);
+              } } catch (exn) {
+                return query.invalid
+                ("Representation is not of type " + query.contentType +
+                 "\n" + exn);
+              }
+            } } catch (exn) {}
+          }
           return query.invalid
-          (query.param.name + ': "' + 
-           query.value + '" is not of type <' +
-           query.param.dataType + '>');
+          ("No validator found for content type " + query.contentType);
         }
       }
+      return query.invalid
+      ("Unrecognized content type " + query.contentType);
     }
-    return query.valid();
   }
 
   var paramValidators = [];
 
-  function addValidator(validator) {
-    if (validator.dataType && validator.regex) {
-      paramValidators.push(validator);
+  function checkParam(query) {
+    for (var i=0; i<paramValidators.length; i++) {
+      var validator = paramValidators[i];
+      try { if (paramValidators[i].dataType(query.param.dataType)) {
+        try { if (paramValidators[i].values(query.value)) {
+          return query.valid();
+        } else {
+          return query.invalid
+          (query.param.name + ': "' + 
+           query.value + '" is not of type <' +
+           query.param.dataType + '>');
+        } } catch (exn) {
+          return query.invalid
+          (query.param.name + ': "' + 
+           query.value + '" is not of type <' +
+           query.param.dataType + '>\n' + 
+           exn);
+        }
+      } } catch (exn) {}
+    }
+    return query.invalid
+    ("No validator found for data type <" + query.param.dataType + ">");
+  }
+
+  function isMember(values) {
+    switch (typeof values) {
+    case "function": return values;
+    case "string": return function(value) { return value === values; };
+    case "boolean": return function(value) { return values; };
+    case "object": 
+      if (values instanceof Array) {
+        return function(value) { return values.indexOf(value) !== -1; };
+      } else {
+        return function(value) { return values.test(value); }
+      }
     }
   }
 
+  function addValidator(validator) {
+    if (validator.dataType && validator.values) {
+      paramValidators.push({
+        dataType: isMember(validator.dataType),
+        values: isMember(validator.values)
+      });
+    } else if (validator.contentType && validator.values) {
+      reprValidators.push({
+        contentType: isMember(validator.contentType),
+        values: isMember(validator.values)
+      });
+    }
+  }
+
+  // Validators for text/uri-list, application/json and application/xml
+
+  addValidator({
+    contentType: "text/uri-list",
+    values: /^([#][^\r\n]*)?([a-zA-Z0-9-_.!~*'();?:@&=+$,#\/]|[%][a-fA-F0-9]{2}|[\r\n]([#][^\r\n]*)?)*$/
+  });
+
+  addValidator({
+    contentType: /^application\/(\S[+])?json\b/,
+    values: function(value) { jQuery.parseJSON(value); return true; }
+  });
+
+  addValidator({
+    contentType: /^(application|text)\/(\S[+])?xml\b/,
+    values: function(value) { jQuery.parseXML(value); return true; }
+  });
+
+  // Validators for built-in XML Schema datatypes
+
   addValidator({ 
-    dataType: "http://www.w3.org/2001/XMLSchema#integer",
-    regex: /^[+-]?\d+$/
+    dataType: "http://www.w3.org/2001/XMLSchema#string",
+    values: true
   });
 
   addValidator({ 
-    dataType: "http://www.w3.org/2001/XMLSchema#nonNegativeInteger",
-    regex: /^[+]?\d+$/
+    dataType: "http://www.w3.org/2001/XMLSchema#boolean",
+    values: ["true","false","0","1"]
+  });
+
+  addValidator({ 
+    dataType: "http://www.w3.org/2001/XMLSchema#decimal",
+    values: /^[+-]?\d+(\.\d+)?$/
+  });
+
+  addValidator({ 
+    dataType: [
+      "http://www.w3.org/2001/XMLSchema#float",
+      "http://www.w3.org/2001/XMLSchema#double"
+    ],
+    values: /^[+-]?(\d+(\.\d+)?([eE]\d+)?|NaN|INF)$/
+  });
+
+  // TODO: value restrictions on dates/times
+  addValidator({ 
+    dataType: "http://www.w3.org/2001/XMLSchema#duration",
+    values: /^[-]?P(\d+Y)?(\d+M)?(\d+DT)?(\d+H)?(\d+M)?(\d+(\.\d+)?S)?$/
+  });
+
+  addValidator({ 
+    dataType: "http://www.w3.org/2001/XMLSchema#timeDate",
+    values: /^[-]?\d{4,}\-\d\d\-\d\dT\d\d\:\d\d\:\d\d(\.\d+)?(([+-]\d\d\:\d\d)|Z)?$/
+  });
+
+  addValidator({ 
+    dataType: "http://www.w3.org/2001/XMLSchema#time",
+    values: /^\d\d\:\d\d\:\d\d(\.\d+)?(([+-]\d\d\:\d\d)|Z)?$/
+  });
+
+  addValidator({ 
+    dataType: "http://www.w3.org/2001/XMLSchema#date",
+    values: /^[-]?\d{4,}\-\d\d\-\d\d(([+-]\d\d\:\d\d)|Z)?$/
+  });
+
+  addValidator({ 
+    dataType: "http://www.w3.org/2001/XMLSchema#gYearMonth",
+    values: /^[-]?\d{4,}\-\d\d(([+-]\d\d\:\d\d)|Z)?$/
+  });
+
+  addValidator({ 
+    dataType: "http://www.w3.org/2001/XMLSchema#gYear",
+    values: /^[-]?\d{4,}(([+-]\d\d\:\d\d)|Z)?$/
+  });
+
+  addValidator({ 
+    dataType: "http://www.w3.org/2001/XMLSchema#gMonthDay",
+    values: /^\-\-\d\d\-\d\d(([+-]\d\d\:\d\d)|Z)?$/
+  });
+
+  addValidator({ 
+    dataType: "http://www.w3.org/2001/XMLSchema#gMonth",
+    values: /^\-\-\d\d(([+-]\d\d\:\d\d)|Z)?$/
+  });
+
+  addValidator({ 
+    dataType: "http://www.w3.org/2001/XMLSchema#gDay",
+    values: /^\-\-\-\d\d(([+-]\d\d\:\d\d)|Z)?$/
+  });
+
+  addValidator({ 
+    dataType: "http://www.w3.org/2001/XMLSchema#hexBinary",
+    values: /^[0-9a-fA-F]*$/
+  });
+
+  addValidator({ 
+    dataType: "http://www.w3.org/2001/XMLSchema#base64Binary",
+    values: /^(([A-Za-z0-9+\/]\s*[A-Za-z0-9+\/]\s*[A-Za-z0-9+\/]\s*[A-Za-z0-9+\/]\s*)*(([A-Za-z0-9+\/]\s*[A-Za-z0-9+\/]\s*[A-Za-z0-9+\/]\s*[A-Za-z0-9+\/])|([A-Za-z0-9+\/]\s*[A-Za-z0-9+\/]\s*[AEIMQUYcgkosw048]\s*[=])|([A-Za-z0-9+\/]\s*[AQgw]\s*[=]\s*[=])))?$/
+  });
+
+  // TODO: Validate URIs properly
+  addValidator({ 
+    dataType: "http://www.w3.org/2001/XMLSchema#anyURI",
+    values: /^([a-zA-Z0-9-_.!~*'();?:@&=+$,#\/]|[%][a-fA-F0-9]{2})+$/
+  });
+
+  // TODO: Unicode QNames
+  addValidator({ 
+    dataType: [
+      "http://www.w3.org/2001/XMLSchema#QName",
+      "http://www.w3.org/2001/XMLSchema#NOTATION"
+    ],
+    values: /^[a-zA-Z_][a-zA-Z0-9_.\-]*([:][a-zA-Z_][a-zA-Z0-9_.\-]*)?$/
+  });
+
+  addValidator({ 
+    dataType: "http://www.w3.org/2001/XMLSchema#normalizedString",
+    values: /^[^\n\r\t]*$/
+  });
+
+  addValidator({ 
+    dataType: "http://www.w3.org/2001/XMLSchema#token",
+    values: /^(\S+([ ]\S+)*)?$/
+  });
+
+  addValidator({ 
+    dataType: "http://www.w3.org/2001/XMLSchema#language",
+    values: /^[a-zA-Z]{1,8}([-][a-zA-Z0-9]{1,8})*$/
+  });
+
+  // TODO: Unicode NMTOKENs
+  addValidator({ 
+    dataType: "http://www.w3.org/2001/XMLSchema#NMTOKEN",
+    values: /^[a-zA-Z0-9_.\-:]+$/
+  });
+
+  // TODO: Unicode NMTOKENS
+  addValidator({ 
+    dataType: "http://www.w3.org/2001/XMLSchema#NMTOKENS",
+    values: /^[a-zA-Z0-9_.\-:]+([ ]+[a-zA-Z0-9_.\-:]+)*$/
+  });
+
+  // TODO: Unicode Names
+  addValidator({ 
+    dataType: "http://www.w3.org/2001/XMLSchema#Name",
+    values: /^[a-zA-Z_:][a-zA-Z0-9_.\-:]*$/
+  });
+
+  // TODO: Unicode NCNames
+  addValidator({ 
+    dataType: [
+      "http://www.w3.org/2001/XMLSchema#NCName",
+      "http://www.w3.org/2001/XMLSchema#ID",
+      "http://www.w3.org/2001/XMLSchema#IDREF",
+      "http://www.w3.org/2001/XMLSchema#ENTITY"
+    ],
+    values: /^[a-zA-Z_][a-zA-Z0-9_.\-]*$/
+  });
+
+  // TODO: Unicode IDREFS
+  addValidator({ 
+    dataType: [
+      "http://www.w3.org/2001/XMLSchema#IDREFS",
+      "http://www.w3.org/2001/XMLSchema#ENTITIES"
+    ],
+    values: /^[a-zA-Z_][a-zA-Z0-9_.\-]*([ ]+[a-zA-Z_][a-zA-Z0-9_.\-]*)$/
+  });
+
+  // TODO: Range validation
+  addValidator({ 
+    dataType: [
+      "http://www.w3.org/2001/XMLSchema#integer",
+      "http://www.w3.org/2001/XMLSchema#long",
+      "http://www.w3.org/2001/XMLSchema#int",
+      "http://www.w3.org/2001/XMLSchema#short",
+      "http://www.w3.org/2001/XMLSchema#byte"
+    ],
+    values: /^[+-]?\d+$/
+  });
+
+  // TODO: Range validation
+  addValidator({ 
+    dataType: [
+      "http://www.w3.org/2001/XMLSchema#nonNegativeInteger",
+      "http://www.w3.org/2001/XMLSchema#unsignedLong",
+      "http://www.w3.org/2001/XMLSchema#unsignedInt",
+      "http://www.w3.org/2001/XMLSchema#unsignedShort",
+      "http://www.w3.org/2001/XMLSchema#unsignedByte"
+    ],
+    values: /^[+]?\d+$/
+  });
+
+  addValidator({ 
+    dataType: "http://www.w3.org/2001/XMLSchema#nonPositiveInteger",
+    values: /^[-]\d+$/
   });
 
   addValidator({ 
     dataType: "http://www.w3.org/2001/XMLSchema#positiveInteger",
-    regex: /^[+]?0*[1-9]\d*$/
+    values: /^[+]?0*[1-9]\d*$/
+  });
+
+  addValidator({ 
+    dataType: "http://www.w3.org/2001/XMLSchema#negativeInteger",
+    values: /^[-]0*[1-9]\d*$/
   });
 
   return {
