@@ -181,6 +181,11 @@ td.attr:before {
 	padding: 0 0.5em;
 }
 
+.exchange + .request {
+	margin-left: 3em;
+	margin-right: 3em;
+}
+
 *[typeof="Example"] {
 	font-weight: bold;
 }
