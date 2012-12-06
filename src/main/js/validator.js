@@ -1,165 +1,138 @@
 define(["jquery"],function(jQuery) {
 
-  function checkExample(query) {
-    return checkRequest({
-      message: query.example.request,
-      request: query.request,
-      invalid: query.invalid,
-      valid: function() { return checkResponse({
-        message: query.example.response,
-        responses: query.request.responses,
-        invalid: query.invalid,
-        valid: query.valid
-      }); }
-    });
+  var success = jQuery.Deferred().resolve();
+  var failure = jQuery.Deferred().reject("");
+
+  function prepend() {
+    var context = arguments;
+    return function(error) {
+      return Array.prototype.join.call(context,"") + error;
+    };
   }
 
-  function checkRequest(query) {
-    return checkParams({
-      values: query.message.headers,
-      params: query.request.headerParams,
-      invalid: query.invalid,
-      valid: function() { return checkParams({
-        values: query.request.uriTemplate.parse(query.message.uri),
-        params: query.request.uriParams,
-        invalid: query.invalid,
-        valid: function() { return checkRepresentation({
-          body: query.message.body,
-          contentType: query.message.headers["Content-Type"],
-          representations: query.request.representations,
-          invalid: query.invalid,
-          valid: query.valid
-        }); }
-      }); }
-    });
-  }
-
-  function checkResponse(query) {
-    for (var i=0; i<query.responses.length; i++) {
-      var response = query.responses[i];
-      if (response.statuses.indexOf(query.message.status) !== -1) {
-        return checkParams({
-          values: query.message.headers,
-          params: response.headerParams,
-          invalid: query.invalid,
-          valid: function() { return checkRepresentation({
-            body: query.message.body,
-            contentType: query.message.headers["Content-Type"],
-            representations: response.representations,
-            invalid: query.invalid,
-            valid: query.valid
-          }); }
-        });
+  function allMap(args,fun) {
+    var count = 0;
+    var promise;
+    function yes() { if (!--count) { promise.resolve(); } }
+    function no(error) { promise.reject(error); }
+    for (var i=0; i<args.length; i++) {
+      var arg = args[i];
+      if (fun) { arg = fun(arg); }
+      switch (arg.state()) {
+        case "rejected":
+  	  return arg;
+	case "pending":
+	  if (!count++) { promise = jQuery.Deferred(); }
+	  arg.done(yes).fail(no);
       }
     }
-    return query.invalid("Unrecognized status code " + query.message.status);
+    return (count? promise: success);
   }
 
-  function checkParams(query,offset) {
-    offset = offset || 0;
-    while (offset < query.params.length) {
-      var param = query.params[offset++];
-      var value = query.values[param.name];
-      if (value) {
-        if (param.dataType) {
-          return checkParam({
-            value: value,
-            param: param,
-            invalid: query.invalid,
-            valid: function() { checkParams(query,offset); }
-          });
-        }
-      } else if (param.required) {
-        return query.invalid("No value for required parameter " + name);
+  function all() { return allMap(arguments); }
+
+  function checkExample(example,request) {
+    return all(
+      checkRequest(example.request,request).pipe(undefined,prepend("Request: ")),
+      checkResponse(example.response,request.responses).pipe(undefined,prepend("Response: "))
+    );
+  }
+
+  function checkRequest(message,request) {
+    return all(
+      checkParams(message.headers,request.headerParams),
+      checkParams(request.uriTemplate.parse(message.uri),request.uriParams),
+      checkRepr(message.body,message.headers["Content-Type"],request.representations)
+    );
+  }
+
+  function checkResponse(message,responses) {
+    for (var i=0; i<responses.length; i++) {
+      var response = responses[i];
+      if (response.statuses.indexOf(message.status) !== -1) {
+	return all(
+	  checkParams(message.headers,response.headerParams),
+	  checkRepr(message.body,message.headers["Content-Type"],response.representations)
+	);
       }
     }
-    return query.valid();
+    return failure.pipe(undefined,prepend("Unrecognized status code ", message.status));
+  }
+
+  function checkParams(values,params) {
+    return allMap(params,function(param) {
+      return checkValue(values[param.name],param).pipe(undefined,prepend(param.name,": "));
+    });
   }
 
   var reprValidators = [];
 
   // TODO: Support subtyping (e.g. application/foo+xml <: application/xml <: application/*)
-  // TODO: Better error reporting from representation validators
-  function checkRepresentation(query) {
-    if (query.body === undefined) {
-      return query.valid();
-    } else if (query.contentType === undefined) {
-      return query.invalid("Missing content type.")
+  function checkRepr(body,contentType,reprs) {
+    if (body === undefined) {
+      return success;
+    } else if (contentType === undefined) {
+      return failure.pipe(undefined,prepend("Missing content type."))
     } else {
-      for (var i=0; i<query.representations.length; i++) {
-        var representation = query.representations[i];
-        if (representation.contentType === query.contentType) {
-          for (var j=0; j<reprValidators.length; j++) {
-            try { if (reprValidators[j].contentType(query.contentType)) {
-              try { if (reprValidators[j].values(query.body,representation.type)) {
-                return query.valid();
-              } else {
-                return query.invalid
-                ("Representation is not of type " + query.contentType);
-              } } catch (exn) {
-                return query.invalid
-                ("Representation is not of type " + query.contentType +
-                 "\n" + exn);
-              }
-            } } catch (exn) {}
-          }
-          return query.invalid
-          ("No validator found for content type " + query.contentType);
-        }
+      for (var i=0; i<reprs.length; i++) {
+	var repr = reprs[i];
+	if (repr.contentType === contentType) {
+	  return allMap(reprValidators,function(validator) {
+	    return validator.contentType(contentType).pipe(
+              function() { return validator.values(body,repr.type); },
+	      function() { return success; }
+	    );
+	  }).pipe(undefined,prepend("Reresentation is not of type ", contentType));
+	}
       }
-      return query.invalid
-      ("Unrecognized content type " + query.contentType);
+      return failure.pipe(undefined,prepend("Unrecongized content type ", contentType));
     }
   }
 
   var paramValidators = [];
 
-  function checkParam(query) {
-    for (var i=0; i<paramValidators.length; i++) {
-      var validator = paramValidators[i];
-      try { if (paramValidators[i].dataType(query.param.dataType)) {
-        try { if (paramValidators[i].values(query.value)) {
-          return query.valid();
-        } else {
-          return query.invalid
-          (query.param.name + ': "' + 
-           query.value + '" is not of type <' +
-           query.param.dataType + '>');
-        } } catch (exn) {
-          return query.invalid
-          (query.param.name + ': "' + 
-           query.value + '" is not of type <' +
-           query.param.dataType + '>\n' + 
-           exn);
-        }
-      } } catch (exn) {}
-    }
-    return query.invalid
-    ("No validator found for data type <" + query.param.dataType + ">");
+  function checkValue(value,dataType) {
+    return allMap(paramValidators,function(validator) {
+      return validator.dataType(dataType).pipe(
+        function() { return validator.values(value); },
+        function() { return success; }
+      );
+    }).pipe(undefined,prepend(value," should be of type ",dataType));
+  }
+
+  function checkBool(bool) {
+    return (bool? success: failure);
+  }
+
+  function constant(value) { 
+    return function() { return value; };
   }
 
   function isMember(values) {
     switch (typeof values) {
-    case "function": return values;
-    case "string": return function(value) { return value === values; };
-    case "boolean": return function(value) { return values; };
+    case "function": return function(value) {
+      try { return values(value); }
+      catch (exn) { return failure.pipe(undefined,prepend(exn)); }
+    };
+    case "string": return function(value) { return checkBool(value === values); };
+    case "boolean": return constant(checkBool(values));
     case "object": 
       if (values instanceof Array) {
-        return function(value) { return values.indexOf(value) !== -1; };
+        return function(value) { return checkBool(values.indexOf(value) !== -1); };
       } else {
-        return function(value) { return values.test(value); }
+        return function(value) { return checkBool(values.test(value)); }
       }
     }
   }
 
   function addValidator(validator) {
     if (validator.dataType && validator.values) {
-      paramValidators.push({
+      paramValidators.unshift({
         dataType: isMember(validator.dataType),
         values: isMember(validator.values)
       });
     } else if (validator.contentType && validator.values) {
-      reprValidators.push({
+      reprValidators.unshift({
         contentType: isMember(validator.contentType),
         values: isMember(validator.values)
       });
@@ -175,12 +148,12 @@ define(["jquery"],function(jQuery) {
 
   addValidator({
     contentType: /^application\/(\S[+])?json\b/,
-    values: function(value) { jQuery.parseJSON(value); return true; }
+    values: function(value) { jQuery.parseJSON(value); return success; }
   });
 
   addValidator({
     contentType: /^(application|text)\/(\S[+])?xml\b/,
-    values: function(value) { jQuery.parseXML(value); return true; }
+    values: function(value) { jQuery.parseXML(value); return success; }
   });
 
   // Validators for built-in XML Schema datatypes
@@ -372,12 +345,12 @@ define(["jquery"],function(jQuery) {
   });
 
   return {
-    checkExample: function(query) { setTimeout(function() {
-      checkExample(query);
-    },0); },
-    checkParam: function(query) { setTimeout(function() {
-      checkParam(query);
-    },0); }
+    checkExample: checkExample,
+    checkRequest: checkRequest,
+    checkResponse: checkResponse,
+    checkRepr: checkRepr,
+    checkValue: checkValue,
+    addValidator: addValidator
   };
 
 });

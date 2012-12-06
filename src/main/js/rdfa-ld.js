@@ -1,45 +1,4 @@
-define(["rdfa"], function (rdfa) {
-
-  // A future value.
-  function Future() {
-    this.value = undefined;
-    this.callbacks = [];
-  }
-  // Get the current value.
-  Future.prototype.get = function() {
-    return this.value;
-  };
-  // Set the current value.
-  // Do nothing if the value already exists.
-  // Notify all the callbacks of the new value.
-  Future.prototype.set = function(value) {
-    if (value !== undefined && this.value === undefined) {
-      this.value = value;
-      for (var i=0; i<this.callbacks.length; i++) {
-        this.callbacks[i](value);
-      }
-      this.callbacks = undefined;
-    }
-    return this;
-  };
-  // Wait for the value to be set.
-  // Calls the callbacks immediately if the value has already been set.
-  Future.prototype.wait = function() {
-    if (this.value === undefined) {
-      Array.prototype.push.apply(this.callbacks,arguments);
-    } else {
-      for (var i=0; i<arguments.length; i++) {
-        arguments[i](this.value);
-      }
-    }
-    return this;
-  };
-  // Map a function over a future.
-  Future.prototype.map = function(f) {
-    var result = new Future();
-    this.wait(function(x) { result.set(f(x)); });
-    return result;
-  }
+define(["rdfa","future"], function (rdfa,future) {
 
   // Find the base URI of a document
   function getURI(doc) {
@@ -95,10 +54,11 @@ define(["rdfa"], function (rdfa) {
   };
   // Build an XHR to fetch a document from a given URI.
   // When all XHRs are finished, set the future to be this.
-  Documents.prototype.xhr = function(uri,future) {
+  Documents.prototype.xhr = function(uri,result) {
     var xhr = new XMLHttpRequest();
     var doc = document.implementation.createHTMLDocument(uri);
     var docs = this;
+    result = result || future.build();
     this.xhrs = this.xhrs+1 || 1;
     this.uris[uri] = doc;
     xhr.onloadend = function() {
@@ -113,11 +73,12 @@ define(["rdfa"], function (rdfa) {
       } catch (e) {
         console.log(e);
       } finally {
-        if (docs.xhrs === 0) { future.set(docs); }
+        if (docs.xhrs === 0) { result.set(docs); }
       }
     }
     xhr.open("GET",uri);
     xhr.send();
+    return result;
   }
   // Returns a future new collection given by adding URIs.
   // Returns a future whose value is 
@@ -125,7 +86,7 @@ define(["rdfa"], function (rdfa) {
   // We strip any #values off the URI.
   Documents.prototype.resolve = function() {
     var docs = this.clone();
-    var result = new Future();
+    var result = future.build();
     for (var i=0; i<arguments.length; i++) {
       var uri = arguments[i].split("#")[0];
       if (uri.charAt(0) !== "_" && !docs.uris[uri]) {
@@ -138,8 +99,8 @@ define(["rdfa"], function (rdfa) {
   // Find the fixed point of a function f
   // which maps documents to future documents.
   Documents.prototype.fix = function(step,result) {
-    var result = result || new Future();
     var curr = this;
+    result = result || future.build();
     step(curr).wait(function(next) {
       if (curr === next) {
 	result.set(curr);

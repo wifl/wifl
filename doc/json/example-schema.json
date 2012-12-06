@@ -1,0 +1,10 @@
+{
+  "store": {
+    "type": "object",
+    "properties": {
+      "manufacturer": { "string": "name", "required": true },
+      "name": { "type": "string", "required": true },
+      "weight": { "type": "number", "required": true },
+    } 
+  }
+}

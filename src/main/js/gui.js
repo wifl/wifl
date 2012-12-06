@@ -305,15 +305,10 @@ define(["jquery","jquery-ui","validator"],function($,jqueryUI,validator) {
         .css("cursor","pointer")
         .addClass("validating")
         .after($example);
-      validator.checkExample({
-        example: example,
-        request: request,
-        valid: function() { 
-          $node.removeClass("validating").addClass("valid");
-        },
-        invalid: function(error) {
-          $node.removeClass("validating").addClass("invalid").attr("title",error);
-        }
+      validator.checkExample(example,request).done(function() {
+	$node.removeClass("validating").addClass("valid");
+      }).fail(function(error) {
+	$node.removeClass("validating").addClass("invalid").attr("title",error);
       });
     } else {
       $node

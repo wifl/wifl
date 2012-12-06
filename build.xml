@@ -21,6 +21,7 @@
   <property name="storedoc" location="${htmldoc}/store"/>
   <property name="wadl" location="${doc}/wadl"/>
   <property name="xsl" location="${doc}/xsl"/>
+  <property name="json" location="${doc}/json"/>
 
   <!-- Library directories -->
   <property name="lib" location="lib"/>
@@ -28,6 +29,7 @@
   <property name="jslib" location="${lib}/js"/>
   <property name="requirejs" location="${jslib}/requirejs"/>
   <property name="qunit" location="${jslib}/qunit"/>
+  <property name="jsonschema" location="${jslib}/json-schema"/>
 	
 	<!-- XSpec properties -->
   <property name="xspec.properties" location="xspec.properties" /> 
@@ -241,6 +243,7 @@
     </copy>
     <copy todir="${dist}/js">
       <fileset file="${requirejs}/require-jquery.js"/>
+      <fileset file="${jsonschema}/json-schema-validate.js"/>
     </copy>
   </target>
 
@@ -248,10 +251,12 @@
     <mkdir dir="${site}"/>
     <copy todir="${site}">
       <fileset dir="${htmlbuild}"/>
+      <fileset dir="${json}"/>
       <fileset dir="${src}/main"/>
     </copy>
     <copy todir="${site}/js">
       <fileset file="${requirejs}/require-jquery.js"/>
+      <fileset file="${jsonschema}/json-schema-validate.js"/>
     </copy>
   </target>
 
