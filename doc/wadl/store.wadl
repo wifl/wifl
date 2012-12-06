@@ -44,19 +44,64 @@
           supports the GET and POST methods.</html:p>
       </doc>
       <param href="#API_key" />
+
+      <method id="Products_GET" name="GET">
+        <doc>
+          To get a listing of all the products in the store, a client
+          sends a  GET request to the resource.
+        </doc>
+        <request>
+          <param id="Start_index" name="start-index" style="query"
+            type="xsd:int" default="1">
+            <doc>The starting index of the requested products.</doc>
+          </param>
+          <param id="Max_results" name="max-results" style="query"
+            type="xsd:int" default="10">
+            <doc>The maximum number of results to be returned.</doc>
+          </param>
+        </request>
+        <response status="200">
+          <doc>
+            The application returns an HTTP response with a status code of
+            200  and a listing of all the products' URIs in the form of a
+            text/uri-list.
+          </doc>
+          <representation id="Product_List" mediaType="text/uri-list">
+            <doc>A list of product URIs.</doc>
+          </representation>
+        </response>
+      </method>
+      <method id="Products_POST" name="POST">
+        <doc>
+          To add a new product to the store, a client sends a
+          POST request to  the <html:span class="uri">/rest/products</html:span>
+          URI. The POST body includes a representation of the new product.
+        </doc>
+        <request>
+          <representation href="#Product_JSON"/>
+        </request>
+        <response status="201">
+          <doc>The application returns an HTTP response with status 201 to 
+            indicate the resource has been created, 
+            a <html:span class="header">Location</html:span>
+            header with the new resource's URI, and a representation of the
+            resource in the body.
+          </doc>
+          <representation href="#Product_JSON" />
+        </response>
+        <response status="400">
+          <doc>
+            If it does not, the application returns an HTTP response with status
+            400.</doc>
+        </response>
+      </method>
       <resource id="Product" path="{productId}">
         <doc>
           <html:p>
             Each product in the store is represented by an item resource at
             <html:span class="uri">/rest/products/{id}</html:span>
             .
-            The product resource has a
-            <html:span rel="pathParam" resource="#Product_ID" typeof="Parameter">
-              <meta property="required" content="true" />
-              required path parameter
-              of id
-            </html:span>
-            .
+            The product resource has a required 'id' path parameter.
           </html:p>
         </doc>
         <param id="Product_ID" name="productId" style="template" type="xsd:int" 
@@ -109,61 +154,16 @@
           </response>
         </method>
       </resource>
-
-      <method id="Products_GET" name="GET">
-        <doc>
-          To get a listing of all the products in the store, a client
-          sends a  GET request to the resource.
-        </doc>
-        <request>
-          <param id="Start_index" name="start-index" style="query"
-            type="xsd:int" default="1">
-            <doc>The starting index of the requested products.</doc>
-          </param>
-          <param id="Max_results" name="max-results" style="query"
-            type="xsd:int" default="10">
-            <doc>The maximum number of results to be returned.</doc>
-          </param>
-        </request>
-        <response status="200">
-          <doc>
-            The application returns an HTTP response with a status code of
-            200  and a listing of all the products' URIs in the form of a
-            text/uri-list.
-          </doc>
-          <representation id="Product_List" mediaType="text/uri-list">
-            <doc>A list of product URIs.</doc>
-          </representation>
-        </response>
-      </method>
-      <method id="Products_POST" name="POST">
-        <doc>
-          To add a new product to the store, a client sends a
-          POST request to  the <html:span class="uri">/rest/products</html:span>
-          URI. The POST body includes a representation of the new product.
-        </doc>
-        <request>
-          <representation href="#Product_JSON"/>
-        </request>
-        <response status="201">
-          <doc>The application returns an HTTP response with status 201 to 
-            indicate the resource has been created, 
-            a <html:span class="header">Location</html:span>
-            header with the new resource's URI, and a representation of the
-            resource in the body.
-          </doc>
-          <representation href="#Product_JSON" />
-        </response>
-        <response status="400">
-          <doc>
-            If it does not, the application returns an HTTP response with status
-            400.</doc>
-        </response>
-      </method>
     </resource>
     
-    <resource id='Bonus' type="#Bonus_Type http://example.com/#ex" path="bonus">
+    <resource id='Bonus' type="#Bonus_Type" path="bonus/{p}">
       <doc>This is a Bonus resource with a resource type.</doc>
+      <param name='p' style="template" type="xsd:string"/>
+      <method name="GET">
+        <request>
+          <param name="qg" style="query"/>
+        </request>
+      </method>
     </resource>
   </resources>
 
@@ -174,9 +174,6 @@
     </param>
     <param name='h' style='header' type='xsd:int'>
       <doc>The most important header parameter.</doc>
-    </param>
-    <param name='t' style='template' type='xsd:int'>
-      <doc>The most ignored template parameter.</doc>
     </param>
     <method name='OPTIONS'>
       <doc>To get the currently supported bonus options.</doc>
