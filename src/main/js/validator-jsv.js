@@ -1,86 +1,59 @@
 define(["jquery","validator","json-schema-validate"],function(jQuery,validator,jsv) {
 
+  var unresolved = {};
   var resolved = {};
 
-  function resolveJSON(obj,keys,offset) {
-    if (typeof obj !== "object") { return obj; }
-    if (obj["$ref"] !== undefined) { return resolveURI(obj["$ref"]); }
-    keys = keys || Object.keys(obj);
-    offset = offset || 0;
-    while (offset < keys.length) {
-      var key = keys[offset++];
-      var value = resolveJSON(obj[key]);
-      if (isPromise(value)) {
-	return value.pipe(function(evaluated) {
-	  obj[key] = evaluated;
-	  return resolveJSON(obj,keys,offset);
-	});
-      } else {
-	obj[key] = value;
-      }
-    }
-    return obj;
-  }
-
   function resolveURI(uri) {
+    if (resolved[uri]) { return resolved[uri]; }
     var offset = uri.indexOf("#");
-    var base = uri;
-    var fragment;
-    if (0 <= offset) {
-      base = uri.substring(0,offset);
-      fragment = uri.substring(offset+1);
+    var base = (offset<0? uri: uri.substring(0,offset));
+    if (!unresolved[base]) {
+      unresolved[base] = jQuery.getJSON(base).done(function(json) {
+        resolved[base] = resolveJSON(base,base+"#",json);
+      });
     }
-    var promise = resolved[base];
-    if (!promise) {
-      function failed(error) {
-        return "Getting JSON from " + base + " failed: " + error.statusText;
+    if (resolved[uri]) { return resolved[uri]; }
+    var marker = unresolved[base].pipe(function() { 
+      if (resolved[uri] === marker) {
+        return validator.failure("Failed to resolve " + uri);
+      } else {
+        return resolved[uri];
       }
-      promise = resolved[base] = jQuery.getJSON(base).pipe(resolveJSON,failed);
-    }
-    if (fragment) {
-      return promise.pipe(jsonPointer(fragment));
-    } else {
-      return promise;
-    }
+    });
+    return resolved[uri] = marker;
   }
 
-  function jsonPointer(path) {
-    var names = path.split("/").filter(id).map(unescape);
-    return function(json) {
-      for (var i=0; i<names.length && json!==undefined; i++) {
-	json = json[names[i]];
-      }
-      return json;
-    };
+  // TODO: Resolve relative URIs properly
+  function resolveJSON(base,uri,json) {
+    if (typeof json !== "object") { 
+      return resolved[uri] = validator.success(json); 
+    } else if (json["$ref"] !== undefined) { 
+      var target = json["$ref"];
+      if (target.charAt(0) === "#") { target = base + target; }
+      return resolved[uri] = resolveURI(target);
+    } else {
+      var keys = Object.keys(json);
+      var result = {};
+      return resolved[uri] = validator.allMap(keys,function(key) {
+        return resolveJSON(base,uri+"/"+key,json[key]).done(function(value) {
+          result[key] = value;
+        });
+      }).pipe(function () { return result; });
+    }
   }
 
   function checkJSON(value,type) {
     var json = jQuery.parseJSON(value);
-    if (!type) { return true; }
-    var result = jQuery.Deferred();
-    resolveURI(type).done(function(schema) {
+    if (!type) { return validator.success(); }
+    return resolveURI(type).pipe(function(schema) {
+      if (!schema) { return validator.failure("Failed to resolve schema for type " + type); }
       var report = jsv.validate(json,schema);
       if (report.valid) {
-	result.resolve();
+	return validator.success();
       } else {
-	result.reject(report.errors.map(errMessage).join("\n"));
-      }
-    }).fail(function(error) {
-      result.reject(error);
+	return validator.failure(report.errors.map(errMessage).join("\n"));
+      } 
     });
-    return result;
-  }
-
-  function isPromise(obj) {
-    return (typeof obj.done === "function");
-  }
-
-  function unescape(name) {
-    return name.replace(/~1/,"/").replace(/~0/,"~");
-  }
-
-  function id(x) {
-    return x;
   }
 
   function errMessage(error) {

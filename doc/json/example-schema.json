@@ -2,7 +2,7 @@
   "store": {
     "type": "object",
     "properties": {
-      "manufacturer": { "string": "name", "required": true },
+      "manufacturer": { "type": "string", "required": true },
       "name": { "type": "string", "required": true },
       "weight": { "type": "number" }
     } 

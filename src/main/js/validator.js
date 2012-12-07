@@ -1,7 +1,23 @@
 define(["jquery"],function(jQuery) {
 
-  var success = jQuery.Deferred().resolve();
-  var failure = jQuery.Deferred().reject();
+  var SUCCESS = jQuery.Deferred().resolve();
+  var FAILURE = jQuery.Deferred().reject();
+
+  function success(value) {
+    if (value === undefined) {
+      return SUCCESS;
+    } else {
+      return jQuery.Deferred().resolve(value);
+    }
+  }
+
+  function failure(error) {
+    if (error === undefined) {
+      return FAILURE;
+    } else {
+      return jQuery.Deferred().reject(error);
+    }
+  }
 
   function prepend() {
     var context = arguments;
@@ -14,7 +30,7 @@ define(["jquery"],function(jQuery) {
 
   function allMap(args,fun) {
     var count = 0;
-    var promise;
+    var promise = SUCCESS;
     function yes() { if (!--count) { promise.resolve(); } }
     function no(error) { promise.reject(error); }
     for (var i=0; i<args.length; i++) {
@@ -28,7 +44,7 @@ define(["jquery"],function(jQuery) {
 	  arg.done(yes).fail(no);
       }
     }
-    return (count? promise: success);
+    return promise;
   }
 
   function all() { return allMap(arguments); }
@@ -72,9 +88,9 @@ define(["jquery"],function(jQuery) {
   // TODO: Support subtyping (e.g. application/foo+xml <: application/xml <: application/*)
   function checkRepr(body,contentType,reprs) {
     if (body === undefined) {
-      return success;
+      return success();
     } else if (contentType === undefined) {
-      return failure.pipe(undefined,prepend("Missing content type."))
+      return failure("Missing content type.");
     } else {
       for (var i=0; i<reprs.length; i++) {
 	var repr = reprs[i];
@@ -82,12 +98,12 @@ define(["jquery"],function(jQuery) {
 	  return allMap(reprValidators,function(validator) {
 	    return validator.contentType(contentType).pipe(
               function() { return validator.values(body,repr.type); },
-	      function() { return success; }
+	      function() { return success(); }
 	    );
 	  }).pipe(undefined,prepend("Reresentation is not of type ", contentType));
 	}
       }
-      return failure.pipe(undefined,prepend("Unrecongized content type ", contentType));
+      return failure("Unrecongized content type " + contentType);
     }
   }
 
@@ -97,13 +113,13 @@ define(["jquery"],function(jQuery) {
     return allMap(paramValidators,function(validator) {
       return validator.type(type).pipe(
         function() { return validator.values(value); },
-        function() { return success; }
+        function() { return success(); }
       );
     }).pipe(undefined,prepend(value," should be of type ",type));
   }
 
   function checkBool(bool) {
-    return (bool? success: failure);
+    return (bool? SUCCESS: FAILURE);
   }
 
   function constant(value) { 
@@ -114,7 +130,7 @@ define(["jquery"],function(jQuery) {
     switch (typeof values) {
     case "function": return function(value,type) {
       try { return values(value,type); }
-      catch (exn) { return failure.pipe(undefined,prepend(exn)); }
+      catch (exn) { return failure(exn); }
     };
     case "string": return function(value) { return checkBool(value === values); };
     case "boolean": return constant(checkBool(values));
@@ -352,7 +368,11 @@ define(["jquery"],function(jQuery) {
     checkResponse: checkResponse,
     checkRepr: checkRepr,
     checkValue: checkValue,
-    addValidator: addValidator
+    addValidator: addValidator,
+    success: success,
+    failure: failure,
+    all: all,
+    allMap: allMap
   };
 
 });
