@@ -55,8 +55,8 @@ the ability to paginate the results using the
 <span rel="queryParam" resource="#Start_index" typeof="Parameter"><span property="name">start-index</span></span> and 
 <span rel="queryParam" resource="#Max_results" typeof="Parameter"><span property="name">max-results</span></span> 
 query parameters, which are
-<span about="#Start_index" rel="dataType" resource="xsd:nonNegativeInteger">both</span>
-<span about="#Max_results" rel="dataType" resource="xsd:nonNegativeInteger">both</span>
+<span about="#Start_index" rel="type" resource="xsd:nonNegativeInteger">both</span>
+<span about="#Max_results" rel="type" resource="xsd:nonNegativeInteger">both</span>
 and default to 
 <span about="#Start_index" property="default">1</span> and
 <span about="#Max_results" property="default">10</span>, respectively.
@@ -90,18 +90,17 @@ resource in the body.
 <div class="appl exchange" typeof="Example"><span rel="exampleRequest" typeof="ExampleRequest"><span property="method">POST</span> <span property="uri">/rest/products</span>
 <span rel="exampleHeader" typeof="ExampleHeader"><span property="name">Host</span>: <span property="value">store.example.com</span></span>
 <span rel="exampleHeader" typeof="ExampleHeader"><span property="name">Content-Type</span>: <span property="value">application/json</span></span>
-<span property="body">{ "manufacturer": "ACME", "name": "Anvil", "weight": "2000" }</span></span>
+<span property="body">{ "manufacturer": "ACME", "name": "Anvil", "weight": 2000 }</span></span>
 <span rel="exampleResponse" typeof="ExampleResponse"><span property="status">201</span> Created
 <span rel="exampleHeader" typeof="ExampleHeader"><span property="name">Location</span>: <span property="value">http://store.example.com/rest/products/662</span></span>
 <span rel="exampleHeader" typeof="ExampleHeader"><span property="name">Content-Type</span>: <span property="value">application/json</span></span>
-<span property="body">{ "manufacturer": "ACME", "name": "Anvil", "weight": "2000" }</span></span>
+<span property="body">{ "manufacturer": "ACME", "name": "Anvil", "weight": 2000 }</span></span>
 </div>
 
 <p><span rel="representation" resource="#Product_JSON" typeof="Representation">
 The submitted representation has a media type of
 <span property="contentType">application/json</span> and 
-must conform to the schema at 
-<span property="representationType">http://store.example.com/rest/schema</span>.</span>
+must conform to the <a rel="type" href="example-schema.json#/store">store schema</a>.</span>
 <span rel="response" resource="#Products_POST_400" typeof="Response">
 If it does not, the application returns an HTTP response with status 
 <span property="status">400</span>.</span></p>
@@ -159,7 +158,7 @@ representation now matches that which was uploaded</span>.</p>
 <div class="appl exchange" typeof="Example"><span rel="exampleRequest" typeof="ExampleRequest"><span property="method">PUT</span> <span property="uri">/rest/products/662</span>
 <span rel="exampleHeader" typeof="ExampleHeader"><span property="name">Host</span>: <span property="value">store.example.com</span></span>
 <span rel="exampleHeader" typeof="ExampleHeader"><span property="name">Content-Type</span>: <span property="value">application/json</span></span>
-<span property="body">{ "manufacturer": "ACME", "name": "Anvil", "weight": "10000" }</span></span>
+<span property="body">{ "manufacturer": "ACME", "name": "Anvil", "weight": 10000 }</span></span>
 <span rel="exampleResponse" typeof="ExampleResponse"><span property="status">204</span> No Content</span>
 </div>
 </div>

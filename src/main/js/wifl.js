@@ -117,7 +117,7 @@ define(["rdfa-ld","uri-template2"], function (rdfaLD,uriTemplate) {
       required: this.targets(uri,"wifl:required",this.trim)[0],
       fixed: this.targets(uri,"wifl:fixed",this.trim)[0],
       default: this.targets(uri,"wifl:default",this.trim)[0],
-      dataType: this.targets(uri,"wifl:dataType",this.trim)[0]
+      type: this.targets(uri,"wifl:type",this.trim)[0]
     };
   };
   // Extract a representation

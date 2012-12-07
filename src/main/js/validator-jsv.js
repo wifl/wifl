@@ -28,11 +28,14 @@ define(["jquery","validator","json-schema-validate"],function(jQuery,validator,j
     var fragment;
     if (0 <= offset) {
       base = uri.substring(0,offset);
-      fragment = uri.substring(offset);
+      fragment = uri.substring(offset+1);
     }
     var promise = resolved[base];
     if (!promise) {
-      promise = resolved[base] = jQuery.getJSON(base).pipe(resolveJSON);
+      function failed(error) {
+        return "Getting JSON from " + base + " failed: " + error.statusText;
+      }
+      promise = resolved[base] = jQuery.getJSON(base).pipe(resolveJSON,failed);
     }
     if (fragment) {
       return promise.pipe(jsonPointer(fragment));
@@ -81,7 +84,7 @@ define(["jquery","validator","json-schema-validate"],function(jQuery,validator,j
   }
 
   function errMessage(error) {
-    return error.property + ":" + error.message;
+    return error.property + ": " + error.message;
   }
 
   validator.addValidator({

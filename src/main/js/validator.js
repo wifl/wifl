@@ -1,12 +1,14 @@
 define(["jquery"],function(jQuery) {
 
   var success = jQuery.Deferred().resolve();
-  var failure = jQuery.Deferred().reject("");
+  var failure = jQuery.Deferred().reject();
 
   function prepend() {
     var context = arguments;
     return function(error) {
-      return Array.prototype.join.call(context,"") + error;
+      var result = Array.prototype.join.call(context,"");
+      if (error) { result = result + ": " + error; }
+      return result;
     };
   }
 
@@ -33,8 +35,8 @@ define(["jquery"],function(jQuery) {
 
   function checkExample(example,request) {
     return all(
-      checkRequest(example.request,request).pipe(undefined,prepend("Request: ")),
-      checkResponse(example.response,request.responses).pipe(undefined,prepend("Response: "))
+      checkRequest(example.request,request).pipe(undefined,prepend("Request")),
+      checkResponse(example.response,request.responses).pipe(undefined,prepend("Response"))
     );
   }
 
@@ -61,7 +63,7 @@ define(["jquery"],function(jQuery) {
 
   function checkParams(values,params) {
     return allMap(params,function(param) {
-      return checkValue(values[param.name],param).pipe(undefined,prepend(param.name,": "));
+      return checkValue(values[param.name],param).pipe(undefined,prepend(param.name));
     });
   }
 
@@ -91,13 +93,13 @@ define(["jquery"],function(jQuery) {
 
   var paramValidators = [];
 
-  function checkValue(value,dataType) {
+  function checkValue(value,type) {
     return allMap(paramValidators,function(validator) {
-      return validator.dataType(dataType).pipe(
+      return validator.type(type).pipe(
         function() { return validator.values(value); },
         function() { return success; }
       );
-    }).pipe(undefined,prepend(value," should be of type ",dataType));
+    }).pipe(undefined,prepend(value," should be of type ",type));
   }
 
   function checkBool(bool) {
@@ -110,8 +112,8 @@ define(["jquery"],function(jQuery) {
 
   function isMember(values) {
     switch (typeof values) {
-    case "function": return function(value) {
-      try { return values(value); }
+    case "function": return function(value,type) {
+      try { return values(value,type); }
       catch (exn) { return failure.pipe(undefined,prepend(exn)); }
     };
     case "string": return function(value) { return checkBool(value === values); };
@@ -126,9 +128,9 @@ define(["jquery"],function(jQuery) {
   }
 
   function addValidator(validator) {
-    if (validator.dataType && validator.values) {
+    if (validator.type && validator.values) {
       paramValidators.unshift({
-        dataType: isMember(validator.dataType),
+        type: isMember(validator.type),
         values: isMember(validator.values)
       });
     } else if (validator.contentType && validator.values) {
@@ -159,22 +161,22 @@ define(["jquery"],function(jQuery) {
   // Validators for built-in XML Schema datatypes
 
   addValidator({ 
-    dataType: "http://www.w3.org/2001/XMLSchema#string",
+    type: "http://www.w3.org/2001/XMLSchema#string",
     values: true
   });
 
   addValidator({ 
-    dataType: "http://www.w3.org/2001/XMLSchema#boolean",
+    type: "http://www.w3.org/2001/XMLSchema#boolean",
     values: ["true","false","0","1"]
   });
 
   addValidator({ 
-    dataType: "http://www.w3.org/2001/XMLSchema#decimal",
+    type: "http://www.w3.org/2001/XMLSchema#decimal",
     values: /^[+-]?\d+(\.\d+)?$/
   });
 
   addValidator({ 
-    dataType: [
+    type: [
       "http://www.w3.org/2001/XMLSchema#float",
       "http://www.w3.org/2001/XMLSchema#double"
     ],
@@ -183,69 +185,69 @@ define(["jquery"],function(jQuery) {
 
   // TODO: value restrictions on dates/times
   addValidator({ 
-    dataType: "http://www.w3.org/2001/XMLSchema#duration",
+    type: "http://www.w3.org/2001/XMLSchema#duration",
     values: /^[-]?P(\d+Y)?(\d+M)?(\d+DT)?(\d+H)?(\d+M)?(\d+(\.\d+)?S)?$/
   });
 
   addValidator({ 
-    dataType: "http://www.w3.org/2001/XMLSchema#timeDate",
+    type: "http://www.w3.org/2001/XMLSchema#timeDate",
     values: /^[-]?\d{4,}\-\d\d\-\d\dT\d\d\:\d\d\:\d\d(\.\d+)?(([+-]\d\d\:\d\d)|Z)?$/
   });
 
   addValidator({ 
-    dataType: "http://www.w3.org/2001/XMLSchema#time",
+    type: "http://www.w3.org/2001/XMLSchema#time",
     values: /^\d\d\:\d\d\:\d\d(\.\d+)?(([+-]\d\d\:\d\d)|Z)?$/
   });
 
   addValidator({ 
-    dataType: "http://www.w3.org/2001/XMLSchema#date",
+    type: "http://www.w3.org/2001/XMLSchema#date",
     values: /^[-]?\d{4,}\-\d\d\-\d\d(([+-]\d\d\:\d\d)|Z)?$/
   });
 
   addValidator({ 
-    dataType: "http://www.w3.org/2001/XMLSchema#gYearMonth",
+    type: "http://www.w3.org/2001/XMLSchema#gYearMonth",
     values: /^[-]?\d{4,}\-\d\d(([+-]\d\d\:\d\d)|Z)?$/
   });
 
   addValidator({ 
-    dataType: "http://www.w3.org/2001/XMLSchema#gYear",
+    type: "http://www.w3.org/2001/XMLSchema#gYear",
     values: /^[-]?\d{4,}(([+-]\d\d\:\d\d)|Z)?$/
   });
 
   addValidator({ 
-    dataType: "http://www.w3.org/2001/XMLSchema#gMonthDay",
+    type: "http://www.w3.org/2001/XMLSchema#gMonthDay",
     values: /^\-\-\d\d\-\d\d(([+-]\d\d\:\d\d)|Z)?$/
   });
 
   addValidator({ 
-    dataType: "http://www.w3.org/2001/XMLSchema#gMonth",
+    type: "http://www.w3.org/2001/XMLSchema#gMonth",
     values: /^\-\-\d\d(([+-]\d\d\:\d\d)|Z)?$/
   });
 
   addValidator({ 
-    dataType: "http://www.w3.org/2001/XMLSchema#gDay",
+    type: "http://www.w3.org/2001/XMLSchema#gDay",
     values: /^\-\-\-\d\d(([+-]\d\d\:\d\d)|Z)?$/
   });
 
   addValidator({ 
-    dataType: "http://www.w3.org/2001/XMLSchema#hexBinary",
+    type: "http://www.w3.org/2001/XMLSchema#hexBinary",
     values: /^[0-9a-fA-F]*$/
   });
 
   addValidator({ 
-    dataType: "http://www.w3.org/2001/XMLSchema#base64Binary",
+    type: "http://www.w3.org/2001/XMLSchema#base64Binary",
     values: /^(([A-Za-z0-9+\/]\s*[A-Za-z0-9+\/]\s*[A-Za-z0-9+\/]\s*[A-Za-z0-9+\/]\s*)*(([A-Za-z0-9+\/]\s*[A-Za-z0-9+\/]\s*[A-Za-z0-9+\/]\s*[A-Za-z0-9+\/])|([A-Za-z0-9+\/]\s*[A-Za-z0-9+\/]\s*[AEIMQUYcgkosw048]\s*[=])|([A-Za-z0-9+\/]\s*[AQgw]\s*[=]\s*[=])))?$/
   });
 
   // TODO: Validate URIs properly
   addValidator({ 
-    dataType: "http://www.w3.org/2001/XMLSchema#anyURI",
+    type: "http://www.w3.org/2001/XMLSchema#anyURI",
     values: /^([a-zA-Z0-9-_.!~*'();?:@&=+$,#\/]|[%][a-fA-F0-9]{2})+$/
   });
 
   // TODO: Unicode QNames
   addValidator({ 
-    dataType: [
+    type: [
       "http://www.w3.org/2001/XMLSchema#QName",
       "http://www.w3.org/2001/XMLSchema#NOTATION"
     ],
@@ -253,41 +255,41 @@ define(["jquery"],function(jQuery) {
   });
 
   addValidator({ 
-    dataType: "http://www.w3.org/2001/XMLSchema#normalizedString",
+    type: "http://www.w3.org/2001/XMLSchema#normalizedString",
     values: /^[^\n\r\t]*$/
   });
 
   addValidator({ 
-    dataType: "http://www.w3.org/2001/XMLSchema#token",
+    type: "http://www.w3.org/2001/XMLSchema#token",
     values: /^(\S+([ ]\S+)*)?$/
   });
 
   addValidator({ 
-    dataType: "http://www.w3.org/2001/XMLSchema#language",
+    type: "http://www.w3.org/2001/XMLSchema#language",
     values: /^[a-zA-Z]{1,8}([-][a-zA-Z0-9]{1,8})*$/
   });
 
   // TODO: Unicode NMTOKENs
   addValidator({ 
-    dataType: "http://www.w3.org/2001/XMLSchema#NMTOKEN",
+    type: "http://www.w3.org/2001/XMLSchema#NMTOKEN",
     values: /^[a-zA-Z0-9_.\-:]+$/
   });
 
   // TODO: Unicode NMTOKENS
   addValidator({ 
-    dataType: "http://www.w3.org/2001/XMLSchema#NMTOKENS",
+    type: "http://www.w3.org/2001/XMLSchema#NMTOKENS",
     values: /^[a-zA-Z0-9_.\-:]+([ ]+[a-zA-Z0-9_.\-:]+)*$/
   });
 
   // TODO: Unicode Names
   addValidator({ 
-    dataType: "http://www.w3.org/2001/XMLSchema#Name",
+    type: "http://www.w3.org/2001/XMLSchema#Name",
     values: /^[a-zA-Z_:][a-zA-Z0-9_.\-:]*$/
   });
 
   // TODO: Unicode NCNames
   addValidator({ 
-    dataType: [
+    type: [
       "http://www.w3.org/2001/XMLSchema#NCName",
       "http://www.w3.org/2001/XMLSchema#ID",
       "http://www.w3.org/2001/XMLSchema#IDREF",
@@ -298,7 +300,7 @@ define(["jquery"],function(jQuery) {
 
   // TODO: Unicode IDREFS
   addValidator({ 
-    dataType: [
+    type: [
       "http://www.w3.org/2001/XMLSchema#IDREFS",
       "http://www.w3.org/2001/XMLSchema#ENTITIES"
     ],
@@ -307,7 +309,7 @@ define(["jquery"],function(jQuery) {
 
   // TODO: Range validation
   addValidator({ 
-    dataType: [
+    type: [
       "http://www.w3.org/2001/XMLSchema#integer",
       "http://www.w3.org/2001/XMLSchema#long",
       "http://www.w3.org/2001/XMLSchema#int",
@@ -319,7 +321,7 @@ define(["jquery"],function(jQuery) {
 
   // TODO: Range validation
   addValidator({ 
-    dataType: [
+    type: [
       "http://www.w3.org/2001/XMLSchema#nonNegativeInteger",
       "http://www.w3.org/2001/XMLSchema#unsignedLong",
       "http://www.w3.org/2001/XMLSchema#unsignedInt",
@@ -330,17 +332,17 @@ define(["jquery"],function(jQuery) {
   });
 
   addValidator({ 
-    dataType: "http://www.w3.org/2001/XMLSchema#nonPositiveInteger",
+    type: "http://www.w3.org/2001/XMLSchema#nonPositiveInteger",
     values: /^[-]\d+$/
   });
 
   addValidator({ 
-    dataType: "http://www.w3.org/2001/XMLSchema#positiveInteger",
+    type: "http://www.w3.org/2001/XMLSchema#positiveInteger",
     values: /^[+]?0*[1-9]\d*$/
   });
 
   addValidator({ 
-    dataType: "http://www.w3.org/2001/XMLSchema#negativeInteger",
+    type: "http://www.w3.org/2001/XMLSchema#negativeInteger",
     values: /^[-]0*[1-9]\d*$/
   });
 
