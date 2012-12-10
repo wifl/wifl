@@ -1,3 +1,7 @@
+require.config({
+    shim: { "rdfa": { exports: "RDFa" } }
+});
+
 define(["rdfa","future"], function (rdfa,future) {
 
   // Find the base URI of a document

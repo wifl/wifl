@@ -1,7 +1,3 @@
-require.config({
-    shim: { "rdfa": { exports: "RDFa" } }
-});
-
 require(["wifl","gui","validator-jsv"],function(wifl,gui) {
   $(function() {
     wifl.build(document).wait(function(api) {

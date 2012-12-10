@@ -42,8 +42,10 @@
 }
 
 .request-controls {
-    width: 100%;
+    width: 875px;
     margin-top: 5px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .request-buttons {
@@ -60,10 +62,11 @@
 
 .request-form {
     width: 200px;
+    padding-right: 5px;
 }
 
 .http-request, .http-response {
-    width: 200px;
+    width: 300px;
     height: 300px;
     border: 1px solid #999999;
     border-radius: 5px;
