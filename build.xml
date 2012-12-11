@@ -242,6 +242,7 @@
       <fileset dir="${src}/main"/>
     </copy>
     <copy todir="${dist}/js">
+      <fileset file="${requirejs}/require.js"/>
       <fileset file="${requirejs}/require-jquery.js"/>
       <fileset file="${jsonschema}/json-schema-validate.js"/>
     </copy>
@@ -255,6 +256,7 @@
       <fileset dir="${src}/main"/>
     </copy>
     <copy todir="${site}/js">
+      <fileset file="${requirejs}/require.js"/>
       <fileset file="${requirejs}/require-jquery.js"/>
       <fileset file="${jsonschema}/json-schema-validate.js"/>
     </copy>
