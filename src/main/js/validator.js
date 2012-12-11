@@ -1,13 +1,13 @@
-define(["jquery"],function(jQuery) {
+define(["deferred","deferred-worker"],function(deferred,deferredWorker) {
 
-  var SUCCESS = jQuery.Deferred().resolve();
-  var FAILURE = jQuery.Deferred().reject();
+  var SUCCESS = deferred.Deferred().resolve();
+  var FAILURE = deferred.Deferred().reject();
 
   function success(value) {
     if (value === undefined) {
       return SUCCESS;
     } else {
-      return jQuery.Deferred().resolve(value);
+      return deferred.Deferred().resolve(value);
     }
   }
 
@@ -15,7 +15,7 @@ define(["jquery"],function(jQuery) {
     if (error === undefined) {
       return FAILURE;
     } else {
-      return jQuery.Deferred().reject(error);
+      return deferred.Deferred().reject(error);
     }
   }
 
@@ -40,7 +40,7 @@ define(["jquery"],function(jQuery) {
         case "rejected":
   	  return arg;
 	case "pending":
-	  if (!count++) { promise = jQuery.Deferred(); }
+	  if (!count++) { promise = deferred.Deferred(); }
 	  arg.done(yes).fail(no);
       }
     }
@@ -166,12 +166,12 @@ define(["jquery"],function(jQuery) {
 
   addValidator({
     contentType: /^application\/(\S[+])?json\b/,
-    values: function(value) { jQuery.parseJSON(value); return success; }
+    values: deferredWorker("validator-jsv")
   });
 
   addValidator({
     contentType: /^(application|text)\/(\S[+])?xml\b/,
-    values: function(value) { jQuery.parseXML(value); return success; }
+    values: function(value) { return failure("No XML validation yet."); }
   });
 
   // Validators for built-in XML Schema datatypes
@@ -372,7 +372,8 @@ define(["jquery"],function(jQuery) {
     success: success,
     failure: failure,
     all: all,
-    allMap: allMap
+    allMap: allMap,
+    get: deferred.get
   };
 
 });

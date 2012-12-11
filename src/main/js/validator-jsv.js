@@ -1,4 +1,4 @@
-define(["jquery","validator","json-schema-validate"],function(jQuery,validator,jsv) {
+define(["validator","json-schema-validate"],function(validator,jsv) {
 
   var unresolved = {};
   var resolved = {};
@@ -8,7 +8,8 @@ define(["jquery","validator","json-schema-validate"],function(jQuery,validator,j
     var offset = uri.indexOf("#");
     var base = (offset<0? uri: uri.substring(0,offset));
     if (!unresolved[base]) {
-      unresolved[base] = jQuery.getJSON(base).done(function(json) {
+      unresolved[base] = validator.get(base).done(function(text) {
+        var json = JSON.parse(text);
         resolved[base] = resolveJSON(base,base+"#",json);
       });
     }
@@ -42,8 +43,12 @@ define(["jquery","validator","json-schema-validate"],function(jQuery,validator,j
     }
   }
 
-  function checkJSON(value,type) {
-    var json = jQuery.parseJSON(value);
+  function errMessage(error) {
+    return error.property + ": " + error.message;
+  }
+
+  return function(value,type) {
+    var json = JSON.parse(value);
     if (!type) { return validator.success(); }
     return resolveURI(type).pipe(function(schema) {
       if (!schema) { return validator.failure("Failed to resolve schema for type " + type); }
@@ -55,16 +60,5 @@ define(["jquery","validator","json-schema-validate"],function(jQuery,validator,j
       } 
     });
   }
-
-  function errMessage(error) {
-    return error.property + ": " + error.message;
-  }
-
-  validator.addValidator({
-    contentType: /^application\/(\S[+])?json\b/,
-    values: checkJSON
-  });
-
-  return validator;
 
 });

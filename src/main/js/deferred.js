@@ -75,48 +75,93 @@ define(function() {
   }
 
   Deferred.prototype.pipe = function(yes,no) {
-    var result = new Deferred();
-    this.done(function() {
+    if (this.results) {
       if (yes) {
         try {
-          var value = yes.apply(result,arguments);
+          var value = yes.apply(this,this.results);
           if (value instanceof Deferred) {
-            value.done(function() { result.resolve.apply(result,arguments); });
+            return value;
           } else {
-            result.resolve(value);
+            var result = new Deferred();
+            result.results = [value];
+            return result;
           }
         } catch (exn) {
-          result.reject(exn);
+          var result = new Deferred();
+          result.failures = [exn];
+          return result;
         }
       } else {
-        result.resolve.apply(result,arguments);
+        return this;
       }
-    });
-    this.fail(function() {
+    } else if (this.failures) {
       if (no) {
         try {
-          var value = no.apply(result,arguments);
+          var value = no.apply(this,this.failures);
           if (value instanceof Deferred) {
-            value.fail(function() { result.reject.apply(result,arguments); });
+            return value;
           } else {
-            result.reject(value);
+            var result = new Deferred();
+            result.failures = [value];
+            return result;
           }
         } catch (exn) {
-          result.reject(exn);
+          var result = new Deferred();
+          result.failures = [exn];
+          return result;
         }
       } else {
-        result.reject.apply(result,arguments);
+        return this;
       }
-    });
-    return result;
+    } else {
+      var result = new Deferred();
+      this.done(function() {
+        if (yes) {
+          try {
+            var value = yes.apply(this,arguments);
+            if (value instanceof Deferred) {
+              value.done(function() { result.resolve.apply(result,arguments); });
+              value.fail(function() { result.reject.apply(result,arguments); });
+            } else {
+              result.resolve(value);
+            }
+          } catch (exn) {
+            result.reject(exn);
+          }
+        } else {
+          result.resolve.apply(result,arguments);
+        }
+      });
+      this.fail(function() {
+        if (no) {
+          try {
+            var value = no.apply(this,arguments);
+            if (value instanceof Deferred) {
+              value.done(function() { result.resolve.apply(result,arguments); });
+              value.fail(function() { result.reject.apply(result,arguments); });
+            } else {
+              result.reject(value);
+            }
+          } catch (exn) {
+            result.reject(exn);
+          }
+        } else {
+          result.reject.apply(result,arguments);
+        }
+      });
+      return result;
+    }
   }
 
-  function getText(uri) {
+  function get(uri,timeout) {
+    timeout = timeout || 10000;
     var result = new Deferred();
     try {
       var xhr = new XMLHttpRequest();
-      xhr.onLoad = function() { result.resolve(xhr.responseText); }
-      xhr.onLoadEnd = function() { result.reject(xhr); }
+      setTimeout(function() { result.reject("Timeout on " + uri); },timeout);
+      xhr.onload = function() { result.resolve(xhr.responseText); };
+      xhr.onerror = function() { result.reject(xhr); };
+      xhr.onabort = function() { result.reject(xhr); };
       xhr.open("GET",uri);
       xhr.send();
     } catch (exn) {
@@ -125,14 +170,9 @@ define(function() {
     return result;
   }
   
-  function getJSON(uri) {
-    return getText(uri).pipe(JSON.parse);
-  }
-  
   return {
     Deferred: Deferred,
-    getText: getText,
-    getJSON: getJSON
+    get: get
   };
 
 });

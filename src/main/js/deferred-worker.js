@@ -1,7 +1,8 @@
 define(["deferred"],function(deferred) {
 
   return function(module) {
-    var worker = new Worker("js/deferred-worker-task.js");
+    var workerURL = require.toUrl("deferred-worker-task.js");
+    var worker = new Worker(workerURL);
     var ids = 0;
     var results = {};
     worker.addEventListener("message",function(event) {
