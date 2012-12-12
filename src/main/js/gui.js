@@ -150,37 +150,38 @@ define(["jquery","jquery-ui","validator"],function($,jqueryUI,validator) {
     var pinit = params[parameter.name];
     if (pdefault === undefined) { pdefault = ""; }
     if (pinit === undefined) { pinit = pdefault; }
-    $pvalue.attr("value",pinit);
-    if (pinit === pdefault) {
-      $pvalue.addClass("default-value");
-    }
-    if (parameter.required) {
-      $result.addClass("required");
-      if (pinit === "") {
-        $result.addClass("invalid");
+    function update() {
+      var value = $pvalue.val();
+      if (value === pdefault) {
+	delete params[parameter.name];
+	$pvalue.addClass("default-value");
+      } else {
+	params[parameter.name] = value;
+	$pvalue.removeClass("default-value");
       }
+      $result.attr("title","Validating");
+      $result.removeClass("valid invalid").addClass("validating"); 
+      validator.checkParam(value,parameter).done(function() { 
+	if (value === $pvalue.val()) {
+	  $result.attr("title","Valid");
+	  $result.removeClass("validating").addClass("valid"); 
+	}
+      }).fail(function(err) { 
+	if (value === $pvalue.val()) {
+	  $result.attr("title",err);
+	  $result.removeClass("validating").addClass("invalid");
+	}
+      });
     }
+    $pvalue.attr("value",pinit);
+    update();
     if (parameter.descriptions.length) {
       $result.attr("title",parameter.descriptions.join("\n"));
     }
     // Sigh, keypress and paste events are fired *before* the DOM value
     // is updated, so we have to set a timeout to call us back after the
     // new value has been set.
-    $pvalue.bind("change keypress paste",function() { setTimeout (function() {
-      var value = $pvalue.val();
-      if (pdefault === value) {
-        delete params[parameter.name];
-        $pvalue.addClass("default-value");
-      } else {
-        params[parameter.name] = $pvalue.val();
-        $pvalue.removeClass("default-value");
-      }
-      if (parameter.required && value === "") {
-        $result.addClass("invalid");
-      } else {
-        $result.removeClass("invalid");
-      }
-    },0);});
+    $pvalue.bind("change keypress paste",function() { setTimeout(update,0); });
     return $result;
   }; }
 
@@ -196,16 +197,45 @@ define(["jquery","jquery-ui","validator"],function($,jqueryUI,validator) {
         }
         return $result;
       }
-      var $ta = $textarea(req.body).addClass("request-repr-body");
+      var $lab = $div("Representation").addClass("pname");
       var $sel = $select(representations.map($opt)).addClass("request-repr-type");
-      return $div($sel,$ta).change(function () {
-        req.body = $ta.val();
-	if ($ta.val()) {
-          req.contentType = $sel.val();
+      var $ta = $textarea().val(req.body).addClass("request-repr-body");
+      var $result = $div($lab,$sel,$ta).addClass("representation");
+      var updating;
+      function update() {
+        var body = req.body = $ta.val();
+	if (body) {
+	  if (!updating) {
+            var contentType = req.contentType = $sel.val();
+	    updating = true;
+	    $lab.attr("title","Validating");
+	    $result.removeClass("valid invalid").addClass("validating");
+	    validator.checkRepr(req.body,req.contentType,representations).done(function() {
+	      updating = false;
+	      if (body === $ta.val() && contentType === $sel.val()) {
+		$lab.attr("title","Valid");
+		$result.removeClass("validating").addClass("valid");
+	      } else {
+		update();
+	      }
+	    }).fail(function(err) {
+	      updating = false;
+	      if (body === $ta.val() && contentType === $sel.val()) {
+		$lab.attr("title",err);
+		$result.removeClass("validating").addClass("invalid");
+	      } else {
+		update();
+	      }
+	    });
+	  }
 	} else {
 	  delete req.contentType;
+	  $result.removeClass("invalid validating").addClass("valid");
 	}
-      });
+      }
+      update();
+      $result.bind("change keypress paste",function() { setTimeout(update,0); });
+      return $result;
     }
   }
 

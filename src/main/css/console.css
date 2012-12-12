@@ -31,18 +31,18 @@
     color: #B81900;
 }
 
-.request-repr-type {
-    margin-top: 5px;
+.validating .pname {
+    color: #E49404;
 }
 
 .request-repr-body {
-    width: 200px;
-    height: 100px;
+    width: 300px;
+    height: 200px;
     resize: none;
 }
 
 .request-controls {
-    width: 875px;
+    width: 975px;
     margin-top: 5px;
     margin-left: auto;
     margin-right: auto;
@@ -61,7 +61,7 @@
 }
 
 .request-form {
-    width: 200px;
+    width: 300px;
     padding-right: 5px;
 }
 
@@ -101,16 +101,16 @@
     color: white;
 }
 
-.validating {
+.validating.exchange {
     background-color: orange;
 }
 
-.valid {
+.valid.exchange {
     background-color: green;
     color: white;
 }
 
-.invalid {
+.invalid.exchange {
     background-color: red;
     color: white;
 }

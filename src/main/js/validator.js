@@ -79,8 +79,18 @@ define(["deferred","deferred-worker"],function(deferred,deferredWorker) {
 
   function checkParams(values,params) {
     return allMap(params,function(param) {
-      return checkValue(values[param.name],param).pipe(undefined,prepend(param.name));
+      return checkParam(values[param.name],param);
     });
+  }
+
+  function checkParam(value,param) {
+    if (value) {
+      return checkValue(value,param.type).pipe(undefined,prepend(param.name));
+    } else if (param.required) {
+      return failure(param.name + " is required");
+    } else {
+      return success();
+    }
   }
 
   var reprValidators = [];
@@ -366,6 +376,8 @@ define(["deferred","deferred-worker"],function(deferred,deferredWorker) {
     checkExample: checkExample,
     checkRequest: checkRequest,
     checkResponse: checkResponse,
+    checkParams: checkParams,
+    checkParam: checkParam,
     checkRepr: checkRepr,
     checkValue: checkValue,
     addValidator: addValidator,
