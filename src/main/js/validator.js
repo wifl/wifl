@@ -74,7 +74,7 @@ define(["deferred","deferred-worker"],function(deferred,deferredWorker) {
 	);
       }
     }
-    return failure.pipe(undefined,prepend("Unrecognized status code ", message.status));
+    return failure("Unrecognized status code ", message.status);
   }
 
   function checkParams(values,params) {
@@ -171,7 +171,7 @@ define(["deferred","deferred-worker"],function(deferred,deferredWorker) {
 
   addValidator({
     contentType: /^(application|text)\/(\S[+])?xml\b/,
-    values: function(value) { return failure("No XML validation yet."); }
+    values: deferredWorker("validator-xsd")
   });
 
   // Validators for built-in XML Schema datatypes

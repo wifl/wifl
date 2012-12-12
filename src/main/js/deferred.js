@@ -159,7 +159,13 @@ define(function() {
     try {
       var xhr = new XMLHttpRequest();
       setTimeout(function() { result.reject("Timeout on " + uri); },timeout);
-      xhr.onload = function() { result.resolve(xhr.responseText); };
+      xhr.onload = function() { 
+	if (200 <= xhr.status && xhr.status < 300) {
+	  result.resolve(xhr.responseText);
+	} else {
+	  result.reject(xhr.responseText);
+	}
+      };
       xhr.onerror = function() { result.reject(xhr); };
       xhr.onabort = function() { result.reject(xhr); };
       xhr.open("GET",uri);

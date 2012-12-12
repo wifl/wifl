@@ -22,6 +22,7 @@
   <property name="wadl" location="${doc}/wadl"/>
   <property name="xsl" location="${doc}/xsl"/>
   <property name="json" location="${doc}/json"/>
+  <property name="xsd" location="${doc}/xsd"/>
 
   <!-- Library directories -->
   <property name="lib" location="lib"/>
@@ -30,8 +31,9 @@
   <property name="requirejs" location="${jslib}/requirejs"/>
   <property name="qunit" location="${jslib}/qunit"/>
   <property name="jsonschema" location="${jslib}/json-schema"/>
+  <property name="xmljs" location="${jslib}/xml-js"/>
 	
-	<!-- XSpec properties -->
+  <!-- XSpec properties -->
   <property name="xspec.properties" location="xspec.properties" /> 
   <property name="xspec.project.dir" location="${env.XSPEC_HOME}" />
   <property name="saxon.jar" location="${javalib}/saxon9he.jar" />
@@ -245,6 +247,7 @@
       <fileset file="${requirejs}/require.js"/>
       <fileset file="${requirejs}/require-jquery.js"/>
       <fileset file="${jsonschema}/json-schema-validate.js"/>
+      <fileset file="${xmljs}/xmllint.js"/>
     </copy>
   </target>
 
@@ -253,12 +256,14 @@
     <copy todir="${site}">
       <fileset dir="${htmlbuild}"/>
       <fileset dir="${json}"/>
+      <fileset dir="${xsd}"/>
       <fileset dir="${src}/main"/>
     </copy>
     <copy todir="${site}/js">
       <fileset file="${requirejs}/require.js"/>
       <fileset file="${requirejs}/require-jquery.js"/>
       <fileset file="${jsonschema}/json-schema-validate.js"/>
+      <fileset file="${xmljs}/xmllint.js"/>
     </copy>
   </target>
 

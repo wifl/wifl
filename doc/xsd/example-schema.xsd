@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+<xsd:element id="product" name="product">
+  <xsd:complexType>
+    <xsd:sequence>
+      <xsd:element id="manufacturer" name="manufacturer" type="xsd:string"/>
+      <xsd:element id="name" name="name" type="xsd:string"/>
+      <xsd:element id="weight" name="weight" type="xsd:nonNegativeInteger"/>
+    </xsd:sequence>
+  </xsd:complexType>
+</xsd:element>
+
+</xsd:schema>
