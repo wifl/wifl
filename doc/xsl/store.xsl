@@ -31,12 +31,12 @@
         <title>&Title;</title>
         <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />
         <link rel="stylesheet" type="text/css" href="spec/spec.css" />
-        <link rel="stylesheet" type="text/css" href="css/console.css" />
+        <link rel="stylesheet" type="text/css" href="css/wifl-console.css" />
         <link rel="stylesheet" type="text/css" href="css/jquery-ui.css" />
         <script type="text/javascript" src="js/require-jquery.js" />
         <script type="text/javascript">
           require.config({ baseUrl: "js" });
-          require(["validator-jsv","gui-examples"]);
+          require(["wifl-console"]);
         </script>
       </head>
       <body prefix="&VocabularyPrefix;: &VocabularyReference;">

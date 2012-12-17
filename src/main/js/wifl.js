@@ -214,6 +214,7 @@ define(["rdfa-ld","uri-template2"], function (rdfaLD,uriTemplate) {
     resource.uriTemplate = this.uriTemplate(resource);
     for (var j=0; j<resource.requests.length; j++) {
       var request = resource.requests[j];
+      request.resource = resource;
       request.path = resource.path;
       request.pathParams = request.myPathParams.concat(resource.pathParams);
       request.queryParams = request.myQueryParams.concat(resource.queryParams);

@@ -45,6 +45,7 @@ define(["jquery","jquery-ui","validator"],function($,jqueryUI,validator) {
   // Sigh...
   function reason(xhr) {
     switch (xhr.status) {
+    case 0:   return "Network Error";
     case 100: return "Continue";
     case 101: return "Switching Protocols";
     case 200: return "OK";

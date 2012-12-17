@@ -1,0 +1,132 @@
+.wifl-container, .wifl-page, .wifl-console {
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    overflow: auto;
+}
+
+.wifl-container {
+    top: 0%;
+    height: 100%;
+}
+
+.wifl-page {
+    top: 0%;
+    height: 70%;
+}
+
+.wifl-console {
+    bottom: 0%;
+    height: 30%;
+    font-family: "Trebuchet MS", Tahoma, Verdana, Arial, sans-serif;
+    font-style: normal;
+    font-size: small;
+}
+
+.wifl-console-resizer {
+    background-color: #EEEEEE;
+    border-top: 1px solid #AAAAAA;
+    cursor: ns-resize;
+    padding-top: 3px;
+}
+
+.wifl-console-head {
+    background-color: #EEEEEE;
+    border-bottom: 1px solid #AAAAAA;
+    overflow: hidden;
+    height: 24px;
+    padding-bottom: 3px;
+}
+
+.wifl-select-request, .wifl-select-resource {
+    margin-left: 3px;
+    float: left;
+}
+
+.wifl-console .wifl-console-hide {
+    width: 24px;
+    margin-right: 3px;
+    float: right;
+}
+
+.wifl-console .wifl-console-hide:hover {
+    color: red;
+}
+
+.wifl-form, .wifl-http-request, .wifl-http-response {
+    position: absolute;
+    top: 32px;
+    bottom: 0px;
+    overflow: auto;
+    width: 33%;
+    padding: 5px;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+}
+
+.wifl-http-request, .wifl-http-response {
+    border-left: 1px solid #AAAAAA;
+    width: 33%;
+    white-space: pre;
+}
+
+.wifl-form {
+    left: 0%;
+    background-color: #EEEEEE;
+}
+
+.wifl-buttons {
+    margin-top: 5px;
+}
+
+.wifl-http-request {
+    left: 33%;
+}
+
+.wifl-http-response {
+    left: 66%;
+}
+
+.wifl-parameter-name {
+    margin-left: 5px;
+    margin-bottom: -2px;
+    font-size: 80%;
+    font-weight: bold;
+    color: #1C94C4;
+}
+
+.wifl-representation-body, .wifl-parameter-value {
+    resize: vertical;
+    width: 100%;
+    margin-bottom: 3px;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+}
+
+.wifl-http-method, .wifl-http-status {
+    font-weight: bold;
+}
+
+.wifl-http-headers {
+    font-style: italic;
+}
+
+.wifl-http-body {
+    margin-top: 3px;
+}
+
+.wifl-default-value {
+    color: #BBBBBB;
+}
+
+.wifl-invalid .wifl-parameter-name {
+    color: #B81900;
+}
+
+.wifl-validating .wifl-parameter-name {
+    color: #E49404;
+}
+
+.wifl-console-show {
+    cursor: pointer;
+}

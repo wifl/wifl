@@ -274,3 +274,19 @@ td.attr:before {
 	margin-right: 3em;
 	padding: 0 0.5em;
 }
+
+.wifl-example {
+    color: white;
+}
+
+.wifl-example-validating {
+    background-color: orange;
+}
+
+.wifl-example-valid {
+    background-color: green;
+}
+
+.wifl-example-invalid {
+    background-color: red;
+}
