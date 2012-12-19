@@ -15,7 +15,7 @@ define(["deferred"],function(deferred) {
           result.reject.apply(result,event.data.failures);
         }
       }
-    });
+    },false);
     return function() {
       var id = ids++;
       var result = deferred.Deferred();

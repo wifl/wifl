@@ -30,4 +30,4 @@ self.addEventListener("message",function(event) {
       fail(id,[exn]);
     }
   });
-});
+},false);
