@@ -190,7 +190,7 @@ define(["jquery","jquery-ui","wifl","validator"],function($,jqueryUI,wifl,valida
     var $pname = $div(parameter.name).addClass("wifl-parameter-name");
     var $pvalue = $input().attr("name",parameter.name).attr("type","text").addClass("wifl-parameter-value");
     var $result = $div($pname,$pvalue).addClass("wifl-parameter");
-    var pdefault = parameter.default;
+    var pdefault = parameter["default"];
     var pinit = params[parameter.name];
     if (pdefault === undefined) { pdefault = ""; }
     if (pinit === undefined) { pinit = pdefault; }
