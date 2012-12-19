@@ -194,7 +194,7 @@
   		<arg value="${src}/test/xsl/wadl-html.xspec"/>
   	</exec>
   <!--		<antcall target="xspec.xspec" inheritall="false">
-  		  <param name="xspec.xml" location="${src}/test/xsl/flatten.xspec"/>
+  		  <param name="xspec.xml" location="${src}/testq/xsl/flatten.xspec"/>
   			<param name="xspec.base.dir" location="${xspec.project.dir}"/>
   			<param name="xspec.dir" location=""/>
   			<param name="xspec.base" value=""/> 
@@ -278,7 +278,17 @@
     </copy>
   </target>
 	
-  <target name="test" depends="uri-template-test">
+  <target name="wifl-test">
+    <mkdir dir="${test}/wifl"/>
+    <copy todir="${test}/wifl">
+      <fileset dir="${src}/test/wifl"/>
+      <fileset dir="${qunit}"/>
+      <fileset dir="${requirejs}"/>
+      <fileset dir="${src}/main/js"/>
+    </copy>
+  </target>
+	
+  <target name="test" depends="uri-template-test, wifl-test">
   </target>
 	
   <target name="zip" depends="init, dist, site, test">
