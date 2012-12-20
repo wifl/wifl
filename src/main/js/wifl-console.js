@@ -36,27 +36,6 @@ define(["jquery","jquery-ui","wifl","validator"],function($,jqueryUI,wifl,valida
     return this;
   }
 
-  // Ditto but for styled CSS (e.g. expicitly added with .css).
-  $.fn.copyStyledCSS = function($from) {
-    if ($from.length) {
-      var from = $from[0];
-      var fromStyles = from.style;
-      for (var i=0; i<this.length; i++) {
-        var to = this[i];
-        var toStyles = to.style;
-        for (var j=0; j<fromStyles.length; j++) {
-          var property = fromStyles[j];
-          var fromValue = fromStyles.getPropertyValue(property);
-          var toValue = toStyles.getPropertyValue(property);
-          if (toValue !== fromValue) {
-            to.style.setProperty(property,fromValue);
-          }
-        }
-      }
-    }
-    return this;
-  }
-
   // Create an element, and append nodes to it.
   // Naming convention: jQuery-wrapped DOM nodes start with $.
   function $element(name) {
@@ -369,7 +348,7 @@ define(["jquery","jquery-ui","wifl","validator"],function($,jqueryUI,wifl,valida
       function onmove(event) {
         var deltaY = event.screenY - screenY;
         $result.height(consoleHeight + screenY - event.screenY);
-        $window.resize();
+        $result.resize();
       }
       document.body.style.cursor = "ns-resize";
       $window.on("mousemove",onmove);
@@ -416,15 +395,20 @@ define(["jquery","jquery-ui","wifl","validator"],function($,jqueryUI,wifl,valida
   function main(api) {
     var $window = $(window);
     var $body = $("body");
-    var $copy = $div($body.children()).copyComputedCSS($("<body>")).copyStyledCSS($body);
+    var $copy = $div($body.children());
     var $page = $div($copy).addClass("wifl-page");
     var $cons = $console(api).addClass("wifl-console");
     var $container = $div($page,$cons).addClass("wifl-container");
     $body.append($container);
-    $window.resize(function() {
+    $cons.resize(function() {
       var consoleH = ($cons.is(":hidden")? 0: $cons.height());
       $page.height($container.height() - consoleH);
       $page.width($container.width());
+      return false;
+    });
+    $window.resize(function() {
+      $copy.copyComputedCSS($body);
+      $cons.resize();
     });
     api.examples.forEach(function(example) {
       document.getElementsBySubject(example.about).forEach(function (node) {
@@ -432,12 +416,12 @@ define(["jquery","jquery-ui","wifl","validator"],function($,jqueryUI,wifl,valida
       });
     });
     $(".wifl-console-hide").click(function() {
-      $cons.hide(); $window.resize();
+      $cons.hide().resize();
     });
     $(".wifl-console-show").click(function() {
       $cons.show(); $window.resize();
     });
-    $cons.hide();
+    $cons.hide()
     $window.resize();
   }
 
