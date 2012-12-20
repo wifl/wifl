@@ -208,6 +208,37 @@ define(["jquery","jquery-ui","wifl","validator"],function($,jqueryUI,wifl,valida
     return $result;
   }; }
 
+  function contentTypes(responses) {
+    var result = {};
+    responses.forEach(function(response) {
+      var okay = response.statuses.some(function(status) {
+        return (200 <= status) && (status < 300);
+      });
+      if (okay) {
+        response.representations.forEach(function(representation) {
+          result[representation.contentType] = true;
+        });
+      }
+    });
+    result = Object.keys(result);
+    return result;
+  }
+
+  function $accepts(params,responses) {
+    var $contentTypes = contentTypes(responses).map(function(contentType) {
+      return $option(contentType);
+    });
+    if ($contentTypes.length) {
+      var $name = $div("Accept").addClass("wifl-parameter-name");
+      var $sel = $select($contentTypes).addClass("wifl-parameter-value");
+      var $result = $div($name,$sel).addClass("wifl-parameter wifl-valid");
+      $sel.change(function() { params["Accept"] = $sel.val(); });
+      if (params["Accept"]) { $sel.val(params["Accept"]); }
+      $sel.change();
+      return $result;
+    }
+  }
+
   function $representations(req,representations) {
     if (representations.length) {
       function $opt(representation) {
@@ -220,8 +251,8 @@ define(["jquery","jquery-ui","wifl","validator"],function($,jqueryUI,wifl,valida
         }
         return $result;
       }
-      var $lab = $div("Representation").addClass("wifl-parameter-name");
-      var $sel = $select(representations.map($opt)).addClass("wifl-representation-type");
+      var $lab = $div("Content-Type").addClass("wifl-parameter-name");
+      var $sel = $select(representations.map($opt)).addClass("wifl-parameter-value");
       var $ta = $textarea().val(req.body).addClass("wifl-representation-body");
       var $result = $div($lab,$sel,$ta).addClass("wifl-representation");
       var updating;
@@ -287,6 +318,7 @@ define(["jquery","jquery-ui","wifl","validator"],function($,jqueryUI,wifl,valida
       $div(request.pathParams.map($parameter(uriParams))).addClass("wifl-path-params"),
       $div(request.queryParams.map($parameter(uriParams))).addClass("wifl-query-params"),
       $div(request.headerParams.map($parameter(headerParams))).addClass("wifl-header-params"),
+      $accepts(headerParams,request.responses),
       $representations(req,request.representations),
       $div($resetButton,$submitButton).addClass("wifl-buttons")
     ).addClass("wifl-form");
