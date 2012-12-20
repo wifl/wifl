@@ -69,7 +69,8 @@ For instance, a POST or PUT request might accept XML or JSON content.
 A request's representation is carried in the HTTP request's message body.</p>
 
 <p class="appl commentary">The <span class="rname">products_POST</span>
-request's representation is a <span class="rname">product_JSON</span>,
+request's representation is <span class="rname">product_JSON</span>
+or <span class="rname">product_XML</span>,
 as is the representation of the <span class="rname">product_PUT</span> 
 request.</p>
 
@@ -85,7 +86,8 @@ two responses: <span class="rname">products_POST_201</span> indicating
 success, and <span class="rname">products_POST_400</span> when the 
 submitted representation fails schema validation.
 The <span class="rname">products_POST_201</span> has a status code of 200
-and a representation of <span class="rname">product_JSON</span>.
+and a representation of <span class="rname">product_JSON</span>
+or  <span class="rname">product_XML</span>.
 The <span class="rname">products_POST_400</span> has a status code of 400
 and no representation.</p>
 
@@ -93,7 +95,8 @@ and no representation.</p>
 responses: <span class="rname">product_GET_200</span> for the success case,
 and <span class="rname">product_GET_404</span> for the not found case.
 The <span class="rname">product_GET_200</span> response's status code is 200
-and its representation is <span class="rname">product_JSON</span>.
+and its representation is <span class="rname">product_JSON</span>
+or  <span class="rname">product_XML</span>.
 The <span class="rname">product_GET_404</span> response's status code is 404
 and it does not have a representation.</p>
 
@@ -105,11 +108,16 @@ A response may optionally have parameters contained in HTTP response headers.</p
 message body.  A representation must indicate the content type that is 
 conveyed in the <span class="header">Content-Type</span> header.
 A representation may optionally indicate the URI of a schema for the message body.
-The URI may be that of an XML schema, a JSON schema, or a schema or grammar
+The URI may be that of a type in XML schema, a JSON schema, or a schema or grammar
 in another specification language.</p>
 
 <p class="appl commentary">The <span class="rname">product_JSON</span>
-representation has a content type of <span class="rvalue">application/json</span>.</p>
+representation has a content type of <span class="rvalue">application/json</span>
+and a type of <span class="rvalue">example-schema.json#/product</span>.</p>
+
+<p class="appl commentary">The <span class="rname">product_XML</span>
+representation has a content type of <span class="rvalue">application/xml</span>
+and a type of <span class="rvalue">example-schema.xml#product</span>.</p>
 
 <p>A parameter is required to have a name.
 It may specify a type defining the parameter's legal values, 

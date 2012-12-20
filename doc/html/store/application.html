@@ -84,8 +84,9 @@ The application returns an HTTP
 response with status <span property="status">201</span> to indicate the
 resource has been created, a <span class="header">Location</span> header
 with the new resource's URI, and a
-<span rel="representation" resource="#Product_JSON">representation</span> of the 
-resource in the body.
+<span rel="representation" resource="#Product_JSON">JSON</span> or 
+<span rel="representation" resource="#Product_XML">XML</span> 
+representation of the resource in the body.
 </span></p>
 
 <div class="appl exchange" typeof="Example"><span rel="exampleRequest" typeof="ExampleRequest"><span property="method">POST</span> <span property="uri">/rest/products</span>
@@ -158,15 +159,17 @@ to get the product's URI:</p>
 
 <p rel="response" resource="#Product_GET_200" typeof="Response">
 If the product exists, the server returns a <span property="status">200</span>
-containing its <span rel="representation" resource="#Product_JSON">JSON 
-representation</span>.</p>
+containing its <span rel="representation" resource="#Product_JSON">JSON</span>
+or <span rel="representation" resource="#Product_XML">XML</span>
+representation.</p>
 </div>
 
 <div rel="request" resource="#Product_PUT" typeof="Request">
 <p>To update an existing product's description, a client sends a 
 <span property="method">PUT</span> request to the
-product's URI with the body containing 
-<span rel="representation" resource="#Product_JSON">the new description</span> and returns
+product's URI with the body containing the new description in
+<span rel="representation" resource="#Product_JSON">JSON</span> or
+<span rel="representation" resource="#Product_XML">XML</span> and returns
 <span rel="response" resource="#Product_PUT_204" typeof="Response">a 
 <span property="status">204</span> response indicating that the 
 representation now matches that which was uploaded</span>.</p>

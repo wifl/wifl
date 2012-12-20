@@ -51,6 +51,7 @@ class Products_GET {
 
 /**
  * @navassoc - representation - Product_JSON
+ * @navassoc - representation - Product_XML
  * @navassoc - response - Products_POST_201
  * @navassoc - response - Products_POST_400
  */
@@ -67,6 +68,7 @@ class Product_GET {
 
 /**
  * @navassoc - representation - Product_JSON
+ * @navassoc - representation - Product_XML
  * @navassoc - response - Product_PUT_204
  */
 class Product_PUT {
@@ -103,6 +105,7 @@ class Products_GET_200 {}
 /**
  * statusCode: 201
  * @navassoc - representation - Product_JSON
+ * @navassoc - representation - Product_XML
  */
 class Products_POST_201 {}
 
@@ -114,6 +117,7 @@ class Products_POST_400 {}
 /**
  * statusCode: 200
  * @navassoc - representation - Product_JSON
+ * @navassoc - representation - Product_XML
  */
 class Product_GET_200 {}
 
@@ -131,9 +135,13 @@ class Product_DELETE_204 {}
 
 /**
  * content-type: "application/json"
- * schema-type: "application/json+schema"
- * schema: "http://store.example.com/schema"
- * type: ""
+ * type: "example-schema.json#/product"
+ */
+class Product_JSON {}
+
+/**
+ * content-type: "application/xml"
+ * type: "example-schema.xml#product"
  */
 class Product_JSON {}
 
