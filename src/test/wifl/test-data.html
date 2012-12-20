@@ -1,10 +1,36 @@
 <html>
-  <body vocabulary="http://wifl.org/spec/#">
+  <body vocab="http://wifl.org/spec/#">
+
     <h1>WIFL Test Data</h1>
+
     <p about="#Root">
       This document contains test WIFL data.
-      It describes a bogus API at 
-      <span property="path">http://bogus.example.com/</span>.
+      It describes a 
+      <span rel="super" resource="#Super">resource</span> at 
+      <span property="path">http://api.example.com/bogus</span>.
     </p>
+
+    <p about="#Super">Every resource in this API has a
+      <span rel="queryParam" resource="#apikey">
+        <span rel="type" resource="xsd:hexBinary">hexadecimal</span>
+        <span property="name">apikey</span> query parameter.
+      </span>
+
+    <p about="#Dogs">
+      The <span rel="parent" resource="#Root">bogus API</span> has a child
+      <span property="path">/dogs</span>
+      <span rel="super" resource="#Super">resource</span>.
+    </p>
+
+    <p about="#Dog">
+      The <span rel="parent" resource="#Dogs">dogs resource</span> has a child
+      <span property="path">/{dogID}</span>
+      <span rel="super" resource="#Super">resource</span>.
+      <span rel="pathParam" resource="#dogID">The
+        <span property="name">dogId</span> path parameter is a
+        <span rel="type" resource="xsd:nonNegativeInteger">natural number</span>.
+      </span>
+    </p>
+
   </body>
 </html>
