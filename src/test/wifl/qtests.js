@@ -272,7 +272,7 @@ define(["qunit","wifl"],function(qunit,wifl) {
       compare(api.lookup("DELETE","http://api.example.com/bogus/dogs/123"),dog.requests[1]);
       compare(api.lookup("GET","http://api.example.com/bogus/dogs/123"),dog.requests[2]);
     });
-    test("uri-templates",function() {
+    test("uri template expansion",function() {
       equal(api.resources[1].uriTemplate.expand({}),"http://api.example.com/bogus/dogs");
       equal(api.resources[2].uriTemplate.expand({}),"http://api.example.com/bogus/dogs/");
       equal(api.resources[2].uriTemplate.expand({ dogID: 3 }),"http://api.example.com/bogus/dogs/3");
@@ -280,6 +280,23 @@ define(["qunit","wifl"],function(qunit,wifl) {
       equal(api.resources[2].uriTemplate.expand({ dogID: "a b" }),"http://api.example.com/bogus/dogs/a%20b");
       equal(api.resources[2].uriTemplate.expand({ dogID: "a/b" }),"http://api.example.com/bogus/dogs/a%2Fb");
       equal(api.resources[3].uriTemplate.expand({}),"http://api.example.com/bogus");
+    });
+    test("uri template parsing",function() {
+      deepEqual(api.resources[1].uriTemplate.parse("http://api.example.com/bogus/dogs"),{});
+      deepEqual(api.resources[2].uriTemplate.parse("http://api.example.com/bogus/dogs/"),{});
+      deepEqual(api.resources[2].uriTemplate.parse("http://api.example.com/bogus/dogs/3"),{ dogID: ["3"] });
+      deepEqual(api.resources[2].uriTemplate.parse("http://api.example.com/bogus/dogs/abc"),{ dogID: ["abc"] });
+      deepEqual(api.resources[2].uriTemplate.parse("http://api.example.com/bogus/dogs/a%20b"),{ dogID: ["a b"] });
+      deepEqual(api.resources[2].uriTemplate.parse("http://api.example.com/bogus/dogs/a%2Fb"),{ dogID: ["a/b"] });
+      deepEqual(api.resources[3].uriTemplate.parse("http://api.example.com/bogus"),{});
+      equal(api.resources[1].uriTemplate.parse("http://api.example.com/boogus/dogs"),undefined);
+      equal(api.resources[2].uriTemplate.parse("http://api.example.com/boogus/dogs/"),undefined);
+      equal(api.resources[2].uriTemplate.parse("http://api.example.com/boogus/dogs/3"),undefined);
+      equal(api.resources[3].uriTemplate.parse("http://api.example.com/boogus"),undefined);
+      equal(api.resources[1].uriTemplate.parse("http://api.example.com/bogus/dogs/abc"),undefined);
+      equal(api.resources[3].uriTemplate.parse("http://api.example.com/bogus/dogs/abc"),undefined);
+      equal(api.resources[1].uriTemplate.parse("http://api.example.com/bogus"),undefined);
+      equal(api.resources[2].uriTemplate.parse("http://api.example.com/bogus"),undefined);
     });
   });
 
