@@ -30,6 +30,7 @@ define(["rdfa","future"], function (rdfa,future) {
   function Documents() {
     this.docs = [];
     this.uris = {};
+    this.mapping = {};
   }
   // Clone a collection
   Documents.prototype.clone = function() {
@@ -37,6 +38,9 @@ define(["rdfa","future"], function (rdfa,future) {
     result.docs = this.docs.slice();
     for (var uri in this.uris) { 
       result.uris[uri] = this.uris[uri];
+    }
+    for (var from in this.mapping) {
+      result.mapping[from] = this.mapping[from];
     }
     return result;
   };
@@ -51,6 +55,10 @@ define(["rdfa","future"], function (rdfa,future) {
         if (result === this) { result = this.clone(); }
         result.uris[uri] = doc;
         rdfa.attach(doc);
+        for (from in this.mapping) {
+          var to = this.mapping[from];
+          doc.data.setMapping(from,to);
+        }
         result.docs.push(doc);
       }
     }
@@ -72,6 +80,10 @@ define(["rdfa","future"], function (rdfa,future) {
           doc.documentElement.innerHTML = xhr.responseText;
           setURI(doc,uri);
           rdfa.attach(doc);
+          for (from in docs.mapping) {
+            var to = docs.mapping[from];
+            doc.data.setMapping(from,to);
+          }
           docs.docs.push(doc);
         }
       } catch (e) {
@@ -146,6 +158,7 @@ define(["rdfa","future"], function (rdfa,future) {
     this.docs.forEach(function(doc) {
       doc.data.setMapping(from,to);
     });
+    this.mapping[from] = to;
     return this;
   };
   // Get the base URIs of each docment
