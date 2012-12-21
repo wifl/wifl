@@ -6,15 +6,6 @@ define(["qunit","wifl"],function(qunit,wifl) {
     return node.href;
   }
 
-  function mkObject(array) {
-    var result = {};
-    array.forEach(function (thing) {
-      var fragment = thing.toString().replace(/^[^#]*/,"");
-      result[fragment] = thing;
-    });
-    return result;
-  }
-
   function under(path,request) {
     var result =jQuery.extend({},request);
     result.path = path + request.path;
@@ -28,16 +19,26 @@ define(["qunit","wifl"],function(qunit,wifl) {
 
   function compare(actual,expected,prefix) {
     prefix = prefix || "this";
-    if (jQuery.isArray(actual) && jQuery.isArray(expected)) {
-      equal(actual.length,expected.length,prefix+".length");
-      var len = Math.min(actual.length,expected.length);
-      for (var i=0; i<len; i++) {
-        compare(actual[i],expected[i],prefix+"["+i+"]");
+    if (jQuery.isArray(expected)) {
+      if (jQuery.isArray(actual)) {
+        equal(actual.length,expected.length,prefix+".length");
+        var len = Math.min(actual.length,expected.length);
+        for (var i=0; i<len; i++) {
+          compare(actual[i],expected[i],prefix+"["+i+"]");
+        }
+      } else {
+        equal(typeof actual,"array","type of " + prefix);
       }
-    } else if (jQuery.isPlainObject(actual) && jQuery.isPlainObject(expected)) {
-      for (var key in expected) {
-        compare(actual[key],expected[key],prefix+"."+key);
+    } else if (typeof expected === "object") {
+      if (typeof actual === "object") {
+        for (var key in expected) {
+          compare(actual[key],expected[key],prefix+"."+key);
+        }
+      } else {
+        equal(typeof actual,"object","type of " + prefix);
       }
+    } else if (typeof actual === "object" || typeof actual === "function") {
+      equal(typeof actual,typeof expected,"type of " + prefix);
     } else {
       equal(actual,expected,prefix);
     }
@@ -257,14 +258,29 @@ define(["qunit","wifl"],function(qunit,wifl) {
   };
 
   wifl.build(document).wait(function(api) {
-    var resources = mkObject(api.resources);
-    var examples = mkObject(api.examples);
-    test("resources",function() { equal(api.resources.length,4); });
-    test("examples",function() { equal(api.examples.length,0); });
-    test("super",function() { compare(resources["#Super"],sooper); });
-    test("root",function() { compare(resources["#Root"],root); });
-    test("dogs",function() { compare(resources["#Dogs"],dogs); });
-    test("dog",function() { compare(resources["#Dog"],dog); });
+    test("resources",function() {
+      compare(api.resources,[sooper,dogs,dog,root]);
+    });
+    test("examples",function() {
+      compare(api.examples,[]);
+    });
+    test("lookup",function() {
+      compare(api.lookup("GET","http://api.example.com/bogus"),root.requests[0]);
+      compare(api.lookup("POST","http://api.example.com/bogus/dogs"),dogs.requests[0]);
+      compare(api.lookup("GET","http://api.example.com/bogus/dogs"),dogs.requests[1]);
+      compare(api.lookup("PUT","http://api.example.com/bogus/dogs/123"),dog.requests[0]);
+      compare(api.lookup("DELETE","http://api.example.com/bogus/dogs/123"),dog.requests[1]);
+      compare(api.lookup("GET","http://api.example.com/bogus/dogs/123"),dog.requests[2]);
+    });
+    test("uri-templates",function() {
+      equal(api.resources[1].uriTemplate.expand({}),"http://api.example.com/bogus/dogs");
+      equal(api.resources[2].uriTemplate.expand({}),"http://api.example.com/bogus/dogs/");
+      equal(api.resources[2].uriTemplate.expand({ dogID: 3 }),"http://api.example.com/bogus/dogs/3");
+      equal(api.resources[2].uriTemplate.expand({ dogID: "abc" }),"http://api.example.com/bogus/dogs/abc");
+      equal(api.resources[2].uriTemplate.expand({ dogID: "a b" }),"http://api.example.com/bogus/dogs/a%20b");
+      equal(api.resources[2].uriTemplate.expand({ dogID: "a/b" }),"http://api.example.com/bogus/dogs/a%2Fb");
+      equal(api.resources[3].uriTemplate.expand({}),"http://api.example.com/bogus");
+    });
   });
 
 });
