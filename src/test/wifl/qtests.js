@@ -257,22 +257,33 @@ define(["qunit","wifl"],function(qunit,wifl) {
     "uriParams": [ dogID, apikey ]
   };
 
-  wifl.build(document).done(function(api) {
-    test("resources",function() {
+  var deferred = wifl.build(document);
+
+  asyncTest("resources",2104,function() {
+    deferred.done(function(api) {
       compare(api.resources,[sooper,dogs,dog,root]);
+      start();
     });
-    test("examples",function() {
+  }); 
+  asyncTest("examples",1,function() {
+    deferred.done(function(api) {
       compare(api.examples,[]);
+      start();
     });
-    test("lookup",function() {
+  });
+  asyncTest("lookup",function() {
+    deferred.done(function(api) {
       compare(api.lookup("GET","http://api.example.com/bogus"),root.requests[0]);
       compare(api.lookup("POST","http://api.example.com/bogus/dogs"),dogs.requests[0]);
       compare(api.lookup("GET","http://api.example.com/bogus/dogs"),dogs.requests[1]);
       compare(api.lookup("PUT","http://api.example.com/bogus/dogs/123"),dog.requests[0]);
       compare(api.lookup("DELETE","http://api.example.com/bogus/dogs/123"),dog.requests[1]);
       compare(api.lookup("GET","http://api.example.com/bogus/dogs/123"),dog.requests[2]);
+      start();
     });
-    test("uri template expansion",function() {
+  });
+  asyncTest("uri template expansion",function() {
+    deferred.done(function(api) {
       equal(api.resources[1].uriTemplate.expand({}),"http://api.example.com/bogus/dogs");
       equal(api.resources[2].uriTemplate.expand({}),"http://api.example.com/bogus/dogs/");
       equal(api.resources[2].uriTemplate.expand({ dogID: 3 }),"http://api.example.com/bogus/dogs/3");
@@ -280,8 +291,11 @@ define(["qunit","wifl"],function(qunit,wifl) {
       equal(api.resources[2].uriTemplate.expand({ dogID: "a b" }),"http://api.example.com/bogus/dogs/a%20b");
       equal(api.resources[2].uriTemplate.expand({ dogID: "a/b" }),"http://api.example.com/bogus/dogs/a%2Fb");
       equal(api.resources[3].uriTemplate.expand({}),"http://api.example.com/bogus");
+      start();
     });
-    test("uri template parsing",function() {
+  });
+  asyncTest("uri template parsing",function() {
+    deferred.done(function(api) {
       deepEqual(api.resources[1].uriTemplate.parse("http://api.example.com/bogus/dogs"),{});
       deepEqual(api.resources[2].uriTemplate.parse("http://api.example.com/bogus/dogs/"),{});
       deepEqual(api.resources[2].uriTemplate.parse("http://api.example.com/bogus/dogs/3"),{ dogID: ["3"] });
@@ -297,6 +311,7 @@ define(["qunit","wifl"],function(qunit,wifl) {
       equal(api.resources[3].uriTemplate.parse("http://api.example.com/bogus/dogs/abc"),undefined);
       equal(api.resources[1].uriTemplate.parse("http://api.example.com/bogus"),undefined);
       equal(api.resources[2].uriTemplate.parse("http://api.example.com/bogus"),undefined);
+      start();
     });
   });
 

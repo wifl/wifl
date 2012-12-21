@@ -66,15 +66,18 @@ define(["rdfa","deferred"], function (rdfa,deferred) {
   };
   // Build an XHR to fetch a document from a given URI.
   // When all XHRs are finished, set the future to be this.
+  // We silently ignore any failed XHRs.
   Documents.prototype.xhr = function(uri,result) {
     var xhr = new XMLHttpRequest();
     var doc = document.implementation.createHTMLDocument(uri);
     var docs = this;
+    var loading = true;
     result = result || deferred.Deferred();
     this.xhrs = this.xhrs+1 || 1;
     this.uris[uri] = doc;
-    xhr.onloadend = function() {
-      try {
+    function loaded() {
+      if (loading) { try {
+        loading = false;
         docs.xhrs--;
         if (xhr.responseText) {
           doc.documentElement.innerHTML = xhr.responseText;
@@ -87,14 +90,25 @@ define(["rdfa","deferred"], function (rdfa,deferred) {
           docs.docs.push(doc);
         }
       } catch (e) {
+        console.log("RDFa-LD failed GET: " + uri);
         console.log(e);
       } finally {
         if (docs.xhrs === 0) { result.resolve(docs); }
-      }
+      } }
+    };
+    try {
+      xhr.addEventListener("load",loaded);
+      xhr.addEventListener("error",loaded);
+      xhr.addEventListener("abort",loaded);
+      xhr.open("GET",uri);
+      xhr.send();
+    } catch (e) {
+      console.log("RDFa-LD failed GET: " + uri);
+      console.log(e);
+      loaded();
+    } finally {
+      return result;
     }
-    xhr.open("GET",uri);
-    xhr.send();
-    return result;
   }
   // Returns a future new collection given by adding URIs.
   // Returns a future whose value is 
