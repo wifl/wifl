@@ -160,7 +160,6 @@ define(["rdfa-ld","uri-template2"], function (rdfaLD,uriTemplate) {
       descriptions: this.targets(uri,"wifl:description",this.trim).concat(this.targets(uri,"dc:description",this.trim)),
       headerParams: this.targets(uri,"wifl:exampleHeader",this.exHeader),
       method: this.targets(uri,"wifl:method",this.trim)[0],
-      verb: this.targets(uri,"wifl:verb",this.trim)[0],
       path: this.targets(uri,"wifl:uri",this.trim)[0],
       body: this.targets(uri,"wifl:body",this.trim)[0]
     };
@@ -286,7 +285,8 @@ define(["rdfa-ld","uri-template2"], function (rdfaLD,uriTemplate) {
 	"wifl:pathParam",
 	"wifl:queryParam",
 	"wifl:headerParam",
-        "wifl:example",
+        "wifl:exampleRequest",
+        "wifl:exampleResponse",
         "wifl:resource",
 	"wifl:request",
 	"wifl:response",
