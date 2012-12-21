@@ -83,7 +83,7 @@ define(["rdfa-ld","uri-template2"], function (rdfaLD,uriTemplate) {
     return this.inherit({
       about: uri,
       toString: this.constant(uri),
-      descriptions: this.targets(uri,"dc:description",this.trim),
+      descriptions: this.targets(uri,"wifl:description",this.trim).concat(this.targets(uri,"dc:description",this.trim)),
       supers: this.targets(uri,"wifl:super",this.resource),
       parent: this.targets(uri,"wifl:parent",this.resource)[0],
       myRequests: this.targets(uri,"wifl:request",this.request),
@@ -99,7 +99,7 @@ define(["rdfa-ld","uri-template2"], function (rdfaLD,uriTemplate) {
     return {
       about: uri,
       toString: this.constant(uri),
-      descriptions: this.targets(uri,"dc:description",this.trim),
+      descriptions: this.targets(uri,"wifl:description",this.trim).concat(this.targets(uri,"dc:description",this.trim)),
       myResponses: this.targets(uri,"wifl:response",this.response),
       myHeaderParams: this.targets(uri,"wifl:headerParam",this.parameter),
       myPathParams: this.targets(uri,"wifl:pathParam",this.parameter),
@@ -113,7 +113,7 @@ define(["rdfa-ld","uri-template2"], function (rdfaLD,uriTemplate) {
     return {
       about: uri,
       toString: this.constant(uri),
-      descriptions: this.targets(uri,"dc:description",this.trim),
+      descriptions: this.targets(uri,"wifl:description",this.trim).concat(this.targets(uri,"dc:description",this.trim)),
       headerParams: this.targets(uri,"wifl:headerParam",this.parameter),
       statuses: this.targets(uri,"wifl:status",this.trim),
       representations: this.targets(uri,"wifl:representation",this.representation),
@@ -124,9 +124,9 @@ define(["rdfa-ld","uri-template2"], function (rdfaLD,uriTemplate) {
     return {
       about: uri,
       toString: this.constant(uri),
-      descriptions: this.targets(uri,"dc:description",this.trim),
+      descriptions: this.targets(uri,"wifl:description",this.trim).concat(this.targets(uri,"dc:description",this.trim)),
       name: this.targets(uri,"wifl:name",this.trim)[0],
-      required: this.targets(uri,"wifl:required",this.trim)[0],
+      required: this.targets(uri,"wifl:required",this.bool)[0],
       fixed: this.targets(uri,"wifl:fixed",this.trim)[0],
       "default": this.targets(uri,"wifl:default",this.trim)[0],
       type: this.targets(uri,"wifl:type",this.trim)[0]
@@ -137,7 +137,7 @@ define(["rdfa-ld","uri-template2"], function (rdfaLD,uriTemplate) {
     return {
       about: uri,
       toString: this.constant(uri),
-      descriptions: this.targets(uri,"dc:description",this.trim),
+      descriptions: this.targets(uri,"wifl:description",this.trim).concat(this.targets(uri,"dc:description",this.trim)),
       contentType: this.targets(uri,"wifl:contentType",this.trim)[0],
       type: this.targets(uri,"wifl:type",this.trim)[0]
     };
@@ -147,7 +147,7 @@ define(["rdfa-ld","uri-template2"], function (rdfaLD,uriTemplate) {
     return this.exInherit({
       about: uri,
       toString: this.constant(uri),
-      descriptions: this.targets(uri,"dc:description",this.trim),
+      descriptions: this.targets(uri,"wifl:description",this.trim).concat(this.targets(uri,"dc:description",this.trim)),
       request: this.targets(uri,"wifl:exampleRequest",this.exRequest)[0],
       response: this.targets(uri,"wifl:exampleResponse",this.exResponse)[0]
     });
@@ -157,7 +157,7 @@ define(["rdfa-ld","uri-template2"], function (rdfaLD,uriTemplate) {
     return {
       about: uri,
       toString: this.constant(uri),
-      descriptions: this.targets(uri,"dc:description",this.trim),
+      descriptions: this.targets(uri,"wifl:description",this.trim).concat(this.targets(uri,"dc:description",this.trim)),
       headerParams: this.targets(uri,"wifl:exampleHeader",this.exHeader),
       method: this.targets(uri,"wifl:method",this.trim)[0],
       verb: this.targets(uri,"wifl:verb",this.trim)[0],
@@ -170,7 +170,7 @@ define(["rdfa-ld","uri-template2"], function (rdfaLD,uriTemplate) {
     return {
       about: uri,
       toString: this.constant(uri),
-      descriptions: this.targets(uri,"dc:description",this.trim),
+      descriptions: this.targets(uri,"wifl:description",this.trim).concat(this.targets(uri,"dc:description",this.trim)),
       headerParams: this.targets(uri,"wifl:exampleHeader",this.exHeader),
       status: this.targets(uri,"wifl:status",this.trim)[0],
       body: this.targets(uri,"wifl:body",this.trim)[0]
@@ -181,7 +181,7 @@ define(["rdfa-ld","uri-template2"], function (rdfaLD,uriTemplate) {
     return {
       about: uri,
       toString: this.constant(uri),
-      descriptions: this.targets(uri,"dc:description",this.trim),
+      descriptions: this.targets(uri,"wifl:description",this.trim).concat(this.targets(uri,"dc:description",this.trim)),
       name: this.targets(uri,"wifl:name",this.trim)[0],
       value: this.targets(uri,"wifl:value",this.trim)[0]
     };
@@ -189,6 +189,11 @@ define(["rdfa-ld","uri-template2"], function (rdfaLD,uriTemplate) {
   // Trim a string
   Wifl.prototype.trim = function(str) {
     return str.trim();
+  }
+  // Parse a bool
+  Wifl.prototype.bool = function(str) {
+    str = str.trim();
+    return (str !== "0") && (str !== "false");
   }
   // A constant function
   Wifl.prototype.constant = function(result) { return function() {
