@@ -1,5 +1,5 @@
 <html>
-  <body vocab="http://wifl.org/spec/#">
+  <body prefix="wifl: http://wifl.org/spec/#" vocab="http://wifl.org/spec/#">
 
     <h1>WIFL Test Data</h1>
 
@@ -17,8 +17,9 @@
       </span>
       Every resource has a 
       <span rel="request" resource="#GET">
-        <span property="method">GET</span> request, which
-        <span rel="response" resource="#200">may respond with
+        <span property="method">GET</span> request (with a 
+        <a rel="queryParam" href="test-hyperlinking.html#foo">pointless parameter</a>)
+        <span rel="response" resource="#200">which may respond with
           <span property="status">200</span> OK, and a
           <span rel="representation" resource="#JSON">
             <span property="contentType">application/json</span>
@@ -33,6 +34,20 @@
       The <span rel="parent" resource="#Root">bogus API</span> has a child
       <span property="path">/dogs</span>
       <span rel="super" resource="#Super">resource</span>.
+      <span rel="request" resource="#POST">
+        This resource supports a 
+        <span property="method">POST</span> request, uploading
+        <span rel="representation" href="#JSON">JSON</span>, and getting back a
+        <span rel="response" resource="#201">
+          <span property="status">201</span> Created, with a
+          <span rel="representation" href="#JSON">JSON</span> representation, and a
+          <span rel="headerParam" resource="#Location">
+            <span property="required" content="true">required</span>
+            <span property="type" resource="xsd:anyURI">URI</span>
+            <span property="name">Location</span> header.
+          </span>
+        </span>
+      </span>
     </p>
 
     <p about="#Dog">
@@ -42,6 +57,17 @@
       <span rel="pathParam" resource="#dogID">The
         <span property="name">dogID</span> path parameter is a
         <span rel="type" resource="xsd:nonNegativeInteger">natural number</span>.
+      </span>
+      <span rel="request" resource="#PUT">This resource supports a 
+        <span property="method">PUT</span> request, uploading
+        <span rel="representation" href="#JSON">JSON</span>, and getting back a
+        <span rel="response" href="#200">200</span> OK,
+      </span>
+      <span rel="request" resource="#DELETE">and a 
+        <span property="method">DELETE</span> request, getting back a
+        <span rel="response" resource="#204">
+          <span property="status">204</span> No Content.
+        </span>
       </span>
     </p>
 

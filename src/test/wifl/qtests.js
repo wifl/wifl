@@ -27,16 +27,16 @@ define(["qunit","wifl"],function(qunit,wifl) {
   }
 
   function compare(actual,expected,prefix) {
-    prefix = prefix || "";
+    prefix = prefix || "this";
     if (jQuery.isArray(actual) && jQuery.isArray(expected)) {
-      equal(actual.length,expected.length,prefix+"length.");
+      equal(actual.length,expected.length,prefix+".length");
       var len = Math.min(actual.length,expected.length);
       for (var i=0; i<len; i++) {
-        compare(actual[i],expected[i],prefix+"["+i+"].");
+        compare(actual[i],expected[i],prefix+"["+i+"]");
       }
     } else if (jQuery.isPlainObject(actual) && jQuery.isPlainObject(expected)) {
       for (var key in expected) {
-        compare(actual[key],expected[key],prefix+key+".");
+        compare(actual[key],expected[key],prefix+"."+key);
       }
     } else {
       equal(actual,expected,prefix);
@@ -61,6 +61,24 @@ define(["qunit","wifl"],function(qunit,wifl) {
     "type": "http://www.w3.org/2001/XMLSchema#nonNegativeInteger"
   };
 
+  var foo = {
+    "default": "abc",
+    "descriptions": [ "remarkably pointless" ],
+    "fixed": undefined,
+    "name": "foo",
+    "required": true,
+    "type": undefined
+  };
+
+  var location = {
+    "default": undefined,
+    "descriptions": [],
+    "fixed": undefined,
+    "name": "Location",
+    "required": true,
+    "type": "http://www.w3.org/2001/XMLSchema#anyURI"
+  };
+
   var json = {
     "contentType": "application/json",
     "descriptions": [],
@@ -71,7 +89,21 @@ define(["qunit","wifl"],function(qunit,wifl) {
     "descriptions": [],
     "headerParams": [],
     "representations": [ json ],
-    "statuses": [ "200" ]
+    "statuses": [ 200 ]
+  };
+
+  var created = {
+    "descriptions": [],
+    "headerParams": [ location ],
+    "representations": [ json ],
+    "statuses": [ 201 ]
+  };
+
+  var noContent = {
+    "descriptions": [],
+    "headerParams": [],
+    "representations": [],
+    "statuses": [ 204 ]
   };
 
   var get = {
@@ -80,13 +112,61 @@ define(["qunit","wifl"],function(qunit,wifl) {
     "method": "GET",
     "myHeaderParams": [],
     "myPathParams": [],
+    "myQueryParams": [ foo ],
+    "myResponses": [ ok ],
+    "path": "",
+    "pathParams": [],
+    "queryParams": [ foo, apikey ],
+    "representations": [],
+    "responses": [ ok ],
+    "uriParams": [ foo, apikey ]
+    };
+
+  var put = {
+    "descriptions": [],
+    "headerParams": [],
+    "method": "PUT",
+    "myHeaderParams": [],
+    "myPathParams": [],
     "myQueryParams": [],
     "myResponses": [ ok ],
     "path": "",
     "pathParams": [],
     "queryParams": [ apikey ],
-    "representations": [],
+    "representations": [ json ],
     "responses": [ ok ],
+    "uriParams": [ apikey ]
+    };
+
+  var post = {
+    "descriptions": [],
+    "headerParams": [],
+    "method": "POST",
+    "myHeaderParams": [],
+    "myPathParams": [],
+    "myQueryParams": [],
+    "myResponses": [ created ],
+    "path": "",
+    "pathParams": [],
+    "queryParams": [ apikey ],
+    "representations": [ json ],
+    "responses": [ created ],
+    "uriParams": [ apikey ]
+    };
+
+  var deleet = {
+    "descriptions": [],
+    "headerParams": [],
+    "method": "DELETE",
+    "myHeaderParams": [],
+    "myPathParams": [],
+    "myQueryParams": [],
+    "myResponses": [ noContent ],
+    "path": "",
+    "pathParams": [],
+    "queryParams": [ apikey ],
+    "representations": [],
+    "responses": [ noContent ],
     "uriParams": [ apikey ]
     };
 
@@ -135,13 +215,16 @@ define(["qunit","wifl"],function(qunit,wifl) {
     "myPath": "/dogs",
     "myPathParams": [],
     "myQueryParams": [],
-    "myRequests": [],
+    "myRequests": [ under("http://api.example.com/bogus/dogs",post) ],
     "myResponses": [],
     "parent": root,
     "path": "http://api.example.com/bogus/dogs",
     "pathParams": [],
     "queryParams": [ apikey ],
-    "requests": [ under("http://api.example.com/bogus/dogs",get) ],
+    "requests": [ 
+      under("http://api.example.com/bogus/dogs",post),
+      under("http://api.example.com/bogus/dogs",get)
+    ],
     "responses": [],
     "supers": [ sooper ],
     "uriParams": [ apikey ]
@@ -154,13 +237,20 @@ define(["qunit","wifl"],function(qunit,wifl) {
     "myPath": "/{dogID}",
     "myPathParams": [ dogID ],
     "myQueryParams": [],
-    "myRequests": [],
+    "myRequests": [
+      under("http://api.example.com/bogus/dogs/{dogID}",put,dogID),
+      under("http://api.example.com/bogus/dogs/{dogID}",deleet,dogID)
+    ],
     "myResponses": [],
     "parent": dogs,
     "path": "http://api.example.com/bogus/dogs/{dogID}",
     "pathParams": [ dogID ],
     "queryParams": [ apikey ],
-    "requests": [ under("http://api.example.com/bogus/dogs/{dogID}",get,dogID) ],
+    "requests": [ 
+      under("http://api.example.com/bogus/dogs/{dogID}",put,dogID),
+      under("http://api.example.com/bogus/dogs/{dogID}",deleet,dogID),
+      under("http://api.example.com/bogus/dogs/{dogID}",get,dogID)
+    ],
     "responses": [],
     "supers": [ sooper ],
     "uriParams": [ dogID, apikey ]
