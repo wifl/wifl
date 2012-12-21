@@ -1,0 +1,64 @@
+<html>
+  <body vocab="http://wifl.org/spec/#">
+
+    <h1>WIFL Test Examples</h1>
+    
+    <p>These are examples of the 
+      <a rel="seeAlso" href="test-data.html">bogus API</a>.</p>
+
+    <p>
+      <span about="#GET">
+        <span rel="exampleRequest" resource="#GETReq">A client sends a
+          <span rel="exampleHeader" href="#Accept"></span>
+          <span rel="exampleHeader" href="#Host"></span>
+          <span property="method">GET</span>
+          <span property="uri">/bogus/dogs/3?apikey=abc123</span>,
+        </span>
+        <span rel="exampleResponse" resource="#GETResp">and recieves back a
+          <span rel="exampleHeader" href="#CType"></span>
+          <span property="status">200</span> OK response, with body
+          <span property="body">{ "name": "Rover" }</span>.
+        </span>
+      </span>
+    </p>
+
+    <p>
+      <span about="#POST">
+        <span rel="exampleRequest" resource="#POSTReq">A client sends a
+          <span rel="exampleHeader" href="#Accept"></span>
+          <span rel="exampleHeader" href="#Host"></span>
+          <span rel="exampleHeader" href="#CType"></span>
+          <span property="method">POST</span>
+          <span property="uri">/bogus/dogs?apikey=abc123</span> with body
+          <span property="body">{ "name": "Fido" }</span>.
+        </span>
+        <span rel="exampleResponse" resource="#POSTResp">and recieves back a
+          <span rel="exampleHeader" href="#CType"></span>
+          <span property="status">201</span> OK response, with 
+          <span rel="exampleHeader" resource="#Location">
+            <span property="name">Location</span>
+            <span property="value">http://api.example.com/bogus/dogs/52</span>
+          </span> and body
+          <span property="body">{ "name": "Fido" }</span>.
+        </span>
+      </span>
+    </p>
+
+    <p>
+      All examples have
+      <span about="#Accept">
+        <span property="name">Accept</span>
+        <span property="value">application/json</span>
+      </span>,
+      <span about="#CType">
+        <span property="name">Content-Type</span>
+        <span property="value">application/json</span>
+      </span>,
+      <span about="#Host">
+        <span property="name">Host</span>
+        <span property="value">api.example.com</span>.
+      </span>
+    </span>
+
+  </body>
+</html>

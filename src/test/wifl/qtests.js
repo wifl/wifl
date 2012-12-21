@@ -257,17 +257,65 @@ define(["qunit","wifl"],function(qunit,wifl) {
     "uriParams": [ dogID, apikey ]
   };
 
+  var getEx = {
+    "descriptions": [],
+    "request": {
+      "descriptions": [],
+      "method": "GET",
+      "path": "/bogus/dogs/3?apikey=abc123",
+      "uri": "http://api.example.com/bogus/dogs/3?apikey=abc123",
+      "headers": {
+        "Accept": "application/json",
+        "Host": "api.example.com"
+      },
+      "body": undefined
+    },
+    "response": {
+      "descriptions": [],
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": "{ \"name\": \"Rover\" }"
+    }
+  };
+
+  var postEx = {
+    "descriptions": [],
+    "request": {
+      "descriptions": [],
+      "method": "POST",
+      "path": "/bogus/dogs?apikey=abc123",
+      "uri": "http://api.example.com/bogus/dogs?apikey=abc123",
+      "headers": {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Host": "api.example.com"
+      },
+      "body": "{ \"name\": \"Fido\" }"
+    },
+    "response": {
+      "descriptions": [],
+      "status": 201,
+      "headers": {
+        "Content-Type": "application/json",
+        "Location": "http://api.example.com/bogus/dogs/52"
+      },
+      "body": "{ \"name\": \"Fido\" }"
+    }
+  };
+
   var deferred = wifl.build(document);
 
-  asyncTest("resources",2104,function() {
+  asyncTest("resources",function() {
     deferred.done(function(api) {
       compare(api.resources,[sooper,dogs,dog,root]);
       start();
     });
   }); 
-  asyncTest("examples",1,function() {
+  asyncTest("examples",function() {
     deferred.done(function(api) {
-      compare(api.examples,[]);
+      compare(api.examples,[getEx,postEx]);
       start();
     });
   });
