@@ -257,7 +257,7 @@ define(["qunit","wifl"],function(qunit,wifl) {
     "uriParams": [ dogID, apikey ]
   };
 
-  wifl.build(document).wait(function(api) {
+  wifl.build(document).done(function(api) {
     test("resources",function() {
       compare(api.resources,[sooper,dogs,dog,root]);
     });

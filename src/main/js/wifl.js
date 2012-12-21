@@ -293,7 +293,7 @@ define(["rdfa-ld","uri-template2"], function (rdfaLD,uriTemplate) {
 	"wifl:representation",
 	"wifl:seeAlso",
 	"rdfs:seeAlso"
-      ).map(function(docs) {
+      ).pipe(function(docs) {
 	return new Wifl(docs).api();
       });
     }

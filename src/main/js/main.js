@@ -1,6 +1,6 @@
 require(["wifl","gui","validator-jsv"],function(wifl,gui) {
   $(function() {
-    wifl.build(document).wait(function(api) {
+    wifl.build(document).done(function(api) {
       api.resources.forEach(function(resource) {
         document.getElementsBySubject(resource.about).forEach(function (node) {
           gui.resource(resource,$(node));

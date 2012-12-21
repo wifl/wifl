@@ -2,7 +2,7 @@ require.config({
     shim: { "rdfa": { exports: "RDFa" } }
 });
 
-define(["rdfa","future"], function (rdfa,future) {
+define(["rdfa","deferred"], function (rdfa,deferred) {
 
   // Find the base URI of a document
   function getURI(doc) {
@@ -70,7 +70,7 @@ define(["rdfa","future"], function (rdfa,future) {
     var xhr = new XMLHttpRequest();
     var doc = document.implementation.createHTMLDocument(uri);
     var docs = this;
-    result = result || future.build();
+    result = result || deferred.Deferred();
     this.xhrs = this.xhrs+1 || 1;
     this.uris[uri] = doc;
     xhr.onloadend = function() {
@@ -89,7 +89,7 @@ define(["rdfa","future"], function (rdfa,future) {
       } catch (e) {
         console.log(e);
       } finally {
-        if (docs.xhrs === 0) { result.set(docs); }
+        if (docs.xhrs === 0) { result.resolve(docs); }
       }
     }
     xhr.open("GET",uri);
@@ -102,27 +102,29 @@ define(["rdfa","future"], function (rdfa,future) {
   // We strip any #values off the URI.
   Documents.prototype.resolve = function() {
     var docs = this.clone();
-    var result = future.build();
+    var result = deferred.Deferred();
     for (var i=0; i<arguments.length; i++) {
       var uri = arguments[i].split("#")[0];
       if (uri.charAt(0) !== "_" && !docs.uris[uri]) {
         docs.xhr(uri,result);
       }
     }
-    if (!docs.xhrs) { result.set(this); }
+    if (!docs.xhrs) { result.resolve(this); }
     return result;
   }
   // Find the fixed point of a function f
   // which maps documents to future documents.
   Documents.prototype.fix = function(step,result) {
     var curr = this;
-    result = result || future.build();
-    step(curr).wait(function(next) {
+    result = result || deferred.Deferred();
+    step(curr).done(function(next) {
       if (curr === next) {
-	result.set(curr);
+	result.resolve(curr);
       } else {
 	next.fix(step,result);
       }
+    }).fail(function(err) {
+      result.reject(err);
     });
     return result;
   }

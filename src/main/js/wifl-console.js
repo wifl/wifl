@@ -457,7 +457,7 @@ define(["jquery","jquery-ui","wifl","validator"],function($,jqueryUI,wifl,valida
     $window.resize();
   }
 
-  jQuery(function() { wifl.build(document).wait(main); })
+  jQuery(function() { wifl.build(document).done(main); })
 
   return {};
 
