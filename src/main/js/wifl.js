@@ -18,7 +18,19 @@ define(["rdfa-ld","uri-template2"], function (rdfaLD,uriTemplate) {
         return true;
       }
     });
-  }
+  };
+  // Shallow clone (but clone any arrays).
+  Wifl.prototype.clone = function(obj) {
+    var result = {};
+    for (key in obj) {
+      var value = obj[key];
+      if (value instanceof Array) {
+        value = value.slice();
+      } 
+      result[key] = value;
+    }
+    return result;
+  };
   // Extract all targets, and apply a function to them
   Wifl.prototype.targets = function(uri,rel,fun) {
     var result = this.docs.getValues(uri,rel);
@@ -207,7 +219,7 @@ define(["rdfa-ld","uri-template2"], function (rdfaLD,uriTemplate) {
     for (var i=0; i<resource.supers.length; i++) {
       resource.queryParams = resource.queryParams.concat(resource.supers[i].queryParams);
       resource.headerParams = resource.headerParams.concat(resource.supers[i].headerParams);
-      resource.requests = resource.requests.concat(resource.supers[i].requests);
+      resource.requests = resource.requests.concat(resource.supers[i].requests.map(this.clone));
       resource.responses = resource.responses.concat(resource.supers[i].responses);
     }
     resource.uriParams = resource.pathParams.concat(resource.queryParams);
