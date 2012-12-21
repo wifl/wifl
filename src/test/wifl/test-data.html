@@ -15,6 +15,19 @@
         <span rel="type" resource="xsd:hexBinary">hexadecimal</span>
         <span property="name">apikey</span> query parameter.
       </span>
+      Every resource has a 
+      <span rel="request" resource="#GET">
+        <span property="method">GET</span> request, which
+        <span rel="response" resource="#200">may respond with
+          <span property="status">200</span> OK, and a
+          <span rel="representation" resource="#JSON">
+            <span property="contentType">application/json</span>
+            body which validates against the
+            <a rel="type" href="test-schema.json">JSON Schema</a>.
+          </span>
+        </span>
+      </span>
+    </p>
 
     <p about="#Dogs">
       The <span rel="parent" resource="#Root">bogus API</span> has a child
@@ -27,7 +40,7 @@
       <span property="path">/{dogID}</span>
       <span rel="super" resource="#Super">resource</span>.
       <span rel="pathParam" resource="#dogID">The
-        <span property="name">dogId</span> path parameter is a
+        <span property="name">dogID</span> path parameter is a
         <span rel="type" resource="xsd:nonNegativeInteger">natural number</span>.
       </span>
     </p>

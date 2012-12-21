@@ -1,5 +1,11 @@
 define(["qunit","wifl"],function(qunit,wifl) {
 
+  function resolve(uri) {
+    var node = document.createElement("a");
+    node.href = uri;
+    return node.href;
+  }
+
   function mkObject(array) {
     var result = {};
     array.forEach(function (thing) {
@@ -9,66 +15,166 @@ define(["qunit","wifl"],function(qunit,wifl) {
     return result;
   }
 
+  function under(path,request) {
+    var result =jQuery.extend({},request);
+    result.path = path + request.path;
+    if (arguments.length > 2) {
+      var pathParams = Array.prototype.slice.call(arguments,2);
+      result.pathParams = request.pathParams.concat(pathParams);
+      result.uriParams = result.pathParams.concat(result.queryParams);
+    }
+    return result;
+  }
+
+  function compare(actual,expected,prefix) {
+    prefix = prefix || "";
+    if (jQuery.isArray(actual) && jQuery.isArray(expected)) {
+      equal(actual.length,expected.length,prefix+"length.");
+      var len = Math.min(actual.length,expected.length);
+      for (var i=0; i<len; i++) {
+        compare(actual[i],expected[i],prefix+"["+i+"].");
+      }
+    } else if (jQuery.isPlainObject(actual) && jQuery.isPlainObject(expected)) {
+      for (var key in expected) {
+        compare(actual[key],expected[key],prefix+key+".");
+      }
+    } else {
+      equal(actual,expected,prefix);
+    }
+  }
+
+  var apikey = {
+    "default": undefined,
+    "descriptions": [],
+    "fixed": undefined,
+    "name": "apikey",
+    "required": undefined,
+    "type": "http://www.w3.org/2001/XMLSchema#hexBinary"
+  };
+
+  var dogID = {
+    "default": undefined,
+    "descriptions": [],
+    "fixed": undefined,
+    "name": "dogID",
+    "required": undefined,
+    "type": "http://www.w3.org/2001/XMLSchema#nonNegativeInteger"
+  };
+
+  var json = {
+    "contentType": "application/json",
+    "descriptions": [],
+    "type": resolve("test-schema.json")
+  };
+
+  var ok = {
+    "descriptions": [],
+    "headerParams": [],
+    "representations": [ json ],
+    "statuses": [ "200" ]
+  };
+
+  var get = {
+    "descriptions": [],
+    "headerParams": [],
+    "method": "GET",
+    "myHeaderParams": [],
+    "myPathParams": [],
+    "myQueryParams": [],
+    "myResponses": [ ok ],
+    "path": "",
+    "pathParams": [],
+    "queryParams": [ apikey ],
+    "representations": [],
+    "responses": [ ok ],
+    "uriParams": [ apikey ]
+    };
+
+  var sooper = {
+    "descriptions": [],
+    "headerParams": [],
+    "myHeaderParams": [],
+    "myPath": undefined,
+    "myPathParams": [],
+    "myQueryParams": [ apikey ],
+    "myRequests": [ get ],
+    "myResponses": [],
+    "parent": undefined,
+    "path": "",
+    "pathParams": [],
+    "queryParams": [ apikey ],
+    "requests": [ get ],
+    "responses": [],
+    "supers": [],
+    "uriParams": [ apikey ]
+  };
+
+  var root = {
+    "descriptions": [],
+    "headerParams": [],
+    "myHeaderParams": [],
+    "myPath": "http://api.example.com/bogus",
+    "myPathParams": [],
+    "myQueryParams": [],
+    "myRequests": [],
+    "myResponses": [],
+    "parent": undefined,
+    "path": "http://api.example.com/bogus",
+    "pathParams": [],
+    "queryParams": [ apikey ],
+    "requests": [ under("http://api.example.com/bogus",get) ],
+    "responses": [],
+    "supers": [ sooper ],
+    "uriParams": [ apikey ]
+  };
+
+  var dogs = {
+    "descriptions": [],
+    "headerParams": [],
+    "myHeaderParams": [],
+    "myPath": "/dogs",
+    "myPathParams": [],
+    "myQueryParams": [],
+    "myRequests": [],
+    "myResponses": [],
+    "parent": root,
+    "path": "http://api.example.com/bogus/dogs",
+    "pathParams": [],
+    "queryParams": [ apikey ],
+    "requests": [ under("http://api.example.com/bogus/dogs",get) ],
+    "responses": [],
+    "supers": [ sooper ],
+    "uriParams": [ apikey ]
+  };
+
+  var dog = {
+    "descriptions": [],
+    "headerParams": [],
+    "myHeaderParams": [],
+    "myPath": "/{dogID}",
+    "myPathParams": [ dogID ],
+    "myQueryParams": [],
+    "myRequests": [],
+    "myResponses": [],
+    "parent": dogs,
+    "path": "http://api.example.com/bogus/dogs/{dogID}",
+    "pathParams": [ dogID ],
+    "queryParams": [ apikey ],
+    "requests": [ under("http://api.example.com/bogus/dogs/{dogID}",get,dogID) ],
+    "responses": [],
+    "supers": [ sooper ],
+    "uriParams": [ dogID, apikey ]
+  };
+
   wifl.build(document).wait(function(api) {
     var resources = mkObject(api.resources);
     var examples = mkObject(api.examples);
-    var sooper = resources["#Super"];
-    var root = resources["#Root"];
-    var dogs = resources["#Dogs"];
-    var dog = resources["#Dog"];
-    test("resources",function() {
-      equal(api.resources.length,4);
-    });
-    test("examples",function() {
-      equal(api.examples.length,0);
-    });
-    test("super",function() {
-      equal(sooper.myPath,undefined);
-      equal(sooper.path,"");
-      equal(sooper.uriTemplate.toString(),"{?apikey}");
-      equal(sooper.pathParams.length,0);
-      equal(sooper.queryParams.length,1);
-      equal(sooper.uriParams.length,1);
-      equal(sooper.headerParams.length,0);
-      equal(sooper.supers.length,0);
-      equal(sooper.parent,undefined);
-    });
-    test("root",function() {
-      equal(root.myPath,"http://api.example.com/bogus");
-      equal(root.path,"http://api.example.com/bogus");
-      equal(root.uriTemplate.toString(),"http://api.example.com/bogus{?apikey}");
-      equal(root.pathParams.length,0);
-      equal(root.queryParams.length,1);
-      equal(root.uriParams.length,1);
-      equal(root.headerParams.length,0);
-      equal(root.supers.length,1);
-      equal(root.supers[0].about,sooper.about);
-      equal(root.parent,undefined);
-    });
-    test("dogs",function() {
-      equal(dogs.myPath,"/dogs");
-      equal(dogs.path,"http://api.example.com/bogus/dogs");
-      equal(dogs.uriTemplate.toString(),"http://api.example.com/bogus/dogs{?apikey}");
-      equal(dogs.pathParams.length,0);
-      equal(dogs.queryParams.length,1);
-      equal(dogs.uriParams.length,1);
-      equal(dogs.headerParams.length,0);
-      equal(dogs.supers.length,1);
-      equal(dogs.supers[0].about,sooper.about);
-      equal(dogs.parent.about,root.about);
-    });
-    test("dog",function() {
-      equal(dog.myPath,"/{dogID}");
-      equal(dog.path,"http://api.example.com/bogus/dogs/{dogID}");
-      equal(dog.uriTemplate.toString(),"http://api.example.com/bogus/dogs/{dogID}{?apikey}");
-      equal(dog.pathParams.length,1);
-      equal(dog.queryParams.length,1);
-      equal(dog.uriParams.length,2);
-      equal(dog.headerParams.length,0);
-      equal(dog.supers.length,1);
-      equal(dog.supers[0].about,sooper.about);
-      equal(dog.parent.about,dogs.about);
-    });
+    test("resources",function() { equal(api.resources.length,4); });
+    test("examples",function() { equal(api.examples.length,0); });
+    test("super",function() { compare(resources["#Super"],sooper); });
+    test("root",function() { compare(resources["#Root"],root); });
+    test("dogs",function() { compare(resources["#Dogs"],dogs); });
+    test("dog",function() { compare(resources["#Dog"],dog); });
   });
 
 });
