@@ -269,7 +269,7 @@ define(["deferred","deferred-worker"],function(deferred,deferredWorker) {
   // TODO: Validate URIs properly
   addValidator({ 
     type: "http://www.w3.org/2001/XMLSchema#anyURI",
-    values: /^([a-zA-Z0-9-_.!~*'();?:@&=+$,#\/]|[%][a-fA-F0-9]{2})+$/
+    values: /^([a-zA-Z0-9-_.!~*'();?:@&=+$,#\/]|[%][a-fA-F0-9]{2})*$/
   });
 
   // TODO: Unicode QNames
