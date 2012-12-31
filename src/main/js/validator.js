@@ -331,7 +331,7 @@ define(["deferred","deferred-worker"],function(deferred,deferredWorker) {
       "http://www.w3.org/2001/XMLSchema#IDREFS",
       "http://www.w3.org/2001/XMLSchema#ENTITIES"
     ],
-    values: /^[a-zA-Z_][a-zA-Z0-9_.\-]*([ ]+[a-zA-Z_][a-zA-Z0-9_.\-]*)$/
+    values: /^[a-zA-Z_][a-zA-Z0-9_.\-]*([ ]+[a-zA-Z_][a-zA-Z0-9_.\-]*)*$/
   });
 
   // TODO: Range validation
@@ -360,7 +360,7 @@ define(["deferred","deferred-worker"],function(deferred,deferredWorker) {
 
   addValidator({ 
     type: "http://www.w3.org/2001/XMLSchema#nonPositiveInteger",
-    values: /^[-]\d+$/
+    values: /^0+|[-]\d+$/
   });
 
   addValidator({ 
