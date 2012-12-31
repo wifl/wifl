@@ -511,4 +511,63 @@ define(["qunit","validator"],function(qunit,validator) {
     fails(validator.checkValue("0x12","http://www.w3.org/2001/XMLSchema#hexBinary"));
   });
 
+  test("Base64Binary",function() {
+    succeeds(validator.checkValue("","http://www.w3.org/2001/XMLSchema#base64Binary"));
+    succeeds(validator.checkValue("Zg==","http://www.w3.org/2001/XMLSchema#base64Binary"));
+    succeeds(validator.checkValue("Zm8=","http://www.w3.org/2001/XMLSchema#base64Binary"));
+    succeeds(validator.checkValue("Zm9v","http://www.w3.org/2001/XMLSchema#base64Binary"));
+    succeeds(validator.checkValue("Zm9vYg==","http://www.w3.org/2001/XMLSchema#base64Binary"));
+    succeeds(validator.checkValue("Zm9vYmE=","http://www.w3.org/2001/XMLSchema#base64Binary"));
+    succeeds(validator.checkValue("Zm9vYmFy","http://www.w3.org/2001/XMLSchema#base64Binary"));
+    fails(validator.checkValue("=","http://www.w3.org/2001/XMLSchema#base64Binary"));
+    fails(validator.checkValue("Zg","http://www.w3.org/2001/XMLSchema#base64Binary"));
+    fails(validator.checkValue("Zm8==","http://www.w3.org/2001/XMLSchema#base64Binary"));
+    fails(validator.checkValue("Zm9v=","http://www.w3.org/2001/XMLSchema#base64Binary"));
+    fails(validator.checkValue("Zm9vYg","http://www.w3.org/2001/XMLSchema#base64Binary"));
+    fails(validator.checkValue("Zm9vYmE==","http://www.w3.org/2001/XMLSchema#base64Binary"));
+    fails(validator.checkValue("Zm9vYmFy=","http://www.w3.org/2001/XMLSchema#base64Binary"));
+    fails(validator.checkValue("==","http://www.w3.org/2001/XMLSchema#base64Binary"));
+    fails(validator.checkValue("Zg=","http://www.w3.org/2001/XMLSchema#base64Binary"));
+    fails(validator.checkValue("Zm8","http://www.w3.org/2001/XMLSchema#base64Binary"));
+    fails(validator.checkValue("Zm9v==","http://www.w3.org/2001/XMLSchema#base64Binary"));
+    fails(validator.checkValue("Zm9vYg=","http://www.w3.org/2001/XMLSchema#base64Binary"));
+    fails(validator.checkValue("Zm9vYmE","http://www.w3.org/2001/XMLSchema#base64Binary"));
+    fails(validator.checkValue("Zm9vYmFy==","http://www.w3.org/2001/XMLSchema#base64Binary"));
+  });
+
+  test("AnyURI",function() {
+    succeeds(validator.checkValue("http://example.com/foo","http://www.w3.org/2001/XMLSchema#anyURI"));
+    succeeds(validator.checkValue("%10","http://www.w3.org/2001/XMLSchema#anyURI"));
+    succeeds(validator.checkValue("","http://www.w3.org/2001/XMLSchema#anyURI"));
+    fails(validator.checkValue("%","http://www.w3.org/2001/XMLSchema#anyURI"));
+    fails(validator.checkValue("%a","http://www.w3.org/2001/XMLSchema#anyURI"));
+    fails(validator.checkValue("%1z","http://www.w3.org/2001/XMLSchema#anyURI"));
+  });
+
+  test("QName",function() {
+    succeeds(validator.checkValue("foo","http://www.w3.org/2001/XMLSchema#QName"));
+    succeeds(validator.checkValue("foo-bar.123","http://www.w3.org/2001/XMLSchema#QName"));
+    succeeds(validator.checkValue("foo:bar","http://www.w3.org/2001/XMLSchema#QName"));
+    succeeds(validator.checkValue("foo:bar-baz.123","http://www.w3.org/2001/XMLSchema#QName"));
+    fails(validator.checkValue("","http://www.w3.org/2001/XMLSchema#QName"));
+    fails(validator.checkValue(" ","http://www.w3.org/2001/XMLSchema#QName"));
+    fails(validator.checkValue("123-foo","http://www.w3.org/2001/XMLSchema#QName"));
+    fails(validator.checkValue("foo:bar:baz","http://www.w3.org/2001/XMLSchema#QName"));
+    fails(validator.checkValue("foo:","http://www.w3.org/2001/XMLSchema#QName"));
+    fails(validator.checkValue(":bar","http://www.w3.org/2001/XMLSchema#QName"));
+  });
+
+  test("NOTATION",function() {
+    succeeds(validator.checkValue("foo","http://www.w3.org/2001/XMLSchema#NOTATION"));
+    succeeds(validator.checkValue("foo-bar.123","http://www.w3.org/2001/XMLSchema#NOTATION"));
+    succeeds(validator.checkValue("foo:bar","http://www.w3.org/2001/XMLSchema#NOTATION"));
+    succeeds(validator.checkValue("foo:bar-baz.123","http://www.w3.org/2001/XMLSchema#NOTATION"));
+    fails(validator.checkValue("","http://www.w3.org/2001/XMLSchema#NOTATION"));
+    fails(validator.checkValue(" ","http://www.w3.org/2001/XMLSchema#NOTATION"));
+    fails(validator.checkValue("123-foo","http://www.w3.org/2001/XMLSchema#NOTATION"));
+    fails(validator.checkValue("foo:bar:baz","http://www.w3.org/2001/XMLSchema#NOTATION"));
+    fails(validator.checkValue("foo:","http://www.w3.org/2001/XMLSchema#NOTATION"));
+    fails(validator.checkValue(":bar","http://www.w3.org/2001/XMLSchema#NOTATION"));
+  });
+
 });
