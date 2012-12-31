@@ -210,13 +210,14 @@ define(["deferred","deferred-worker"],function(deferred,deferredWorker) {
   });
 
   // TODO: value restrictions on dates/times
+  // TODO: incorrectly allows T separator without a following H M or S value
   addValidator({ 
     type: "http://www.w3.org/2001/XMLSchema#duration",
-    values: /^[-]?P(\d+Y)?(\d+M)?(\d+DT)?(\d+H)?(\d+M)?(\d+(\.\d+)?S)?$/
+    values: /^[-]?P(\d+Y)?(\d+M)?(\d+D)?(T(\d+H)?(\d+M)?(\d+(\.\d+)?S)?)?$/
   });
 
   addValidator({ 
-    type: "http://www.w3.org/2001/XMLSchema#timeDate",
+    type: "http://www.w3.org/2001/XMLSchema#dateTime",
     values: /^[-]?\d{4,}\-\d\d\-\d\dT\d\d\:\d\d\:\d\d(\.\d+)?(([+-]\d\d\:\d\d)|Z)?$/
   });
 
