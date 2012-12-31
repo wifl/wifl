@@ -288,7 +288,17 @@
     </copy>
   </target>
 	
-  <target name="test" depends="uri-template-test, wifl-test">
+  <target name="wifl-validator-test">
+    <mkdir dir="${test}/wifl-validator"/>
+    <copy todir="${test}/wifl-validator">
+      <fileset dir="${src}/test/wifl-validator"/>
+      <fileset dir="${qunit}"/>
+      <fileset dir="${requirejs}"/>
+      <fileset dir="${src}/main/js"/>
+    </copy>
+  </target>
+	
+  <target name="test" depends="uri-template-test, wifl-test, wifl-validator-test">
   </target>
 	
   <target name="zip" depends="init, dist, site, test">
