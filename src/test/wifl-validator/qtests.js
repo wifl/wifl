@@ -570,4 +570,457 @@ define(["qunit","validator"],function(qunit,validator) {
     fails(validator.checkValue(":bar","http://www.w3.org/2001/XMLSchema#NOTATION"));
   });
 
+  test("NormalizedString",function() {
+    succeeds(validator.checkValue("","http://www.w3.org/2001/XMLSchema#normalizedString"));
+    succeeds(validator.checkValue("foo","http://www.w3.org/2001/XMLSchema#normalizedString"));
+    succeeds(validator.checkValue("foo bar 123","http://www.w3.org/2001/XMLSchema#normalizedString"));
+    succeeds(validator.checkValue(" foo  bar ","http://www.w3.org/2001/XMLSchema#normalizedString"));
+    fails(validator.checkValue("foo\tbar","http://www.w3.org/2001/XMLSchema#normalizedString"));
+    fails(validator.checkValue("foo\rbar","http://www.w3.org/2001/XMLSchema#normalizedString"));
+    fails(validator.checkValue("foo\nbar","http://www.w3.org/2001/XMLSchema#normalizedString"));
+  });
+
+  test("Token",function() {
+    succeeds(validator.checkValue("","http://www.w3.org/2001/XMLSchema#token"));
+    succeeds(validator.checkValue("foo","http://www.w3.org/2001/XMLSchema#token"));
+    succeeds(validator.checkValue("foo bar 123","http://www.w3.org/2001/XMLSchema#token"));
+    fails(validator.checkValue("foo bar ","http://www.w3.org/2001/XMLSchema#token"));
+    fails(validator.checkValue("foo  bar","http://www.w3.org/2001/XMLSchema#token"));
+    fails(validator.checkValue(" foo bar","http://www.w3.org/2001/XMLSchema#token"));
+    fails(validator.checkValue("foo\tbar","http://www.w3.org/2001/XMLSchema#token"));
+    fails(validator.checkValue("foo\rbar","http://www.w3.org/2001/XMLSchema#token"));
+    fails(validator.checkValue("foo\nbar","http://www.w3.org/2001/XMLSchema#token"));
+  });
+
+  test("Language",function() {
+    succeeds(validator.checkValue("foo","http://www.w3.org/2001/XMLSchema#language"));
+    succeeds(validator.checkValue("foo-bar-123","http://www.w3.org/2001/XMLSchema#language"));
+    fails(validator.checkValue("","http://www.w3.org/2001/XMLSchema#language"));
+    fails(validator.checkValue("123-foo","http://www.w3.org/2001/XMLSchema#language"));
+    fails(validator.checkValue("-foo","http://www.w3.org/2001/XMLSchema#language"));
+    fails(validator.checkValue("foo-","http://www.w3.org/2001/XMLSchema#language"));
+    fails(validator.checkValue("foobarbaz-foo","http://www.w3.org/2001/XMLSchema#language"));
+    fails(validator.checkValue("foo-123456789","http://www.w3.org/2001/XMLSchema#language"));
+  });
+
+  test("NMTOKEN",function() {
+    succeeds(validator.checkValue("foo","http://www.w3.org/2001/XMLSchema#NMTOKEN"));
+    succeeds(validator.checkValue("foo-bar.123","http://www.w3.org/2001/XMLSchema#NMTOKEN"));
+    succeeds(validator.checkValue("foo:bar","http://www.w3.org/2001/XMLSchema#NMTOKEN"));
+    succeeds(validator.checkValue("foo:bar-baz.123","http://www.w3.org/2001/XMLSchema#NMTOKEN"));
+    succeeds(validator.checkValue("foo:bar:baz","http://www.w3.org/2001/XMLSchema#NMTOKEN"));
+    succeeds(validator.checkValue("foo:","http://www.w3.org/2001/XMLSchema#NMTOKEN"));
+    succeeds(validator.checkValue(":bar","http://www.w3.org/2001/XMLSchema#NMTOKEN"));
+    succeeds(validator.checkValue("123-foo","http://www.w3.org/2001/XMLSchema#NMTOKEN"));
+    fails(validator.checkValue("foo bar","http://www.w3.org/2001/XMLSchema#NMTOKEN"));
+    fails(validator.checkValue("foo ","http://www.w3.org/2001/XMLSchema#NMTOKEN"));
+    fails(validator.checkValue(" bar","http://www.w3.org/2001/XMLSchema#NMTOKEN"));
+    fails(validator.checkValue("","http://www.w3.org/2001/XMLSchema#NMTOKEN"));
+    fails(validator.checkValue(" ","http://www.w3.org/2001/XMLSchema#NMTOKEN"));
+  });
+
+  test("NMTOKENS",function() {
+    succeeds(validator.checkValue("foo","http://www.w3.org/2001/XMLSchema#NMTOKENS"));
+    succeeds(validator.checkValue("foo-bar.123","http://www.w3.org/2001/XMLSchema#NMTOKENS"));
+    succeeds(validator.checkValue("foo:bar","http://www.w3.org/2001/XMLSchema#NMTOKENS"));
+    succeeds(validator.checkValue("foo:bar-baz.123","http://www.w3.org/2001/XMLSchema#NMTOKENS"));
+    succeeds(validator.checkValue("foo:bar:baz","http://www.w3.org/2001/XMLSchema#NMTOKENS"));
+    succeeds(validator.checkValue("foo:","http://www.w3.org/2001/XMLSchema#NMTOKENS"));
+    succeeds(validator.checkValue(":bar","http://www.w3.org/2001/XMLSchema#NMTOKENS"));
+    succeeds(validator.checkValue("123-foo","http://www.w3.org/2001/XMLSchema#NMTOKENS"));
+    succeeds(validator.checkValue("foo bar","http://www.w3.org/2001/XMLSchema#NMTOKENS"));
+    fails(validator.checkValue("foo ","http://www.w3.org/2001/XMLSchema#NMTOKENS"));
+    fails(validator.checkValue(" bar","http://www.w3.org/2001/XMLSchema#NMTOKENS"));
+    fails(validator.checkValue("","http://www.w3.org/2001/XMLSchema#NMTOKENS"));
+    fails(validator.checkValue(" ","http://www.w3.org/2001/XMLSchema#NMTOKENS"));
+  });
+
+  test("Name",function() {
+    succeeds(validator.checkValue("foo","http://www.w3.org/2001/XMLSchema#Name"));
+    succeeds(validator.checkValue("foo-bar.123","http://www.w3.org/2001/XMLSchema#Name"));
+    succeeds(validator.checkValue("foo:bar","http://www.w3.org/2001/XMLSchema#Name"));
+    succeeds(validator.checkValue("foo:bar-baz.123","http://www.w3.org/2001/XMLSchema#Name"));
+    succeeds(validator.checkValue("foo:bar:baz","http://www.w3.org/2001/XMLSchema#Name"));
+    succeeds(validator.checkValue("foo:","http://www.w3.org/2001/XMLSchema#Name"));
+    succeeds(validator.checkValue(":bar","http://www.w3.org/2001/XMLSchema#Name"));
+    fails(validator.checkValue("123-foo","http://www.w3.org/2001/XMLSchema#Name"));
+    fails(validator.checkValue("foo bar","http://www.w3.org/2001/XMLSchema#Name"));
+    fails(validator.checkValue("foo ","http://www.w3.org/2001/XMLSchema#Name"));
+    fails(validator.checkValue(" bar","http://www.w3.org/2001/XMLSchema#Name"));
+    fails(validator.checkValue("","http://www.w3.org/2001/XMLSchema#Name"));
+    fails(validator.checkValue(" ","http://www.w3.org/2001/XMLSchema#Name"));
+  });
+
+  test("NCName",function() {
+    succeeds(validator.checkValue("foo","http://www.w3.org/2001/XMLSchema#NCName"));
+    succeeds(validator.checkValue("foo-bar.123","http://www.w3.org/2001/XMLSchema#NCName"));
+    fails(validator.checkValue("foo:bar","http://www.w3.org/2001/XMLSchema#NCName"));
+    fails(validator.checkValue("123-foo","http://www.w3.org/2001/XMLSchema#NCName"));
+    fails(validator.checkValue("foo bar","http://www.w3.org/2001/XMLSchema#NCName"));
+    fails(validator.checkValue("foo ","http://www.w3.org/2001/XMLSchema#NCName"));
+    fails(validator.checkValue(" bar","http://www.w3.org/2001/XMLSchema#NCName"));
+    fails(validator.checkValue("","http://www.w3.org/2001/XMLSchema#NCName"));
+    fails(validator.checkValue(" ","http://www.w3.org/2001/XMLSchema#NCName"));
+  });
+
+  test("ID",function() {
+    succeeds(validator.checkValue("foo","http://www.w3.org/2001/XMLSchema#ID"));
+    succeeds(validator.checkValue("foo-bar.123","http://www.w3.org/2001/XMLSchema#ID"));
+    fails(validator.checkValue("foo:bar","http://www.w3.org/2001/XMLSchema#ID"));
+    fails(validator.checkValue("123-foo","http://www.w3.org/2001/XMLSchema#ID"));
+    fails(validator.checkValue("foo bar","http://www.w3.org/2001/XMLSchema#ID"));
+    fails(validator.checkValue("foo ","http://www.w3.org/2001/XMLSchema#ID"));
+    fails(validator.checkValue(" bar","http://www.w3.org/2001/XMLSchema#ID"));
+    fails(validator.checkValue("","http://www.w3.org/2001/XMLSchema#ID"));
+    fails(validator.checkValue(" ","http://www.w3.org/2001/XMLSchema#ID"));
+  });
+
+  test("IDREF",function() {
+    succeeds(validator.checkValue("foo","http://www.w3.org/2001/XMLSchema#IDREF"));
+    succeeds(validator.checkValue("foo-bar.123","http://www.w3.org/2001/XMLSchema#IDREF"));
+    fails(validator.checkValue("foo:bar","http://www.w3.org/2001/XMLSchema#IDREF"));
+    fails(validator.checkValue("123-foo","http://www.w3.org/2001/XMLSchema#IDREF"));
+    fails(validator.checkValue("foo bar","http://www.w3.org/2001/XMLSchema#IDREF"));
+    fails(validator.checkValue("foo ","http://www.w3.org/2001/XMLSchema#IDREF"));
+    fails(validator.checkValue(" bar","http://www.w3.org/2001/XMLSchema#IDREF"));
+    fails(validator.checkValue("","http://www.w3.org/2001/XMLSchema#IDREF"));
+    fails(validator.checkValue(" ","http://www.w3.org/2001/XMLSchema#IDREF"));
+  });
+
+  test("ENTITY",function() {
+    succeeds(validator.checkValue("foo","http://www.w3.org/2001/XMLSchema#ENTITY"));
+    succeeds(validator.checkValue("foo-bar.123","http://www.w3.org/2001/XMLSchema#ENTITY"));
+    fails(validator.checkValue("foo:bar","http://www.w3.org/2001/XMLSchema#ENTITY"));
+    fails(validator.checkValue("123-foo","http://www.w3.org/2001/XMLSchema#ENTITY"));
+    fails(validator.checkValue("foo bar","http://www.w3.org/2001/XMLSchema#ENTITY"));
+    fails(validator.checkValue("foo ","http://www.w3.org/2001/XMLSchema#ENTITY"));
+    fails(validator.checkValue(" bar","http://www.w3.org/2001/XMLSchema#ENTITY"));
+    fails(validator.checkValue("","http://www.w3.org/2001/XMLSchema#ENTITY"));
+    fails(validator.checkValue(" ","http://www.w3.org/2001/XMLSchema#ENTITY"));
+  });
+
+  test("IDREFS",function() {
+    succeeds(validator.checkValue("foo","http://www.w3.org/2001/XMLSchema#IDREFS"));
+    succeeds(validator.checkValue("foo-bar.123","http://www.w3.org/2001/XMLSchema#IDREFS"));
+    succeeds(validator.checkValue("foo bar","http://www.w3.org/2001/XMLSchema#IDREFS"));
+    fails(validator.checkValue("foo:bar","http://www.w3.org/2001/XMLSchema#IDREFS"));
+    fails(validator.checkValue("123-foo","http://www.w3.org/2001/XMLSchema#IDREFS"));
+    fails(validator.checkValue("foo ","http://www.w3.org/2001/XMLSchema#IDREFS"));
+    fails(validator.checkValue(" bar","http://www.w3.org/2001/XMLSchema#IDREFS"));
+    fails(validator.checkValue("","http://www.w3.org/2001/XMLSchema#IDREFS"));
+    fails(validator.checkValue(" ","http://www.w3.org/2001/XMLSchema#IDREFS"));
+  });
+
+  test("ENTITIES",function() {
+    succeeds(validator.checkValue("foo","http://www.w3.org/2001/XMLSchema#ENTITIES"));
+    succeeds(validator.checkValue("foo-bar.123","http://www.w3.org/2001/XMLSchema#ENTITIES"));
+    succeeds(validator.checkValue("foo bar","http://www.w3.org/2001/XMLSchema#ENTITIES"));
+    fails(validator.checkValue("foo:bar","http://www.w3.org/2001/XMLSchema#ENTITIES"));
+    fails(validator.checkValue("123-foo","http://www.w3.org/2001/XMLSchema#ENTITIES"));
+    fails(validator.checkValue("foo ","http://www.w3.org/2001/XMLSchema#ENTITIES"));
+    fails(validator.checkValue(" bar","http://www.w3.org/2001/XMLSchema#ENTITIES"));
+    fails(validator.checkValue("","http://www.w3.org/2001/XMLSchema#ENTITIES"));
+    fails(validator.checkValue(" ","http://www.w3.org/2001/XMLSchema#ENTITIES"));
+  });
+
+  test("Integer",function() {
+    succeeds(validator.checkValue("0","http://www.w3.org/2001/XMLSchema#integer"));
+    succeeds(validator.checkValue("1","http://www.w3.org/2001/XMLSchema#integer"));
+    succeeds(validator.checkValue("-1","http://www.w3.org/2001/XMLSchema#integer"));
+    succeeds(validator.checkValue("2","http://www.w3.org/2001/XMLSchema#integer"));
+    succeeds(validator.checkValue("0123","http://www.w3.org/2001/XMLSchema#integer"));
+    succeeds(validator.checkValue("0129","http://www.w3.org/2001/XMLSchema#integer"));
+    fails(validator.checkValue("123.0","http://www.w3.org/2001/XMLSchema#integer"));
+    fails(validator.checkValue("123.5","http://www.w3.org/2001/XMLSchema#integer"));
+    fails(validator.checkValue("true","http://www.w3.org/2001/XMLSchema#integer"));
+    fails(validator.checkValue("false","http://www.w3.org/2001/XMLSchema#integer"));
+    fails(validator.checkValue("","http://www.w3.org/2001/XMLSchema#integer"));
+    fails(validator.checkValue("0x123","http://www.w3.org/2001/XMLSchema#integer"));
+    fails(validator.checkValue("123a","http://www.w3.org/2001/XMLSchema#integer"));
+    fails(validator.checkValue("NaN","http://www.w3.org/2001/XMLSchema#integer"));
+    fails(validator.checkValue("INF","http://www.w3.org/2001/XMLSchema#integer"));
+    fails(validator.checkValue("1E2","http://www.w3.org/2001/XMLSchema#integer"));
+    fails(validator.checkValue("+1E2","http://www.w3.org/2001/XMLSchema#integer"));
+    fails(validator.checkValue("-1E2","http://www.w3.org/2001/XMLSchema#integer"));
+    fails(validator.checkValue("1.2E34","http://www.w3.org/2001/XMLSchema#integer"));
+    fails(validator.checkValue("1E2.3","http://www.w3.org/2001/XMLSchema#integer"));
+  });
+
+  test("Long",function() {
+    succeeds(validator.checkValue("0","http://www.w3.org/2001/XMLSchema#long"));
+    succeeds(validator.checkValue("1","http://www.w3.org/2001/XMLSchema#long"));
+    succeeds(validator.checkValue("-1","http://www.w3.org/2001/XMLSchema#long"));
+    succeeds(validator.checkValue("2","http://www.w3.org/2001/XMLSchema#long"));
+    succeeds(validator.checkValue("0123","http://www.w3.org/2001/XMLSchema#long"));
+    succeeds(validator.checkValue("0129","http://www.w3.org/2001/XMLSchema#long"));
+    fails(validator.checkValue("123.0","http://www.w3.org/2001/XMLSchema#long"));
+    fails(validator.checkValue("123.5","http://www.w3.org/2001/XMLSchema#long"));
+    fails(validator.checkValue("true","http://www.w3.org/2001/XMLSchema#long"));
+    fails(validator.checkValue("false","http://www.w3.org/2001/XMLSchema#long"));
+    fails(validator.checkValue("","http://www.w3.org/2001/XMLSchema#long"));
+    fails(validator.checkValue("0x123","http://www.w3.org/2001/XMLSchema#long"));
+    fails(validator.checkValue("123a","http://www.w3.org/2001/XMLSchema#long"));
+    fails(validator.checkValue("NaN","http://www.w3.org/2001/XMLSchema#long"));
+    fails(validator.checkValue("INF","http://www.w3.org/2001/XMLSchema#long"));
+    fails(validator.checkValue("1E2","http://www.w3.org/2001/XMLSchema#long"));
+    fails(validator.checkValue("+1E2","http://www.w3.org/2001/XMLSchema#long"));
+    fails(validator.checkValue("-1E2","http://www.w3.org/2001/XMLSchema#long"));
+    fails(validator.checkValue("1.2E34","http://www.w3.org/2001/XMLSchema#long"));
+    fails(validator.checkValue("1E2.3","http://www.w3.org/2001/XMLSchema#long"));
+  });
+
+  test("Int",function() {
+    succeeds(validator.checkValue("0","http://www.w3.org/2001/XMLSchema#int"));
+    succeeds(validator.checkValue("1","http://www.w3.org/2001/XMLSchema#int"));
+    succeeds(validator.checkValue("-1","http://www.w3.org/2001/XMLSchema#int"));
+    succeeds(validator.checkValue("2","http://www.w3.org/2001/XMLSchema#int"));
+    succeeds(validator.checkValue("0123","http://www.w3.org/2001/XMLSchema#int"));
+    succeeds(validator.checkValue("0129","http://www.w3.org/2001/XMLSchema#int"));
+    fails(validator.checkValue("123.0","http://www.w3.org/2001/XMLSchema#int"));
+    fails(validator.checkValue("123.5","http://www.w3.org/2001/XMLSchema#int"));
+    fails(validator.checkValue("true","http://www.w3.org/2001/XMLSchema#int"));
+    fails(validator.checkValue("false","http://www.w3.org/2001/XMLSchema#int"));
+    fails(validator.checkValue("","http://www.w3.org/2001/XMLSchema#int"));
+    fails(validator.checkValue("0x123","http://www.w3.org/2001/XMLSchema#int"));
+    fails(validator.checkValue("123a","http://www.w3.org/2001/XMLSchema#int"));
+    fails(validator.checkValue("NaN","http://www.w3.org/2001/XMLSchema#int"));
+    fails(validator.checkValue("INF","http://www.w3.org/2001/XMLSchema#int"));
+    fails(validator.checkValue("1E2","http://www.w3.org/2001/XMLSchema#int"));
+    fails(validator.checkValue("+1E2","http://www.w3.org/2001/XMLSchema#int"));
+    fails(validator.checkValue("-1E2","http://www.w3.org/2001/XMLSchema#int"));
+    fails(validator.checkValue("1.2E34","http://www.w3.org/2001/XMLSchema#int"));
+    fails(validator.checkValue("1E2.3","http://www.w3.org/2001/XMLSchema#int"));
+  });
+
+  test("Short",function() {
+    succeeds(validator.checkValue("0","http://www.w3.org/2001/XMLSchema#short"));
+    succeeds(validator.checkValue("1","http://www.w3.org/2001/XMLSchema#short"));
+    succeeds(validator.checkValue("-1","http://www.w3.org/2001/XMLSchema#short"));
+    succeeds(validator.checkValue("2","http://www.w3.org/2001/XMLSchema#short"));
+    succeeds(validator.checkValue("0123","http://www.w3.org/2001/XMLSchema#short"));
+    succeeds(validator.checkValue("0129","http://www.w3.org/2001/XMLSchema#short"));
+    fails(validator.checkValue("123.0","http://www.w3.org/2001/XMLSchema#short"));
+    fails(validator.checkValue("123.5","http://www.w3.org/2001/XMLSchema#short"));
+    fails(validator.checkValue("true","http://www.w3.org/2001/XMLSchema#short"));
+    fails(validator.checkValue("false","http://www.w3.org/2001/XMLSchema#short"));
+    fails(validator.checkValue("","http://www.w3.org/2001/XMLSchema#short"));
+    fails(validator.checkValue("0x123","http://www.w3.org/2001/XMLSchema#short"));
+    fails(validator.checkValue("123a","http://www.w3.org/2001/XMLSchema#short"));
+    fails(validator.checkValue("NaN","http://www.w3.org/2001/XMLSchema#short"));
+    fails(validator.checkValue("INF","http://www.w3.org/2001/XMLSchema#short"));
+    fails(validator.checkValue("1E2","http://www.w3.org/2001/XMLSchema#short"));
+    fails(validator.checkValue("+1E2","http://www.w3.org/2001/XMLSchema#short"));
+    fails(validator.checkValue("-1E2","http://www.w3.org/2001/XMLSchema#short"));
+    fails(validator.checkValue("1.2E34","http://www.w3.org/2001/XMLSchema#short"));
+    fails(validator.checkValue("1E2.3","http://www.w3.org/2001/XMLSchema#short"));
+  });
+
+  test("Byte",function() {
+    succeeds(validator.checkValue("0","http://www.w3.org/2001/XMLSchema#byte"));
+    succeeds(validator.checkValue("1","http://www.w3.org/2001/XMLSchema#byte"));
+    succeeds(validator.checkValue("-1","http://www.w3.org/2001/XMLSchema#byte"));
+    succeeds(validator.checkValue("2","http://www.w3.org/2001/XMLSchema#byte"));
+    succeeds(validator.checkValue("0123","http://www.w3.org/2001/XMLSchema#byte"));
+    succeeds(validator.checkValue("0129","http://www.w3.org/2001/XMLSchema#byte"));
+    fails(validator.checkValue("123.0","http://www.w3.org/2001/XMLSchema#byte"));
+    fails(validator.checkValue("123.5","http://www.w3.org/2001/XMLSchema#byte"));
+    fails(validator.checkValue("true","http://www.w3.org/2001/XMLSchema#byte"));
+    fails(validator.checkValue("false","http://www.w3.org/2001/XMLSchema#byte"));
+    fails(validator.checkValue("","http://www.w3.org/2001/XMLSchema#byte"));
+    fails(validator.checkValue("0x123","http://www.w3.org/2001/XMLSchema#byte"));
+    fails(validator.checkValue("123a","http://www.w3.org/2001/XMLSchema#byte"));
+    fails(validator.checkValue("NaN","http://www.w3.org/2001/XMLSchema#byte"));
+    fails(validator.checkValue("INF","http://www.w3.org/2001/XMLSchema#byte"));
+    fails(validator.checkValue("1E2","http://www.w3.org/2001/XMLSchema#byte"));
+    fails(validator.checkValue("+1E2","http://www.w3.org/2001/XMLSchema#byte"));
+    fails(validator.checkValue("-1E2","http://www.w3.org/2001/XMLSchema#byte"));
+    fails(validator.checkValue("1.2E34","http://www.w3.org/2001/XMLSchema#byte"));
+    fails(validator.checkValue("1E2.3","http://www.w3.org/2001/XMLSchema#byte"));
+  });
+
+  test("NonNegativeInteger",function() {
+    succeeds(validator.checkValue("0","http://www.w3.org/2001/XMLSchema#nonNegativeInteger"));
+    succeeds(validator.checkValue("1","http://www.w3.org/2001/XMLSchema#nonNegativeInteger"));
+    succeeds(validator.checkValue("2","http://www.w3.org/2001/XMLSchema#nonNegativeInteger"));
+    succeeds(validator.checkValue("0123","http://www.w3.org/2001/XMLSchema#nonNegativeInteger"));
+    succeeds(validator.checkValue("0129","http://www.w3.org/2001/XMLSchema#nonNegativeInteger"));
+    fails(validator.checkValue("-1","http://www.w3.org/2001/XMLSchema#nonNegativeInteger"));
+    fails(validator.checkValue("123.0","http://www.w3.org/2001/XMLSchema#nonNegativeInteger"));
+    fails(validator.checkValue("123.5","http://www.w3.org/2001/XMLSchema#nonNegativeInteger"));
+    fails(validator.checkValue("true","http://www.w3.org/2001/XMLSchema#nonNegativeInteger"));
+    fails(validator.checkValue("false","http://www.w3.org/2001/XMLSchema#nonNegativeInteger"));
+    fails(validator.checkValue("","http://www.w3.org/2001/XMLSchema#nonNegativeInteger"));
+    fails(validator.checkValue("0x123","http://www.w3.org/2001/XMLSchema#nonNegativeInteger"));
+    fails(validator.checkValue("123a","http://www.w3.org/2001/XMLSchema#nonNegativeInteger"));
+    fails(validator.checkValue("NaN","http://www.w3.org/2001/XMLSchema#nonNegativeInteger"));
+    fails(validator.checkValue("INF","http://www.w3.org/2001/XMLSchema#nonNegativeInteger"));
+    fails(validator.checkValue("1E2","http://www.w3.org/2001/XMLSchema#nonNegativeInteger"));
+    fails(validator.checkValue("+1E2","http://www.w3.org/2001/XMLSchema#nonNegativeInteger"));
+    fails(validator.checkValue("-1E2","http://www.w3.org/2001/XMLSchema#nonNegativeInteger"));
+    fails(validator.checkValue("1.2E34","http://www.w3.org/2001/XMLSchema#nonNegativeInteger"));
+    fails(validator.checkValue("1E2.3","http://www.w3.org/2001/XMLSchema#nonNegativeInteger"));
+  });
+
+  test("UnsignedLong",function() {
+    succeeds(validator.checkValue("0","http://www.w3.org/2001/XMLSchema#unsignedLong"));
+    succeeds(validator.checkValue("1","http://www.w3.org/2001/XMLSchema#unsignedLong"));
+    succeeds(validator.checkValue("2","http://www.w3.org/2001/XMLSchema#unsignedLong"));
+    succeeds(validator.checkValue("0123","http://www.w3.org/2001/XMLSchema#unsignedLong"));
+    succeeds(validator.checkValue("0129","http://www.w3.org/2001/XMLSchema#unsignedLong"));
+    fails(validator.checkValue("-1","http://www.w3.org/2001/XMLSchema#unsignedLong"));
+    fails(validator.checkValue("123.0","http://www.w3.org/2001/XMLSchema#unsignedLong"));
+    fails(validator.checkValue("123.5","http://www.w3.org/2001/XMLSchema#unsignedLong"));
+    fails(validator.checkValue("true","http://www.w3.org/2001/XMLSchema#unsignedLong"));
+    fails(validator.checkValue("false","http://www.w3.org/2001/XMLSchema#unsignedLong"));
+    fails(validator.checkValue("","http://www.w3.org/2001/XMLSchema#unsignedLong"));
+    fails(validator.checkValue("0x123","http://www.w3.org/2001/XMLSchema#unsignedLong"));
+    fails(validator.checkValue("123a","http://www.w3.org/2001/XMLSchema#unsignedLong"));
+    fails(validator.checkValue("NaN","http://www.w3.org/2001/XMLSchema#unsignedLong"));
+    fails(validator.checkValue("INF","http://www.w3.org/2001/XMLSchema#unsignedLong"));
+    fails(validator.checkValue("1E2","http://www.w3.org/2001/XMLSchema#unsignedLong"));
+    fails(validator.checkValue("+1E2","http://www.w3.org/2001/XMLSchema#unsignedLong"));
+    fails(validator.checkValue("-1E2","http://www.w3.org/2001/XMLSchema#unsignedLong"));
+    fails(validator.checkValue("1.2E34","http://www.w3.org/2001/XMLSchema#unsignedLong"));
+    fails(validator.checkValue("1E2.3","http://www.w3.org/2001/XMLSchema#unsignedLong"));
+  });
+
+  test("UnsignedInt",function() {
+    succeeds(validator.checkValue("0","http://www.w3.org/2001/XMLSchema#unsignedInt"));
+    succeeds(validator.checkValue("1","http://www.w3.org/2001/XMLSchema#unsignedInt"));
+    succeeds(validator.checkValue("2","http://www.w3.org/2001/XMLSchema#unsignedInt"));
+    succeeds(validator.checkValue("0123","http://www.w3.org/2001/XMLSchema#unsignedInt"));
+    succeeds(validator.checkValue("0129","http://www.w3.org/2001/XMLSchema#unsignedInt"));
+    fails(validator.checkValue("-1","http://www.w3.org/2001/XMLSchema#unsignedInt"));
+    fails(validator.checkValue("123.0","http://www.w3.org/2001/XMLSchema#unsignedInt"));
+    fails(validator.checkValue("123.5","http://www.w3.org/2001/XMLSchema#unsignedInt"));
+    fails(validator.checkValue("true","http://www.w3.org/2001/XMLSchema#unsignedInt"));
+    fails(validator.checkValue("false","http://www.w3.org/2001/XMLSchema#unsignedInt"));
+    fails(validator.checkValue("","http://www.w3.org/2001/XMLSchema#unsignedInt"));
+    fails(validator.checkValue("0x123","http://www.w3.org/2001/XMLSchema#unsignedInt"));
+    fails(validator.checkValue("123a","http://www.w3.org/2001/XMLSchema#unsignedInt"));
+    fails(validator.checkValue("NaN","http://www.w3.org/2001/XMLSchema#unsignedInt"));
+    fails(validator.checkValue("INF","http://www.w3.org/2001/XMLSchema#unsignedInt"));
+    fails(validator.checkValue("1E2","http://www.w3.org/2001/XMLSchema#unsignedInt"));
+    fails(validator.checkValue("+1E2","http://www.w3.org/2001/XMLSchema#unsignedInt"));
+    fails(validator.checkValue("-1E2","http://www.w3.org/2001/XMLSchema#unsignedInt"));
+    fails(validator.checkValue("1.2E34","http://www.w3.org/2001/XMLSchema#unsignedInt"));
+    fails(validator.checkValue("1E2.3","http://www.w3.org/2001/XMLSchema#unsignedInt"));
+  });
+
+  test("UnsignedShort",function() {
+    succeeds(validator.checkValue("0","http://www.w3.org/2001/XMLSchema#unsignedShort"));
+    succeeds(validator.checkValue("1","http://www.w3.org/2001/XMLSchema#unsignedShort"));
+    succeeds(validator.checkValue("2","http://www.w3.org/2001/XMLSchema#unsignedShort"));
+    succeeds(validator.checkValue("0123","http://www.w3.org/2001/XMLSchema#unsignedShort"));
+    succeeds(validator.checkValue("0129","http://www.w3.org/2001/XMLSchema#unsignedShort"));
+    fails(validator.checkValue("-1","http://www.w3.org/2001/XMLSchema#unsignedShort"));
+    fails(validator.checkValue("123.0","http://www.w3.org/2001/XMLSchema#unsignedShort"));
+    fails(validator.checkValue("123.5","http://www.w3.org/2001/XMLSchema#unsignedShort"));
+    fails(validator.checkValue("true","http://www.w3.org/2001/XMLSchema#unsignedShort"));
+    fails(validator.checkValue("false","http://www.w3.org/2001/XMLSchema#unsignedShort"));
+    fails(validator.checkValue("","http://www.w3.org/2001/XMLSchema#unsignedShort"));
+    fails(validator.checkValue("0x123","http://www.w3.org/2001/XMLSchema#unsignedShort"));
+    fails(validator.checkValue("123a","http://www.w3.org/2001/XMLSchema#unsignedShort"));
+    fails(validator.checkValue("NaN","http://www.w3.org/2001/XMLSchema#unsignedShort"));
+    fails(validator.checkValue("INF","http://www.w3.org/2001/XMLSchema#unsignedShort"));
+    fails(validator.checkValue("1E2","http://www.w3.org/2001/XMLSchema#unsignedShort"));
+    fails(validator.checkValue("+1E2","http://www.w3.org/2001/XMLSchema#unsignedShort"));
+    fails(validator.checkValue("-1E2","http://www.w3.org/2001/XMLSchema#unsignedShort"));
+    fails(validator.checkValue("1.2E34","http://www.w3.org/2001/XMLSchema#unsignedShort"));
+    fails(validator.checkValue("1E2.3","http://www.w3.org/2001/XMLSchema#unsignedShort"));
+  });
+
+  test("UnsignedByte",function() {
+    succeeds(validator.checkValue("0","http://www.w3.org/2001/XMLSchema#unsignedByte"));
+    succeeds(validator.checkValue("1","http://www.w3.org/2001/XMLSchema#unsignedByte"));
+    succeeds(validator.checkValue("2","http://www.w3.org/2001/XMLSchema#unsignedByte"));
+    succeeds(validator.checkValue("0123","http://www.w3.org/2001/XMLSchema#unsignedByte"));
+    succeeds(validator.checkValue("0129","http://www.w3.org/2001/XMLSchema#unsignedByte"));
+    fails(validator.checkValue("-1","http://www.w3.org/2001/XMLSchema#unsignedByte"));
+    fails(validator.checkValue("123.0","http://www.w3.org/2001/XMLSchema#unsignedByte"));
+    fails(validator.checkValue("123.5","http://www.w3.org/2001/XMLSchema#unsignedByte"));
+    fails(validator.checkValue("true","http://www.w3.org/2001/XMLSchema#unsignedByte"));
+    fails(validator.checkValue("false","http://www.w3.org/2001/XMLSchema#unsignedByte"));
+    fails(validator.checkValue("","http://www.w3.org/2001/XMLSchema#unsignedByte"));
+    fails(validator.checkValue("0x123","http://www.w3.org/2001/XMLSchema#unsignedByte"));
+    fails(validator.checkValue("123a","http://www.w3.org/2001/XMLSchema#unsignedByte"));
+    fails(validator.checkValue("NaN","http://www.w3.org/2001/XMLSchema#unsignedByte"));
+    fails(validator.checkValue("INF","http://www.w3.org/2001/XMLSchema#unsignedByte"));
+    fails(validator.checkValue("1E2","http://www.w3.org/2001/XMLSchema#unsignedByte"));
+    fails(validator.checkValue("+1E2","http://www.w3.org/2001/XMLSchema#unsignedByte"));
+    fails(validator.checkValue("-1E2","http://www.w3.org/2001/XMLSchema#unsignedByte"));
+    fails(validator.checkValue("1.2E34","http://www.w3.org/2001/XMLSchema#unsignedByte"));
+    fails(validator.checkValue("1E2.3","http://www.w3.org/2001/XMLSchema#unsignedByte"));
+  });
+
+  test("NonPositiveInteger",function() {
+    succeeds(validator.checkValue("0","http://www.w3.org/2001/XMLSchema#nonPositiveInteger"));
+    succeeds(validator.checkValue("-1","http://www.w3.org/2001/XMLSchema#nonPositiveInteger"));
+    succeeds(validator.checkValue("-2","http://www.w3.org/2001/XMLSchema#nonPositiveInteger"));
+    succeeds(validator.checkValue("-0123","http://www.w3.org/2001/XMLSchema#nonPositiveInteger"));
+    succeeds(validator.checkValue("-0129","http://www.w3.org/2001/XMLSchema#nonPositiveInteger"));
+    fails(validator.checkValue("1","http://www.w3.org/2001/XMLSchema#nonPositiveInteger"));
+    fails(validator.checkValue("-123.0","http://www.w3.org/2001/XMLSchema#nonPositiveInteger"));
+    fails(validator.checkValue("-123.5","http://www.w3.org/2001/XMLSchema#nonPositiveInteger"));
+    fails(validator.checkValue("-true","http://www.w3.org/2001/XMLSchema#nonPositiveInteger"));
+    fails(validator.checkValue("-false","http://www.w3.org/2001/XMLSchema#nonPositiveInteger"));
+    fails(validator.checkValue("-","http://www.w3.org/2001/XMLSchema#nonPositiveInteger"));
+    fails(validator.checkValue("-0x123","http://www.w3.org/2001/XMLSchema#nonPositiveInteger"));
+    fails(validator.checkValue("-123a","http://www.w3.org/2001/XMLSchema#nonPositiveInteger"));
+    fails(validator.checkValue("-NaN","http://www.w3.org/2001/XMLSchema#nonPositiveInteger"));
+    fails(validator.checkValue("-INF","http://www.w3.org/2001/XMLSchema#nonPositiveInteger"));
+    fails(validator.checkValue("-1E2","http://www.w3.org/2001/XMLSchema#nonPositiveInteger"));
+    fails(validator.checkValue("+1E2","http://www.w3.org/2001/XMLSchema#nonPositiveInteger"));
+    fails(validator.checkValue("-1E2","http://www.w3.org/2001/XMLSchema#nonPositiveInteger"));
+    fails(validator.checkValue("-1.2E34","http://www.w3.org/2001/XMLSchema#nonPositiveInteger"));
+    fails(validator.checkValue("-1E2.3","http://www.w3.org/2001/XMLSchema#nonPositiveInteger"));
+  });
+
+
+  test("PositiveInteger",function() {
+    succeeds(validator.checkValue("1","http://www.w3.org/2001/XMLSchema#positiveInteger"));
+    succeeds(validator.checkValue("2","http://www.w3.org/2001/XMLSchema#positiveInteger"));
+    succeeds(validator.checkValue("0123","http://www.w3.org/2001/XMLSchema#positiveInteger"));
+    succeeds(validator.checkValue("0129","http://www.w3.org/2001/XMLSchema#positiveInteger"));
+    fails(validator.checkValue("0","http://www.w3.org/2001/XMLSchema#positiveInteger"));
+    fails(validator.checkValue("-1","http://www.w3.org/2001/XMLSchema#positiveInteger"));
+    fails(validator.checkValue("123.0","http://www.w3.org/2001/XMLSchema#positiveInteger"));
+    fails(validator.checkValue("123.5","http://www.w3.org/2001/XMLSchema#positiveInteger"));
+    fails(validator.checkValue("true","http://www.w3.org/2001/XMLSchema#positiveInteger"));
+    fails(validator.checkValue("false","http://www.w3.org/2001/XMLSchema#positiveInteger"));
+    fails(validator.checkValue("","http://www.w3.org/2001/XMLSchema#positiveInteger"));
+    fails(validator.checkValue("0x123","http://www.w3.org/2001/XMLSchema#positiveInteger"));
+    fails(validator.checkValue("123a","http://www.w3.org/2001/XMLSchema#positiveInteger"));
+    fails(validator.checkValue("NaN","http://www.w3.org/2001/XMLSchema#positiveInteger"));
+    fails(validator.checkValue("INF","http://www.w3.org/2001/XMLSchema#positiveInteger"));
+    fails(validator.checkValue("1E2","http://www.w3.org/2001/XMLSchema#positiveInteger"));
+    fails(validator.checkValue("+1E2","http://www.w3.org/2001/XMLSchema#positiveInteger"));
+    fails(validator.checkValue("-1E2","http://www.w3.org/2001/XMLSchema#positiveInteger"));
+    fails(validator.checkValue("1.2E34","http://www.w3.org/2001/XMLSchema#positiveInteger"));
+    fails(validator.checkValue("1E2.3","http://www.w3.org/2001/XMLSchema#positiveInteger"));
+  });
+
+  test("NegativeInteger",function() {
+    succeeds(validator.checkValue("-1","http://www.w3.org/2001/XMLSchema#negativeInteger"));
+    succeeds(validator.checkValue("-2","http://www.w3.org/2001/XMLSchema#negativeInteger"));
+    succeeds(validator.checkValue("-0123","http://www.w3.org/2001/XMLSchema#negativeInteger"));
+    succeeds(validator.checkValue("-0129","http://www.w3.org/2001/XMLSchema#negativeInteger"));
+    fails(validator.checkValue("0","http://www.w3.org/2001/XMLSchema#negativeInteger"));
+    fails(validator.checkValue("1","http://www.w3.org/2001/XMLSchema#negativeInteger"));
+    fails(validator.checkValue("-123.0","http://www.w3.org/2001/XMLSchema#negativeInteger"));
+    fails(validator.checkValue("-123.5","http://www.w3.org/2001/XMLSchema#negativeInteger"));
+    fails(validator.checkValue("-true","http://www.w3.org/2001/XMLSchema#negativeInteger"));
+    fails(validator.checkValue("-false","http://www.w3.org/2001/XMLSchema#negativeInteger"));
+    fails(validator.checkValue("-","http://www.w3.org/2001/XMLSchema#negativeInteger"));
+    fails(validator.checkValue("-0x123","http://www.w3.org/2001/XMLSchema#negativeInteger"));
+    fails(validator.checkValue("-123a","http://www.w3.org/2001/XMLSchema#negativeInteger"));
+    fails(validator.checkValue("-NaN","http://www.w3.org/2001/XMLSchema#negativeInteger"));
+    fails(validator.checkValue("-INF","http://www.w3.org/2001/XMLSchema#negativeInteger"));
+    fails(validator.checkValue("-1E2","http://www.w3.org/2001/XMLSchema#negativeInteger"));
+    fails(validator.checkValue("+1E2","http://www.w3.org/2001/XMLSchema#negativeInteger"));
+    fails(validator.checkValue("-1E2","http://www.w3.org/2001/XMLSchema#negativeInteger"));
+    fails(validator.checkValue("-1.2E34","http://www.w3.org/2001/XMLSchema#negativeInteger"));
+    fails(validator.checkValue("-1E2.3","http://www.w3.org/2001/XMLSchema#negativeInteger"));
+  });
+
 });
