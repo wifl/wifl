@@ -30,6 +30,7 @@
   <property name="jslib" location="${lib}/js"/>
   <property name="requirejs" location="${jslib}/requirejs"/>
   <property name="jqueryui" location="${jslib}/jquery-ui"/>
+  <property name="rdfa" location="${jslib}/rdfa"/>
   <property name="qunit" location="${jslib}/qunit"/>
   <property name="jsonschema" location="${jslib}/json-schema"/>
   <property name="xmljs" location="${jslib}/xml-js"/>
@@ -247,6 +248,7 @@
     <copy todir="${dist}/js">
       <fileset file="${requirejs}/require.js"/>
       <fileset file="${requirejs}/require-jquery.js"/>
+      <fileset file="${rdfa}/rdfa.js"/>
       <fileset file="${jqueryui}/jquery-ui.js"/>
       <fileset file="${jsonschema}/json-schema-validate.js"/>
       <fileset file="${xmljs}/xmllint.js"/>
@@ -264,6 +266,7 @@
     <copy todir="${site}/js">
       <fileset file="${requirejs}/require.js"/>
       <fileset file="${requirejs}/require-jquery.js"/>
+      <fileset file="${rdfa}/rdfa.js"/>
       <fileset file="${jqueryui}/jquery-ui.js"/>
       <fileset file="${jsonschema}/json-schema-validate.js"/>
       <fileset file="${xmljs}/xmllint.js"/>
