@@ -258,7 +258,7 @@ define(["deferred","deferred-worker"],function(deferred,deferredWorker) {
 
   addValidator({ 
     type: "http://www.w3.org/2001/XMLSchema#hexBinary",
-    values: /^[0-9a-fA-F]*$/
+    values: /^([0-9a-fA-F][0-9a-fA-F])*$/
   });
 
   addValidator({ 

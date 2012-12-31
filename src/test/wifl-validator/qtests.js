@@ -475,4 +475,40 @@ define(["qunit","validator"],function(qunit,validator) {
     fails(validator.checkValue("--12-12T12:12:12","http://www.w3.org/2001/XMLSchema#gMonthDay"));
   });
 
+  test("GMonth",function() {
+    succeeds(validator.checkValue("--12","http://www.w3.org/2001/XMLSchema#gMonth"));
+    succeeds(validator.checkValue("--12Z","http://www.w3.org/2001/XMLSchema#gMonth"));
+    succeeds(validator.checkValue("--12+12:00","http://www.w3.org/2001/XMLSchema#gMonth"));
+    succeeds(validator.checkValue("--12-12:00","http://www.w3.org/2001/XMLSchema#gMonth"));
+    fails(validator.checkValue("12","http://www.w3.org/2001/XMLSchema#gMonth"));
+    fails(validator.checkValue("-12","http://www.w3.org/2001/XMLSchema#gMonth"));
+    fails(validator.checkValue("--1","http://www.w3.org/2001/XMLSchema#gMonth"));
+    fails(validator.checkValue("--12+1:00","http://www.w3.org/2001/XMLSchema#gMonth"));
+    fails(validator.checkValue("--12+12:0","http://www.w3.org/2001/XMLSchema#gMonth"));
+    fails(validator.checkValue("--12T12:12:12","http://www.w3.org/2001/XMLSchema#gMonth"));
+  });
+
+  test("GDay",function() {
+    succeeds(validator.checkValue("---12","http://www.w3.org/2001/XMLSchema#gDay"));
+    succeeds(validator.checkValue("---12Z","http://www.w3.org/2001/XMLSchema#gDay"));
+    succeeds(validator.checkValue("---12+12:00","http://www.w3.org/2001/XMLSchema#gDay"));
+    succeeds(validator.checkValue("---12-12:00","http://www.w3.org/2001/XMLSchema#gDay"));
+    fails(validator.checkValue("12","http://www.w3.org/2001/XMLSchema#gDay"));
+    fails(validator.checkValue("-12","http://www.w3.org/2001/XMLSchema#gDay"));
+    fails(validator.checkValue("---1","http://www.w3.org/2001/XMLSchema#gDay"));
+    fails(validator.checkValue("---12+1:00","http://www.w3.org/2001/XMLSchema#gDay"));
+    fails(validator.checkValue("---12+12:0","http://www.w3.org/2001/XMLSchema#gDay"));
+    fails(validator.checkValue("---12T12:12:12","http://www.w3.org/2001/XMLSchema#gDay"));
+  });
+
+  test("HexBinary",function() {
+    succeeds(validator.checkValue("1234567890abcdefABCDEF","http://www.w3.org/2001/XMLSchema#hexBinary"));
+    succeeds(validator.checkValue("","http://www.w3.org/2001/XMLSchema#hexBinary"));
+    succeeds(validator.checkValue("00","http://www.w3.org/2001/XMLSchema#hexBinary"));
+    fails(validator.checkValue("0","http://www.w3.org/2001/XMLSchema#hexBinary"));
+    fails(validator.checkValue("01 23","http://www.w3.org/2001/XMLSchema#hexBinary"));
+    fails(validator.checkValue("-1234567890abcdefABCDEF","http://www.w3.org/2001/XMLSchema#hexBinary"));
+    fails(validator.checkValue("0x12","http://www.w3.org/2001/XMLSchema#hexBinary"));
+  });
+
 });
