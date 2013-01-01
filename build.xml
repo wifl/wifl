@@ -290,6 +290,7 @@
       <fileset dir="${src}/test/wifl"/>
       <fileset dir="${qunit}"/>
       <fileset dir="${requirejs}"/>
+      <fileset dir="${rdfa}"/>
       <fileset dir="${src}/main/js"/>
     </copy>
   </target>
@@ -300,6 +301,9 @@
       <fileset dir="${src}/test/wifl-validator"/>
       <fileset dir="${qunit}"/>
       <fileset dir="${requirejs}"/>
+      <fileset dir="${rdfa}"/>
+      <fileset dir="${jsonschema}"/>
+      <fileset dir="${xmljs}"/>
       <fileset dir="${src}/main/js"/>
     </copy>
   </target>
