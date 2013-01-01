@@ -57,11 +57,16 @@ define(["deferred","deferred-worker"],function(deferred,deferredWorker) {
   }
 
   function checkRequest(message,request) {
-    return all(
-      checkParams(message.headers,request.headerParams),
-      checkParams(request.uriTemplate.parse(message.uri),request.uriParams),
-      checkRepr(message.body,message.headers["Content-Type"],request.representations)
-    );
+    var uriParams = request.uriTemplate.parse(message.uri);
+    if (uriParams) {
+      return all(
+        checkParams(message.headers,request.headerParams),
+        checkParams(uriParams,request.uriParams),
+        checkRepr(message.body,message.headers["Content-Type"],request.representations)
+      );
+    } else {
+      return failure("Failed to match " + message.uri + " against " + request.uriTemplate);
+    }
   }
 
   function checkResponse(message,responses) {
