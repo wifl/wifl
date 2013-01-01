@@ -58,14 +58,16 @@ define(["deferred","deferred-worker"],function(deferred,deferredWorker) {
 
   function checkRequest(message,request) {
     var uriParams = request.uriTemplate.parse(message.uri);
-    if (uriParams) {
+    if (message.method !== request.method) {
+      return failure("Method " + message.method + " should be " + request.method);
+    } else if (!uriParams) {
+      return failure("Failed to match " + message.uri + " against " + request.uriTemplate);
+    } else {
       return all(
         checkParams(message.headers,request.headerParams),
         checkParams(uriParams,request.uriParams),
         checkRepr(message.body,message.headers["Content-Type"],request.representations)
       );
-    } else {
-      return failure("Failed to match " + message.uri + " against " + request.uriTemplate);
     }
   }
 
