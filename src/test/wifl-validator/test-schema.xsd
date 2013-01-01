@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+<xsd:element id="dog" name="dog">
+  <xsd:complexType>
+    <xsd:sequence>
+      <xsd:element id="name" name="name" type="xsd:string"/>
+      <xsd:element id="age" name="age" type="xsd:nonNegativeInteger" minOccurs="0"/>
+    </xsd:sequence>
+  </xsd:complexType>
+</xsd:element>
+
+</xsd:schema>

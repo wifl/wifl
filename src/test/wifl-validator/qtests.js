@@ -1,4 +1,4 @@
-define(["qunit","validator"],function(qunit,validator) {
+define(["qunit","uri-template2","validator"],function(qunit,urit,validator) {
 
   function resolve(uri) {
     var node = document.createElement("a");
@@ -8,7 +8,14 @@ define(["qunit","validator"],function(qunit,validator) {
 
   function under(path,request) {
     var result =jQuery.extend({},request);
-    result.path = path + request.path;
+    var template = path + request.path;
+    result.path = template;
+    if (request.queryParams.length) {
+      function name(param) { return param.name; }
+      var names = request.queryParams.map(name).sort();
+      template = template + "{?" + names.join(",") + "}";
+    }
+    result.uriTemplate = urit.parse(template);
     if (arguments.length > 2) {
       var pathParams = Array.prototype.slice.call(arguments,2);
       result.pathParams = request.pathParams.concat(pathParams);
@@ -22,7 +29,7 @@ define(["qunit","validator"],function(qunit,validator) {
     "descriptions": [],
     "fixed": undefined,
     "name": "apikey",
-    "required": undefined,
+    "required": true,
     "type": "http://www.w3.org/2001/XMLSchema#hexBinary"
   };
 
@@ -40,7 +47,7 @@ define(["qunit","validator"],function(qunit,validator) {
     "descriptions": [ "remarkably pointless" ],
     "fixed": undefined,
     "name": "foo",
-    "required": true,
+    "required": undefined,
     "type": undefined
   };
 
@@ -56,7 +63,13 @@ define(["qunit","validator"],function(qunit,validator) {
   var json = {
     "contentType": "application/json",
     "descriptions": [],
-    "type": resolve("test-schema.json")
+    "type": resolve("test-schema.json#/dog")
+  };
+
+  var xml = {
+    "contentType": "application/xml",
+    "descriptions": [],
+    "type": resolve("test-schema.xsd#dog")
   };
 
   var okay = {
@@ -1021,6 +1034,43 @@ define(["qunit","validator"],function(qunit,validator) {
     fails(validator.checkValue("-1E2","http://www.w3.org/2001/XMLSchema#negativeInteger"));
     fails(validator.checkValue("-1.2E34","http://www.w3.org/2001/XMLSchema#negativeInteger"));
     fails(validator.checkValue("-1E2.3","http://www.w3.org/2001/XMLSchema#negativeInteger"));
+  });
+
+  test("Unspecified representations",function() {
+    succeeds(validator.checkRepr(undefined,undefined,[]));
+    fails(validator.checkRepr('',undefined,[]));
+  });
+
+  test("JSON Representations",function() {
+    succeeds(validator.checkRepr('{ "name": "Fido" }','application/json',[json]));
+    succeeds(validator.checkRepr('{ "name": "Fido", "age": 5 }','application/json',[json]));
+    fails(validator.checkRepr('','application/json',[json]));
+    fails(validator.checkRepr('}{','application/json',[json]));
+    fails(validator.checkRepr('{}','application/json',[json]));
+    fails(validator.checkRepr('{ "name": 5 }','application/json',[json]));
+    fails(validator.checkRepr('{ name: "Fido" }','application/json',[json]));
+    fails(validator.checkRepr('{ "name": "Fido", "age": "5" }','application/json',[json]));
+    fails(validator.checkRepr('{ "name": "Fido", "age": -1 }','application/json',[json]));
+    fails(validator.checkRepr('{ "name": "Fido" }','application/json',[]));
+  });
+
+  test("XML Representations",function() {
+    succeeds(validator.checkRepr('<dog><name>Fido</name></dog>','application/xml',[xml]));
+    succeeds(validator.checkRepr('<dog><name>Fido</name><age>5</age></dog>','application/xml',[xml]));
+    fails(validator.checkRepr('','application/xml',[xml]));
+    fails(validator.checkRepr('><','application/xml',[xml]));
+    fails(validator.checkRepr('<dog/>','application/xml',[xml]));
+    fails(validator.checkRepr('<DOG><NAME>Fido</NAME></DOG>','application/xml',[xml]));
+    fails(validator.checkRepr('<dog><name>Fido</name><age>five</age></dog>','application/xml',[xml]));
+    fails(validator.checkRepr('<dog><name>Fido</name><age>-1</age></dog>','application/xml',[xml]));
+    fails(validator.checkRepr('<dog><name>Fido</name></dog>','application/xml',[]));
+  });
+
+  test("Examples",function() {
+    succeeds(validator.checkExample(getEx,dog.requests[2]));
+    succeeds(validator.checkExample(postEx,dogs.requests[0]));
+    fails(validator.checkExample(getEx,dog.requests[0]));
+    fails(validator.checkExample(getEx,dogs.requests[1]));
   });
 
 });
