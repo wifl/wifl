@@ -60,6 +60,12 @@ define(["qunit","uri-template2","validator"],function(qunit,urit,validator) {
     "type": "http://www.w3.org/2001/XMLSchema#anyURI"
   };
 
+  var anything = {
+    "contentType": "application/*",
+    "descriptions": [],
+    "type": undefined
+  };
+
   var json = {
     "contentType": "application/json",
     "descriptions": [],
@@ -1041,28 +1047,44 @@ define(["qunit","uri-template2","validator"],function(qunit,urit,validator) {
     fails(validator.checkRepr('',undefined,[]));
   });
 
+  test("Arbitrary Representations",function() {
+    succeeds(validator.checkRepr('abc','application/vnd.dog',[anything]));
+    succeeds(validator.checkRepr('<stuff/>','application/vnd.dog+xml',[anything]));
+    succeeds(validator.checkRepr('<stuff foo="1" bar="2"><fish/><fowl/></stuff>','application/vnd.dog+xml',[anything]));
+    succeeds(validator.checkRepr('{}','application/vnd.dog+json',[anything]));
+    fails(validator.checkRepr('abc','application/vnd.dog',[]));
+    fails(validator.checkRepr('abc','application/vnd.dog+xml',[anything]));
+    fails(validator.checkRepr('abc','application/vnd.dog+json',[anything]));
+  });
+
   test("JSON Representations",function() {
-    succeeds(validator.checkRepr('{ "name": "Fido" }','application/json',[json]));
-    succeeds(validator.checkRepr('{ "name": "Fido", "age": 5 }','application/json',[json]));
-    fails(validator.checkRepr('','application/json',[json]));
-    fails(validator.checkRepr('}{','application/json',[json]));
-    fails(validator.checkRepr('{}','application/json',[json]));
-    fails(validator.checkRepr('{ "name": 5 }','application/json',[json]));
-    fails(validator.checkRepr('{ name: "Fido" }','application/json',[json]));
-    fails(validator.checkRepr('{ "name": "Fido", "age": "5" }','application/json',[json]));
-    fails(validator.checkRepr('{ "name": "Fido", "age": -1 }','application/json',[json]));
+    succeeds(validator.checkRepr('{ "name": "Fido" }','application/json',[json,xml]));
+    succeeds(validator.checkRepr('{ "name": "Fido", "age": 5 }','application/json',[json,xml]));
+    succeeds(validator.checkRepr('{ "name": "Fido" }','application/vnd.dog+json',[json,xml]));
+    fails(validator.checkRepr('','application/json',[json,xml]));
+    fails(validator.checkRepr('}{','application/json',[json,xml]));
+    fails(validator.checkRepr('{}','application/json',[json,xml]));
+    fails(validator.checkRepr('{}','application/vnd.dog+json',[json,xml]));
+    fails(validator.checkRepr('{ "name": 5 }','application/json',[json,xml]));
+    fails(validator.checkRepr('{ name: "Fido" }','application/json',[json,xml]));
+    fails(validator.checkRepr('{ "name": "Fido", "age": "5" }','application/json',[json,xml]));
+    fails(validator.checkRepr('{ "name": "Fido", "age": -1 }','application/json',[json,xml]));
+    fails(validator.checkRepr('{ "name": "Fido" }','application/*',[json,xml]));
     fails(validator.checkRepr('{ "name": "Fido" }','application/json',[]));
   });
 
   test("XML Representations",function() {
-    succeeds(validator.checkRepr('<dog><name>Fido</name></dog>','application/xml',[xml]));
-    succeeds(validator.checkRepr('<dog><name>Fido</name><age>5</age></dog>','application/xml',[xml]));
-    fails(validator.checkRepr('','application/xml',[xml]));
-    fails(validator.checkRepr('><','application/xml',[xml]));
-    fails(validator.checkRepr('<dog/>','application/xml',[xml]));
-    fails(validator.checkRepr('<DOG><NAME>Fido</NAME></DOG>','application/xml',[xml]));
-    fails(validator.checkRepr('<dog><name>Fido</name><age>five</age></dog>','application/xml',[xml]));
-    fails(validator.checkRepr('<dog><name>Fido</name><age>-1</age></dog>','application/xml',[xml]));
+    succeeds(validator.checkRepr('<dog><name>Fido</name></dog>','application/xml',[json,xml]));
+    succeeds(validator.checkRepr('<dog><name>Fido</name><age>5</age></dog>','application/xml',[json,xml]));
+    succeeds(validator.checkRepr('<dog><name>Fido</name></dog>','application/vnd.dog+xml',[json,xml]));
+    fails(validator.checkRepr('','application/xml',[json,xml]));
+    fails(validator.checkRepr('><','application/xml',[json,xml]));
+    fails(validator.checkRepr('<dog/>','application/xml',[json,xml]));
+    fails(validator.checkRepr('<dog/>','application/vnd.dog+xml',[json,xml]));
+    fails(validator.checkRepr('<DOG><NAME>Fido</NAME></DOG>','application/xml',[json,xml]));
+    fails(validator.checkRepr('<dog><name>Fido</name><age>five</age></dog>','application/xml',[json,xml]));
+    fails(validator.checkRepr('<dog><name>Fido</name><age>-1</age></dog>','application/xml',[json,xml]));
+    fails(validator.checkRepr('<dog><name>Fido</name></dog>','application/*',[]));
     fails(validator.checkRepr('<dog><name>Fido</name></dog>','application/xml',[]));
   });
 
