@@ -102,7 +102,16 @@ define(["deferred","deferred-worker"],function(deferred,deferredWorker) {
 
   var reprValidators = [];
 
-  // TODO: Support subtyping (e.g. application/foo+xml <: application/xml <: application/*)
+  function isSubtype(subType,superType) {
+    if (subType === superType) { return true; }
+    // application/foo+xml is a subtype of application/xml
+    subType = subType.replace(/[/]\S+[+]/,"/");
+    if (subType === superType) { return true; }
+    // application/xml is a subtype of application/*
+    subType = subType.replace(/[/]\S+/,"/*");
+    return (subType === superType);
+  }
+
   function checkRepr(body,contentType,reprs) {
     if (body === undefined) {
       return success();
@@ -111,13 +120,13 @@ define(["deferred","deferred-worker"],function(deferred,deferredWorker) {
     } else {
       for (var i=0; i<reprs.length; i++) {
 	var repr = reprs[i];
-	if (repr.contentType === contentType) {
+	if (isSubtype(contentType,repr.contentType)) {
 	  return allMap(reprValidators,function(validator) {
 	    return validator.contentType(contentType).pipe(
               function() { return validator.values(body,repr.type); },
 	      function() { return success(); }
 	    );
-	  }).pipe(undefined,prepend("Reresentation is not of type ", contentType));
+	  }).pipe(undefined,prepend("Representation is not of type ", contentType));
 	}
       }
       return failure("Unrecongized content type " + contentType);
@@ -182,12 +191,12 @@ define(["deferred","deferred-worker"],function(deferred,deferredWorker) {
   });
 
   addValidator({
-    contentType: /^application\/(\S[+])?json\b/,
+    contentType: /^application\/(\S+[+])?json\b/,
     values: deferredWorker("validator-jsv")
   });
 
   addValidator({
-    contentType: /^(application|text)\/(\S[+])?xml\b/,
+    contentType: /^(application|text)\/(\S+[+])?xml\b/,
     values: deferredWorker("validator-xsd")
   });
 
