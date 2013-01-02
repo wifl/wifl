@@ -18,16 +18,38 @@ define(["validator","xmllint"],function(validator,validateXML) {
   }
 
   function rootElement(xml) {
-    var regex = /^([<][?].*[?][>]|[<][-][-].*[-][-][>]|\s)*[<](\w+[:])?(\w+)[ \r\n\t>]/;
+    var regex = /^([<][?].*[?][>]|[<][-][-].*[-][-][>]|\s)*[<](\w+[:])?(\w+)[ \r\n\t/>]/;
     var match = regex.exec(xml);
     if (match) { return match[3]; }
   }
 
+  // Sigh, this is a lot of work just to get a schema which only checks for well-formed XML.
+  // We're inside a web worker, so we can't just use the built in browser XML parser.
+  // xml.js requires a schema (you can't just use it for XML well-formedness checking).
+  function trivialSchema(xml) {
+    var name = rootElement(xml);
+    if (name) {
+      return validator.success('<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">' +
+          '<xsd:element name="' + name + '">' +
+            '<xsd:complexType>' +
+              '<xsd:sequence>' +
+                '<xsd:any minOccurs="0" maxOccurs="unbounded" processContents="lax"/>' +
+              '</xsd:sequence>' +
+              '<xsd:anyAttribute processContents="lax"/>' +
+            '</xsd:complexType>' +
+          '</xsd:element>' +
+        '</xsd:schema>');
+    } else {
+      return validator.failure("No root element in XML.");
+    }
+  }
+
   return function(xml,uri) {
-    var offset = uri.indexOf("#");
+    var offset = (uri? uri.indexOf("#"): -1);
     var base = (offset<0? uri: uri.substring(0,offset));
     var fragment = (offset<0? undefined: uri.substring(offset+1));
-    return validator.get(base).pipe(function(schema) {
+    var getSchema = (uri? validator.get(base): trivialSchema(xml));
+    return getSchema.pipe(function(schema) {
       if (fragment) {
 	// TODO: Handle namespacing properly
 	// TODO: Allow complex types, not just elements
@@ -45,7 +67,7 @@ define(["validator","xmllint"],function(validator,validateXML) {
       if (/\bvalidates\s*$/.test(result)) {
 	return validator.success();
       } else {
-	return validator.failure("<" + result + ">");
+	return validator.failure(result);
       }
     });
   };
