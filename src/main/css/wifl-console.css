@@ -21,6 +21,8 @@
     font-family: "Trebuchet MS", Tahoma, Verdana, Arial, sans-serif;
     font-style: normal;
     font-size: small;
+    color: black;
+    background-color: white;
 }
 
 .wifl-console-resizer {
