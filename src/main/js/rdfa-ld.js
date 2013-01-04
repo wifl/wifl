@@ -192,9 +192,8 @@ define(["rdfa","deferred"], function (rdfa,deferred) {
   var empty = new Documents();
 
   return {
-    create: function(doc) {
-      return empty.add(doc);
-    }
+    build: function(doc) { return empty.add(doc); },
+    get: function(uri) { return empty.resolve(uri); }
   };
 
 });

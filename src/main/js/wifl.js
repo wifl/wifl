@@ -277,26 +277,29 @@ define(["rdfa-ld","uri-template2"], function (rdfaLD,uriTemplate) {
 
   // To create a WIFL object we resolve wrt all the properties
   // which can refer from one WIFL object to another.
+  function wifl(docs) {
+    return docs.setMapping("wifl","http://wifl.org/spec/#").resolveTargets(
+      "wifl:parent",
+      "wifl:super",
+      "wifl:pathParam",
+      "wifl:queryParam",
+      "wifl:headerParam",
+      "wifl:exampleRequest",
+      "wifl:exampleResponse",
+      "wifl:resource",
+      "wifl:request",
+      "wifl:response",
+      "wifl:representation",
+      "wifl:seeAlso",
+      "rdfs:seeAlso"
+    ).pipe(function(docs) {
+      return new Wifl(docs).api();
+    });
+  }
+
   return {
-    build: function(doc) {
-      return rdfaLD.create(doc).setMapping("wifl","http://wifl.org/spec/#").resolveTargets(
-	"wifl:parent",
-	"wifl:super",
-	"wifl:pathParam",
-	"wifl:queryParam",
-	"wifl:headerParam",
-        "wifl:exampleRequest",
-        "wifl:exampleResponse",
-        "wifl:resource",
-	"wifl:request",
-	"wifl:response",
-	"wifl:representation",
-	"wifl:seeAlso",
-	"rdfs:seeAlso"
-      ).pipe(function(docs) {
-	return new Wifl(docs).api();
-      });
-    }
+    build: function(doc) { return wifl(rdfaLD.build(doc)); },
+    get: function(uri) { return rdfaLD.get(uri).pipe(wifl); }
   };
 
 });
