@@ -1,6 +1,7 @@
 # Ignore the target directories
 dist/
 site/
+node_modules/
 
 # Ignore emacs backup files
 *~
