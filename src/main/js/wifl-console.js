@@ -442,6 +442,21 @@ define(["jquery","jquery-ui","wifl","validator"],function($,jqueryUI,wifl,valida
       $copy.copyComputedCSS($body);
       $cons.resize();
     });
+    api.resources.forEach(function(resource) {
+      document.getElementsBySubject(resource.about).forEach(function (node) {
+        $(node).find(".wifl-console-show").click(function() {
+          $cons.find(".wifl-select-resource").val(resource.about).change();
+        });
+      });
+      resource.requests.forEach(function(request) {
+        document.getElementsBySubject(request.about).forEach(function (node) {
+          $(node).find(".wifl-console-show").click(function() {
+            $cons.find(".wifl-select-resource").val(resource.about).change();
+            $cons.find(".wifl-select-request").val(request.about).change();
+          });
+        });
+      });
+    });
     api.examples.forEach(function(example) {
       document.getElementsBySubject(example.about).forEach(function (node) {
         validateExample(example,api,$(node),$cons);
