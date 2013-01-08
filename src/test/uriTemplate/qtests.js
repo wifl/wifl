@@ -1,21 +1,15 @@
 define(["qunit", "uri-template", "json",
         "json!spec-examples.json", "json!spec-examples-by-section.json",
         "json!negative-tests.json", "json!extended-tests.json"],
-        function(qunit, uriTemplateProcessorGenerator, json, 
+        function(qunit, urit, json, 
             specExamples, specExamplesBySection, negativeTests, extendedTests) {
           requirejs.config({
             shim: {"qunit":[] }
           });
         
           function expand(template, env) {
-            var binding = {get: function(name) {
-              return env[name];
-            }}
-            try {
-              return uriTemplateProcessorGenerator.create(template).expand(binding);
-            } catch (e) {
-              return false;
-            }
+            var template = urit.parse(template);
+            return (template && template.expand(env)) || false
           }
         
           function isArray(obj) {
@@ -34,29 +28,28 @@ define(["qunit", "uri-template", "json",
             equal(actual, expected);
           }
         
+          function runTest(group) {
+            test(group.level, function() {
+              for (var i=0; i<group.testcases.length; i++) {
+                var template = group.testcases[i][0];
+                var expected = group.testcases[i][1];
+                check(expand(template, group.variables), expected);
+              }
+            });
+          }
+
           function runTests(obj) {
             for (var groupName in obj) {
-              var group = obj[groupName];
-              var env;
-              module(groupName, {
-                setup: function() {
-                  env = group.variables;
-                }
-              });
-              test(group.level, function() {
-                for (var i=0; i<group.testcases.length; i++) {
-                  var template = group.testcases[i][0];
-                  var expected = group.testcases[i][1];
-                  check(expand(template, env), expected);
-                }
-              });
+              module(groupName);
+              runTest(obj[groupName]);
             }
           }
+
           return {
             run: function() {
-              runTests(specExamples);
-              runTests(specExamplesBySection);
-              runTests(negativeTests);
+             runTests(specExamples);
+             runTests(specExamplesBySection);
+             runTests(negativeTests);
               runTests(extendedTests);
             }
           }

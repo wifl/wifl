@@ -1,4 +1,4 @@
-define(["rdfa-ld","uri-template2"], function (rdfaLD,uriTemplate) {
+define(["rdfa-ld","uri-template"], function (rdfaLD,uriTemplate) {
   
   // Extract WIFL from a collection of documents
   // Note that this will go into an infinite loop if

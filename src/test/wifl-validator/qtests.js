@@ -1,4 +1,4 @@
-define(["qunit","uri-template2","validator"],function(qunit,urit,validator) {
+define(["qunit","uri-template","validator"],function(qunit,urit,validator) {
 
   function resolve(uri) {
     var node = document.createElement("a");
