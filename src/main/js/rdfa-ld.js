@@ -148,6 +148,12 @@ define(["rdfa","deferred"], function (rdfa,deferred) {
       return doc.data.getSubjects(property,value);
     }));
   }
+  // Get all properties of a subject
+  Documents.prototype.getProperties = function(subject) {
+    return flatten(this.docs.map(function (doc) {
+      return doc.data.getProperties(subject);
+    }));
+  }
   // Get all values in a (subject,property,value) relation.
   Documents.prototype.getValues = function(subject,property) {
     return flatten(this.docs.map(function (doc) {
@@ -192,8 +198,8 @@ define(["rdfa","deferred"], function (rdfa,deferred) {
   var empty = new Documents();
 
   return {
-    build: function(doc) { return empty.add(doc); },
-    get: function(uri) { return empty.resolve(uri); }
+    build: function() { return empty.add.apply(empty,arguments); },
+    get: function() { return empty.resolve.apply(empty,arguments); }
   };
 
 });

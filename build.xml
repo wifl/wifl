@@ -34,6 +34,7 @@
   <property name="qunit" location="${jslib}/qunit"/>
   <property name="jsonschema" location="${jslib}/json-schema"/>
   <property name="xmljs" location="${jslib}/xml-js"/>
+  <property name="d3" location="${jslib}/d3"/>
 	
   <!-- XSpec properties -->
   <property name="xspec.properties" location="xspec.properties" /> 
@@ -43,7 +44,22 @@
   	else="${env.XSPEC_HOME}/bin/xspec.sh">
 		<os family="windows"/>
   </condition>
-	
+
+  <!-- Graphviz properties -->	
+  <condition property="graphviz.dot" value="${env.GRAPHVIZ_HOME}/bin/dot" else="dot">
+    <isset property="env.GRAPHVIZ_HOME" />
+  </condition>
+
+  <!-- Node properties -->
+  <property name="node.dependencies" value="jsdom requirejs xmlhttprequest" />
+  <property name="node.modules" value="node_modules" />
+  <condition property="node.program" value="${env.NODE_HOME}/bin/node" else="node">
+    <isset property="env.NODE_HOME" />
+  </condition>
+  <condition property="node.npm" value="${env.NPM_HOME}/bin/npm" else="npm">
+    <isset property="env.NPM_HOME" />
+  </condition>
+
   <!-- Target directories -->
   <property name="build" location="build"/>
   <property name="htmlbuild" value="${build}/html" />
@@ -69,7 +85,6 @@
   <target name="umlgraph-file"
     description="Create PNG representation of UMLGraph source file" >
     <fail unless="env.UMLGRAPH_HOME" message="Must set environment variable UMLGRAPH_HOME" />
-    <fail unless="env.GRAPHVIZ_HOME" message="Must set environment variable GRAPHVIZ_HOME" />
     <tempfile property="dotfile" destdir="${build}" suffix=".dot" deleteonexit="true" />
     <javadoc
       access="package"
@@ -79,7 +94,7 @@
         <param name="-output" value="${dotfile}" />
       </doclet>
     </javadoc>
-    <exec executable="${env.GRAPHVIZ_HOME}/bin/dot" >
+    <exec executable="${graphviz.dot}" >
       <arg value="-T" />
       <arg value="${outformat}" />
       <arg value="-o" />
@@ -91,7 +106,6 @@
   <target name="umlgraph-views"
     description="Create PNG representation of views in UMLGraph source file" >
     <fail unless="env.UMLGRAPH_HOME" message="Must set environment variable UMLGRAPH_HOME" />
-    <fail unless="env.GRAPHVIZ_HOME" message="Must set environment variable GRAPHVIZ_HOME" />
     <javadoc
       access="package"
       sourcefiles="${srcfile}"
@@ -101,7 +115,7 @@
         <param name="-views" />
       </doclet>
     </javadoc>
-    <apply executable="${env.GRAPHVIZ_HOME}/bin/dot" dest="${outdir}" parallel="false">
+    <apply executable="${graphviz.dot}" dest="${outdir}" parallel="false">
       <arg value="-T" />
       <arg value="${outformat}"/>
       <arg value="-o"/>
@@ -114,12 +128,38 @@
       <fileset dir="${outdir}" includes="*.dot" />
     </delete>
   </target>
-  
-  <target name="store.png"
-    description="Create PNG representation of Store UMLGraph source file" >
-    <antcall target="umlgraph-file">
-      <param name="srcfile" value="${umlgraph}/wifl/Store.java" />
-      <param name="outformat" value="png" />
+
+  <available property="node.modules.available" file="${node.modules}" />
+  <target name="node.install" unless="${node.modules.available}">
+    <exec executable="${node.npm}" >
+      <arg value="install" />
+      <arg line="${node.dependencies}" />
+    </exec>
+  </target>
+
+  <target name="rdfa-graphviz" depends="node.install"
+    description="Create PNG representation of RDFa from a given URL" >
+    <tempfile property="dotfile" destdir="${build}" suffix=".dot" deleteonexit="true" />
+    <property name="dotargs" value="" />
+    <echo message ="Converting ${srcuri} to dot graph." />
+    <exec executable="${node.program}" output="${dotfile}" logError="true">
+      <arg value="${dist}/js/rdfa-graphviz.js" />
+      <arg value="${srcuri}" />
+    </exec>
+    <echo message ="Converting dot graph to ${outfile}." />
+    <exec executable="${graphviz.dot}" >
+      <arg line="${dotargs}" />
+      <arg value="-o" />
+      <arg value="${outfile}" />
+      <arg value="${dotfile}" />
+    </exec>
+  </target>
+
+  <target name="store.png" depends="dist, store.html"
+    description="Create PNG representation of Store RDFa" >
+    <antcall target="rdfa-graphviz">
+      <param name="srcuri" value="${htmlbuild}/store.html#Product" />
+      <param name="dotargs" value="-Grankdir=LR -Nstyle=filled -Nfillcolor=#ffff99 -T png" />
       <param name="outfile" value="${imgbuild}/Store.png" />
     </antcall>
   </target>
@@ -178,7 +218,7 @@
     </javadoc>
   </target>
   
-  <target name="store.html" depends="wiflxml.xml, wifl.pngs, store.png"
+  <target name="store.html" depends="wiflxml.xml, wifl.pngs"
     description="Create HTML documentation of Store example" >
     <xslt
       in="${build}/WiflXml.xml"
@@ -229,7 +269,7 @@
     <mkdir dir="${htmlbuild}"/>
   </target>
 	
-  <target name="doc" depends="builddir, spec.html, store.html, store-wadl.html, wifl.xml"
+  <target name="doc" depends="builddir, spec.html, store.html, store.png, store-wadl.html, wifl.xml"
     description="Build documentation" >
     <mkdir dir="${htmlbuild}"/>
     <copy todir="${htmlbuild}">
@@ -252,6 +292,7 @@
       <fileset file="${jqueryui}/jquery-ui.js"/>
       <fileset file="${jsonschema}/json-schema-validate.js"/>
       <fileset file="${xmljs}/xmllint.js"/>
+      <fileset file="${d3}/d3.v3.min.js"/>
     </copy>
   </target>
 
@@ -270,6 +311,7 @@
       <fileset file="${jqueryui}/jquery-ui.js"/>
       <fileset file="${jsonschema}/json-schema-validate.js"/>
       <fileset file="${xmljs}/xmllint.js"/>
+      <fileset file="${d3}/d3.v3.min.js"/>
     </copy>
   </target>
 
@@ -324,11 +366,12 @@
   <target name="all" depends="zip"/>
 
   <target name="clean">
-  	<delete dir="${build}"/>
+    <delete dir="${build}"/>
     <delete dir="${dist}"/>
     <delete dir="${site}"/>
     <delete dir="${test}"/>
     <delete dir="${zip}"/>
+    <delete dir="${node.modules}"/>
   </target>
 
 </project>
