@@ -158,7 +158,7 @@
     description="Create PNG representation of Store RDFa" >
     <antcall target="rdfa-graphviz">
       <param name="srcuri" value="${htmlbuild}/store.html#Product" />
-      <param name="dotargs" value="-Grankdir=LR -Nstyle=filled -Nfillcolor=#ffff99 -T png" />
+      <param name="dotargs" value="-Grankdir=LR -Nstyle=filled -Nfillcolor=#ffffdd -T png" />
       <param name="outfile" value="${imgbuild}/Store.png" />
     </antcall>
   </target>
