@@ -34,7 +34,6 @@
   <property name="qunit" location="${jslib}/qunit"/>
   <property name="jsonschema" location="${jslib}/json-schema"/>
   <property name="xmljs" location="${jslib}/xml-js"/>
-  <property name="d3" location="${jslib}/d3"/>
 	
   <!-- XSpec properties -->
   <property name="xspec.properties" location="xspec.properties" /> 
@@ -292,7 +291,6 @@
       <fileset file="${jqueryui}/jquery-ui.js"/>
       <fileset file="${jsonschema}/json-schema-validate.js"/>
       <fileset file="${xmljs}/xmllint.js"/>
-      <fileset file="${d3}/d3.v3.min.js"/>
     </copy>
   </target>
 
@@ -311,7 +309,6 @@
       <fileset file="${jqueryui}/jquery-ui.js"/>
       <fileset file="${jsonschema}/json-schema-validate.js"/>
       <fileset file="${xmljs}/xmllint.js"/>
-      <fileset file="${d3}/d3.v3.min.js"/>
     </copy>
   </target>
 
