@@ -37,6 +37,12 @@ function absoluteURI(uri) {
   return url.resolve(cwd,uri);
 }
 
+// Test an object for emptiness
+function isEmpty(obj) {
+  for (var key in obj) { return false; }
+  return true;
+}
+
 // Write text
 function Writer(base,vocab) {
   if (base) {
@@ -167,24 +173,32 @@ Writer.prototype.writeGraph = function(graph) {
     if (types.length) {
       this.write(' : ',types.map(this.shorthand,this).join(' &amp; '));
     }
-    this.write('</td></tr>\n    <tr><td><table cellspacing="0" border="0">');
-    for (attribute in graph.attributes[subject]) {
-      var values = Object.keys(graph.attributes[subject][attribute]);
-      this.write('\n    <tr><td align="right">',this.shorthand(attribute),' =</td><td align="left">');
-      if (values.length === 1) {
-        this.write(this.shorthand(values[0]));
-      } else {
-        this.write('[',values.map(this.shorthand,this).join(','),']');
+    this.write('</td></tr>');
+    if (!isEmpty(graph.attributes[subject])) {
+      this.write('\n    <tr><td><table cellspacing="0" border="0">');
+      for (attribute in graph.attributes[subject]) {
+        var values = Object.keys(graph.attributes[subject][attribute]);
+        this.write('\n    <tr><td align="right">',this.shorthand(attribute),' =</td><td align="left">');
+        if (values.length === 1) {
+          this.write(this.shorthand(values[0]));
+        } else {
+          this.write('[',values.map(this.shorthand,this).join(','),']');
+        }
+        this.write('</td></tr>');
       }
-      this.write('</td></tr>');
+      this.write('\n    </table></td></tr>');
     }
-    this.write('\n    </table></td></tr></table>> ]');
+    this.write('</table>> ]');
     for (var property in graph.properties[subject]) {
       var prop = this.shorthand(property);
       for (var object in graph.properties[subject][property]) {
         var obj = this.shorthand(object);
         this.write('\n  "',subj,'" -> "',obj,'" [ label=<',this.escape(prop),'> ]');
       }
+    }
+    for (var supertype in graph.supertypes[subject]) {
+      var sup = this.shorthand(supertype);
+      this.write('\n  "',sup,'" -> "',subj,'" [ arrowtail="empty", dir="back" ]');
     }
   }
   this.write('\n}\n');
@@ -196,6 +210,7 @@ function Graph() {
   this.attributes = {};
   this.properties = {};
   this.types = {};
+  this.supertypes = {};
 }
 
 // Add a subject
@@ -205,6 +220,7 @@ Graph.prototype.addSubject = function(subject) {
     this.attributes[subject] = {};
     this.properties[subject] = {};
     this.types[subject] = {};
+    this.supertypes[subject] = {};
   }
 }
 
@@ -229,8 +245,13 @@ Graph.prototype.addProperty = function(subject,property,object) {
 // Add a type
 Graph.prototype.addType = function(subject,type) {
   this.addSubject(subject);
-  var types = this.types[subject];
-  types[type] = true;
+  this.types[subject][type] = true;
+}
+
+// Add a supertype
+Graph.prototype.addSupertype = function(subject,supertype) {
+  this.addSubject(subject);
+  this.supertypes[subject][supertype] = true;
 }
 
 // Load the node-wrapped rdfa library.
@@ -269,6 +290,11 @@ requirejs(["rdfa-ld"],function(rdfaLD) {
               docs.getValues(subject,property).forEach(function (type) {
                 graph.addType(subject,type);
               });
+            } else if (property === "http://www.w3.org/2000/01/rdf-schema#subClassOf") {
+              docs.getValues(subject,property).forEach(function (type) {
+                graph.addSupertype(subject,type);
+                uris.push(type);
+              });
             } else if (property === "http://purl.org/dc/terms/description") {
             } else {
               docs.getValues(subject,property).forEach(function(value) {
@@ -293,65 +319,3 @@ requirejs(["rdfa-ld"],function(rdfaLD) {
     process.exit(1);
   });
 });  
-
-  // for (var i=2; i<process.argv.length; i++) {
-  //   var filename = process.argv[i];
-  //   var html = fs.readFileSync(filename);
-  //   var doc = jsdom.jsdom(html);
-  //   rdfa.attach(doc);
-  //   var vocab = doc.data.getValues(null,"rdfa:usesVocabulary")[0];
-  //   var vocabHash = vocab + "#";
-  //   var baseURI = doc.baseURI;
-  //   var baseURIHash = baseURI + "#";
-  //   var baseDir = url.resolve(doc.baseURI,"..");
-  //   var baseDirSlash = baseDir + "/";
-  //   function shorthand(uri) {
-  //     if (uri.indexOf(vocabHash) === 0) {
-  //       return uri.substring(vocab.length);
-  //     } else if (uri.indexOf(baseURIHash) === 0) {
-  //       return uri.substring(baseURI.length);
-  //     } else if (uri.indexOf(baseDirSlash) === 0) {
-  //       return uri.substring(baseDirSlash.length);
-  //     } else {
-  //       return uri;
-  //     }
-  //   }
-  //   doc.data.getSubjects().forEach(function(subject) {
-  //     subject = shorthand(subject);
-  //     graph.addSubject(subject);
-  //     doc.data.get.forEach
-  //   });
-
-  // });
-  //   subjects.forEach(function(subject) {
-  //     var properties = doc.data.getProperties(subject);
-  //     var types = [];
-  //     var labels = [];
-  //     properties.forEach(function(property) {
-  //       var values = doc.data.getValues(subject,property);
-  //       values.forEach(function(value) {
-  //         if (property === "http://www.w3.org/ns/rdfa#usesVocabulary") {
-  //         } else if (property === "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
-  //           types.push(shorthand(value));
-  //         } else if (0 <= subjects.indexOf(value)) {
-  //           var edge = graph.addEdge(subject,value);
-  //           edge.set("label",shorthand(property));
-  //         } else {
-  //           labels.push(shorthand(property) + " = " + escape(value));
-  //         }
-  //       });
-  //     });
-  //     var node = graph.addNode(subject);
-  //     var label = shorthand(subject);
-  //     if (types.length) {
-  //       label = label + " : " + types.join("&");
-  //     }
-  //     if (labels.length) {
-  //       label = label + "\\l" + labels.join("\\l");
-  //     }
-  //     node.set("label",label);
-  //     node.set("shape","box");
-  //   });
-  // }
-// });
-
