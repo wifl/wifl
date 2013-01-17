@@ -57,42 +57,41 @@ Writer.prototype.write = function() {
 // prefix map, so we recreate it here.
 
 var rdfaPrefixes = {
-  "http://creativecommons.org/ns#": "cc",
-  "http://www.w3.org/2008/content#": "cnt",
   "http://commontag.org/ns#": "ctag",
-  "http://purl.org/dc/terms/": "dc",
-  "http://www.w3.org/ns/dcat#": "dcat",
-  "http://purl.org/dc/terms/": "dcterms",
-  "http://www.w3.org/ns/earl#": "earl",
-  "http://xmlns.com/foaf/0.1/": "foaf",
-  "http://www.w3.org/ns/people#": "gldp",
-  "http://purl.org/goodrelations/v1#": "gr",
-  "http://www.w3.org/2003/g/data-view#": "grddl",
-  "http://www.w3.org/2006/http#": "ht",
-  "http://www.w3.org/2002/12/cal/icaltzd#": "ical",
-  "http://www.w3.org/ns/ma-ont#": "ma",
+  "http://creativecommons.org/ns#": "cc",
   "http://ogp.me/ns#": "og",
-  "http://www.w3.org/ns/org#": "org",
-  "http://www.w3.org/2002/07/owl#": "owl",
-  "http://www.w3.org/2009/pointers#": "ptr",
-  "http://www.w3.org/1999/02/22-rdf-syntax-ns#": "rdf",
-  "http://www.w3.org/ns/rdfa#": "rdfa",
-  "http://www.w3.org/2000/01/rdf-schema#": "rdfs",
+  "http://purl.org/dc/terms/": "dc",
+  "http://purl.org/goodrelations/v1#": "gr",
   "http://purl.org/stuff/rev#": "rev",
-  "http://www.w3.org/2007/rif#": "rif",
-  "http://schema.org/": "schema",
-  "http://www.w3.org/ns/sparql-service-description#": "sd",
-  "http://rdfs.org/sioc/ns#": "sioc",
-  "http://www.w3.org/2004/02/skos/core#": "skos",
-  "http://www.w3.org/2008/05/skos-xl#": "skosxl",
   "http://rdf.data-vocabulary.org/#": "v",
-  "http://www.w3.org/2006/vcard/ns#": "vcard",
   "http://rdfs.org/ns/void#": "void",
+  "http://rdfs.org/sioc/ns#": "sioc",
+  "http://schema.org/": "schema",
+  "http://www.w3.org/1999/02/22-rdf-syntax-ns#": "rdf",
+  "http://www.w3.org/1999/xhtml/vocab#": "xhv",
+  "http://www.w3.org/2000/01/rdf-schema#": "rdfs",
+  "http://www.w3.org/2001/XMLSchema#": "xsd",
+  "http://www.w3.org/2002/07/owl#": "owl",
+  "http://www.w3.org/2002/12/cal/icaltzd#": "ical",
+  "http://www.w3.org/2003/g/data-view#": "grddl",
+  "http://www.w3.org/2004/02/skos/core#": "skos",
+  "http://www.w3.org/2006/http#": "ht",
+  "http://www.w3.org/2006/vcard/ns#": "vcard",
   "http://www.w3.org/2007/05/powder#": "wdr",
   "http://www.w3.org/2007/05/powder-s#": "wdrs",
-  "http://www.w3.org/1999/xhtml/vocab#": "xhv",
+  "http://www.w3.org/2007/rif#": "rif",
+  "http://www.w3.org/2008/05/skos-xl#": "skosxl",
+  "http://www.w3.org/2008/content#": "cnt",
+  "http://www.w3.org/2009/pointers#": "ptr",
   "http://www.w3.org/XML/1998/namespace": "xml",
-  "http://www.w3.org/2001/XMLSchema#": "xsd"
+  "http://www.w3.org/ns/dcat#": "dcat",
+  "http://www.w3.org/ns/earl#": "earl",
+  "http://www.w3.org/ns/ma-ont#": "ma",
+  "http://www.w3.org/ns/org#": "org",
+  "http://www.w3.org/ns/people#": "gldp",
+  "http://www.w3.org/ns/rdfa#": "rdfa",
+  "http://www.w3.org/ns/sparql-service-description#": "sd",
+  "http://xmlns.com/foaf/0.1/": "foaf"
 };
 
 var rdfaTerms = {   
@@ -249,11 +248,20 @@ requirejs(["rdfa-ld"],function(rdfaLD) {
       var out = new Writer(base,vocab);
       var graph = new Graph();
       var subjects = {};
+      var objects = {};
       docs.getSubjects().forEach(function(subject) {
-        subjects[subject] = true;
+        subjects[subject] = docs.getValues(subject);
+        subjects[subject].forEach(function(value) {
+          if (objects[value]) {
+            objects[value].push(subject);
+          } else {
+            objects[value] = [subject];
+          }
+        });
       });
       while (uris.length) {
         var subject = uris.shift();
+        uris.push.apply(uris,objects[subject]);
         if (!graph.subjects[subject]) {
           graph.addSubject(subject);
           docs.getProperties(subject).forEach(function(property) {
@@ -261,6 +269,7 @@ requirejs(["rdfa-ld"],function(rdfaLD) {
               docs.getValues(subject,property).forEach(function (type) {
                 graph.addType(subject,type);
               });
+            } else if (property === "http://purl.org/dc/terms/description") {
             } else {
               docs.getValues(subject,property).forEach(function(value) {
                 if (subjects[value]) {
