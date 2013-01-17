@@ -194,7 +194,7 @@
 
 <xsl:template mode="wifl" match="html:tt[@class='default']">
   <xsl:copy>
-    <xsl:attribute name="property" select="'defaultValue'"/>
+    <xsl:attribute name="property" select="'default'"/>
     <xsl:apply-templates select="@*|node()" mode="wifl"/>
   </xsl:copy>
 </xsl:template>
