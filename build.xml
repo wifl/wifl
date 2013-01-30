@@ -52,10 +52,24 @@
   <!-- Node properties -->
   <property name="node.dependencies" value="jsdom requirejs xmlhttprequest" />
   <property name="node.modules" value="node_modules" />
-  <condition property="node.program" value="${env.NODE_HOME}/bin/node" else="node">
+	<condition property="node.executable.name" value="node.exe" else="node">
+		<os family="windows"/>
+	</condition>
+	<condition property="npm.executable.name" value="npm.cmd" else="npm">
+	  <os family="windows"/>
+	</condition>
+	<condition property="node.executable.path" value="." else="bin">
+		<os family="windows"/>
+	</condition>
+	<condition property="npm.executable.path" value="." else="bin">
+	  <os family="windows"/>
+	</condition>
+  <condition property="node.program" value="${env.NODE_HOME}/${node.executable.path}/${node.executable.name}" 
+  	else="${node.executable.name}">
     <isset property="env.NODE_HOME" />
   </condition>
-  <condition property="node.npm" value="${env.NPM_HOME}/bin/npm" else="npm">
+  <condition property="node.npm" value="${env.NPM_HOME}/${npm.executable.path}/${npm.executable.name}" 
+  	else="${npm.executable.name}">
     <isset property="env.NPM_HOME" />
   </condition>
 
