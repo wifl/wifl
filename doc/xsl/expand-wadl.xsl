@@ -178,36 +178,36 @@
   </xsl:function>
   
   <xsl:function name="wadl:clean-id" as="xs:string">
-  <xsl:param name="id"/>
-  <xsl:choose>
-    <xsl:when test="contains($id,'#') and wadl:has-local-base($bases,$id)">
-      <xsl:value-of select="substring-after($id, '#')"/>
-    </xsl:when>
-    <xsl:otherwise>
-      <xsl:value-of select="translate($id, '#', '_')"/>
-    </xsl:otherwise>
-  </xsl:choose>
-</xsl:function>
-
-<xsl:function name="wadl:has-local-base">
-  <xsl:param name="bases"/>
-  <xsl:param name="id"/>
-  <xsl:value-of select="exists(
-  for $i in (1 to count($bases))
-    return $i[starts-with($id, wadl:strip-slash($bases[$i]))]
-  )"/>
-</xsl:function>
-
-<xsl:function name="wadl:strip-slash" as="xs:string">
-  <xsl:param name="s"/>
-  <xsl:choose>
-    <xsl:when test="substring($s, string-length($s), 1)='/'">
-      <xsl:value-of select="substring($s, 1, string-length($s)-1)"/>
-    </xsl:when>
-    <xsl:otherwise>
-      <xsl:value-of select="$s"/>
-    </xsl:otherwise>
-  </xsl:choose>
-</xsl:function>
+    <xsl:param name="id"/>
+    <xsl:choose>
+      <xsl:when test="contains($id,'#') and wadl:has-local-base($bases,$id)">
+        <xsl:value-of select="substring-after($id, '#')"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:value-of select="translate($id, '#', '_')"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:function>
+	
+  <xsl:function name="wadl:has-local-base">
+    <xsl:param name="bases"/>
+    <xsl:param name="id"/>
+    <xsl:value-of select="exists(
+    for $i in (1 to count($bases))
+      return $i[starts-with($id, wadl:strip-slash($bases[$i]))]
+    )"/>
+  </xsl:function>
+	
+  <xsl:function name="wadl:strip-slash" as="xs:string">
+    <xsl:param name="s"/>
+    <xsl:choose>
+      <xsl:when test="substring($s, string-length($s), 1)='/'">
+        <xsl:value-of select="substring($s, 1, string-length($s)-1)"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:value-of select="$s"/>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:function>
   
 </xsl:stylesheet>

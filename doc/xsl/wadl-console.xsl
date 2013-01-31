@@ -30,13 +30,16 @@
   media-type="application/xhtml+xml"
   indent="yes" />
 
-<xsl:include href="html-wifl.xsl" />
+<xsl:include href="wifl-console.xsl" />
 
 <xsl:template match="/">
   <xsl:variable name="html">
     <xsl:apply-templates/>
   </xsl:variable>
-  <xsl:apply-templates select="$html" mode="wifl" />
+  <xsl:variable name="wifl">
+    <xsl:apply-templates select="$html" mode="wifl" />
+  </xsl:variable>
+  <xsl:apply-templates select="$wifl" mode="console"/>
 </xsl:template>
 
 </xsl:stylesheet>

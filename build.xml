@@ -245,15 +245,15 @@
 	
   <target name="xslt-test" depends="init"
     description="Test XSLT stylesheets">
+    <exec executable="${xspec.program}">
+      <arg value="${src}/test/xsl/expand-wadl.xspec"/>
+    </exec>
   	<exec executable="${xspec.program}">
   		<arg value="${src}/test/xsl/wadl-html.xspec"/>
   	</exec>
-  <!--		<antcall target="xspec.xspec" inheritall="false">
-  		  <param name="xspec.xml" location="${src}/testq/xsl/flatten.xspec"/>
-  			<param name="xspec.base.dir" location="${xspec.project.dir}"/>
-  			<param name="xspec.dir" location=""/>
-  			<param name="xspec.base" value=""/> 
-  		</antcall> -->
+    <exec executable="${xspec.program}">
+      <arg value="${src}/test/xsl/wadl-wifl.xspec"/>
+    </exec>
   </target>
 	
   <target name="store-wadl.html" depends="init"

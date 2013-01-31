@@ -3,9 +3,10 @@
     wadl-html.xsl
     
     Transforms Web Application Description Language (WADL) XML documents into HTML.
+    
+    The generated HTML preserves WADL element heritage with class, property,
+    or content attribute values for subsequent transformations.
      
-    See example_wadl.xml at http://github.com/ipcsystems/wadl-stylesheet to explore 
-    this stylesheet's capabilities and the README.txt for other usage information.
     Note that the contents of a doc element is rendered as a:
         * hyperlink if the title attribute contains is equal to 'Example'
         * mono-spaced font ('pre' tag) if content contains the text 'Example'
@@ -14,9 +15,6 @@
         * Ignores queryType attributes of resource element.
         * Ignores profile attribute of representation element.
         * Ignores path attribute and child link elements of param element.
-    
-    The generated HTML preserves WADL element heritage with class, property,
-    or content attribute values for subsequent transformations.
 
     Parts of this work are adapted from Mark Nottingham's wadl_documentation.xsl, at
         https://github.com/mnot/wadl_stylesheets.
@@ -33,7 +31,9 @@
  exclude-result-prefixes="html wadl wh xs"
 >
 
-<xsl:output method="xhtml" encoding="UTF-8" indent="yes" />
+<xsl:output method="xhtml" encoding="UTF-8" 
+  media-type="application/xhtml+xml"
+  indent="yes" />
 
 <xsl:include href="expand-wadl.xsl"/>
   
@@ -60,7 +60,7 @@
 		  <xsl:apply-templates select="wadl:doc"/>
 		  
 		  <!-- Summary -->
-		  <h2>Summary</h2>
+		  <h2 class="summary">Summary</h2>
 		  <table>
 	      <tr>
 	        <th>Resource</th>
@@ -85,7 +85,7 @@
 		  </xsl:if>
 		  
 		  <!-- Detail -->
-		  <h2>Resources</h2>
+		  <h2 class="resources">Resources</h2>
 		  <xsl:apply-templates select="wadl:resources"/>
 	
 	  </body>
@@ -149,8 +149,8 @@
        wh:getFullResourcePath($resourceBase,@path) else @id"/>
      </h3>
      <xsl:apply-templates select="wadl:doc"/>
-     <h5>Methods</h5>
      <div class="methods">
+       <h5>Methods</h5>
        <xsl:apply-templates select="wadl:method"/>
      </div>
     </xsl:if>
@@ -169,7 +169,7 @@
     <table class="methodNameTable">
       <tr>
         <td class="methodNameTd">
-          <xsl:value-of select="@name"/>
+          <span property="name"><xsl:value-of select="@name"/></span>
         </td>
         <td class="methodIdTd">
           <xsl:if test="@id">
@@ -180,39 +180,62 @@
     </table>
 
     <div class="request">
-	    <span property="name" content="{@name}"/>
 	    <xsl:apply-templates select="wadl:doc"/>
 	
 	    <!-- Request -->
-	    <h6>request</h6>
-	    <div class="input">
-	      <xsl:choose>
-          <xsl:when test="wadl:request">
-            <xsl:for-each select="wadl:request">
-              <xsl:call-template name="getRequestInputBlock" />
-            </xsl:for-each>
-          </xsl:when>
-          <xsl:when test="ancestor::wadl:resource/wadl:param">
-            <xsl:call-template name="getRequestInputBlock" />
-          </xsl:when>
-          <xsl:otherwise>
-            unspecified
-          </xsl:otherwise>
-	      </xsl:choose>
-	    </div>
-	                    
-	    <!-- Response -->
-	    <h6>responses</h6>
-	    <div class="output">
+	    <table class="requestTable">
+	    <tr>
+		    <th>Request</th>
+		    <th>Responses</th>
+	    </tr>
+	    
+	    <tr>
+		    <td rowspan="{max((1, count(wadl:response)))}">
+			    <div class="input">
+			      <xsl:choose>
+		          <xsl:when test="wadl:request">
+		            <xsl:for-each select="wadl:request">
+		              <xsl:call-template name="getRequestInputBlock" />
+		            </xsl:for-each>
+		          </xsl:when>
+		          <xsl:when test="ancestor::wadl:resource/wadl:param">
+		            <xsl:call-template name="getRequestInputBlock" />
+		          </xsl:when>
+		          <xsl:otherwise>
+		            unspecified
+		          </xsl:otherwise>
+			      </xsl:choose>
+			    </div>
+		    </td>
+	    
+  	    <!-- Responses -->
 	      <xsl:choose>
           <xsl:when test="wadl:response">
-            <xsl:apply-templates select="wadl:response"/>
+            <xsl:for-each select="wadl:response">
+              <xsl:choose>
+	              <xsl:when test="position() != 1">
+	                <tr>
+	                  <td class="output">
+	                    <xsl:apply-templates select="."/>
+	                  </td>
+	                </tr>
+	              </xsl:when>
+	              <xsl:otherwise>
+	                <td class="output">
+	                  <xsl:apply-templates select="."/>
+	                </td>
+	              </xsl:otherwise>
+              </xsl:choose>
+            </xsl:for-each>
           </xsl:when>
           <xsl:otherwise>
+            <td class="output">
             unspecified
+            </td>
           </xsl:otherwise>
 	      </xsl:choose>                
-	    </div>
+	    </tr>
+	    </table>
     </div>
   </div>
 </xsl:template>
@@ -221,7 +244,7 @@
   <tr class="{@style}">
     <xsl:if test="@id"><xsl:attribute name="id" select="wh:getId(.)"/></xsl:if>
     <td class="name"><xsl:value-of select="@name"/></td>
-    <td>
+    <td class="type">
       <xsl:if test="not(@type) and not(@fixed)">
         unspecified type
       </xsl:if>
@@ -250,21 +273,19 @@
         </xsl:for-each>
       </xsl:if>
     </td>
-    <xsl:if test="wadl:doc">
-        <td class="doc"><xsl:value-of select="wadl:doc"/></td>
-    </xsl:if>
+    <td class="doc"><xsl:value-of select="wadl:doc"/></td>
   </tr>
 </xsl:template>
 
 <xsl:template match="wadl:response">
 	<div class="response">
-	  <div class="h8">status:
+	  <div class="h8">
 	   <xsl:choose>
        <xsl:when test="@status">
            <span class="status"><xsl:value-of select="@status"/></span>
        </xsl:when>
        <xsl:otherwise>
-           <span class="status">200</span> - OK
+           <span class="status">200</span>
        </xsl:otherwise>
 	   </xsl:choose>
 	  </div>
@@ -303,7 +324,7 @@
     </td>
     <xsl:choose>
       <xsl:when test="@href or @element">
-        <td>
+        <td class="type">
           <xsl:variable name="href" select="@href" />
           <xsl:choose>
             <xsl:when test="@href">
@@ -323,11 +344,11 @@
         </td>
       </xsl:when>
       <xsl:otherwise>
-        <td />
+        <td class="type"/>
       </xsl:otherwise>
     </xsl:choose>
 
-    <td>
+    <td class="doc">
       <xsl:call-template name="getDoc">
         <xsl:with-param name="base" select="''" />
       </xsl:call-template>
@@ -426,8 +447,8 @@
   else ancestor::wadl:resource/wadl:param[@style=$style]"/>
   <xsl:variable name="params" select="$inherited | wadl:param[@style=$style]"/> 
   <xsl:if test="$params">
-    <div class="h7"><xsl:value-of select="$style"/> params</div>
-    <table>
+    <div class="h7"><xsl:value-of select="$style"/> parameters</div>
+    <table class="parameterTable">
         <xsl:apply-templates select="$params"/>
     </table>
     <p/>
@@ -480,20 +501,19 @@
 <xsl:template name="getStyle">
      <style type="text/css">
         body {
-            font-family: sans-serif;
+            font-family: "Trebuchet MS", Tahoma, Verdana, Arial, sans-serif;
             font-size: 0.85em;
             margin: 2em 2em;
         }
         .methods {
-            margin-left: 2em; 
+            margin-left: 1em; 
             margin-bottom: 2em;
         }
         .method {
-            background-color: #eef;
+            background-color: #eee;
             border: 1px solid #DDDDE6;
             padding: .5em;
             margin-bottom: 1em;
-            width: 50em
         }
         .methodNameTable {
             width: 100%;
@@ -502,7 +522,7 @@
             font-size: 1.4em;
         }
         .methodNameTable * td {
-            background-color: #eef;
+            background-color: #eee;
         }
         .methodNameTd {
             font-weight: bold;
@@ -510,8 +530,21 @@
         .methodIdTd {
             text-align: right;
         }
-        .input, .output {
-            margin-left: 2em;
+        td.name, td.type {
+            width: 25%;
+        }
+        td.doc {
+            width: 50%;
+        }
+        .requestTable {
+            margin-top: 0.5em;
+        }
+        .requestTable th {
+            color: #99a;
+            font-size: 0.85em;
+        }
+        .requestTable th:first-child {
+            width: 50%;
         }
         .representationParams {
             padding: 0em 0em 0em 2em;
@@ -526,7 +559,7 @@
             font-weight: bold;
         }
         .grammars {
-            margin-left: -1em; 
+            margin-left: -2em; 
             margin-bottom: 2em;
         }
         .grammar {
@@ -548,7 +581,7 @@
             font-size: 1.5em;
            }
         h3 {
-            color: #FF6633;
+            color: #009966;
             font-size: 1.35em;
             margin-top: .5em;
             margin-bottom: 0em;
@@ -559,7 +592,7 @@
             margin: 0.5em 0em 0.25em 0em;
         }
         h6 {
-            color: #700000;
+            color: #0066cc;
             font-size: 1em;
             margin: 1em 0em 0em 0em;
         }
@@ -568,7 +601,7 @@
             font-size: 1em;
             font-weight: bold;
             font-style: italic;
-            color: blue;
+            color: #1C94C4;
         }
         .h8 {
             margin-top: .75em;
@@ -583,6 +616,7 @@
         table {
             margin-bottom: 0.5em;
             border: 1px solid #E0E0E0;
+            width: 100%;
         }
         th {
             text-align: left;
