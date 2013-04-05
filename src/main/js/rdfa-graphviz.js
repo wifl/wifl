@@ -31,9 +31,14 @@ Object.defineProperty(global.window.Node.prototype,"baseURI",{
   }
 });
 
-// Convert a relative URI to an absolute URI by resoving wrt cwd.
+// Convert a relative URI to an absolute URI by resolving wrt cwd.
 var cwd = "file://" + process.cwd() + "/";
 function absoluteURI(uri) {
+  if (uri.indexOf("file://")==0 ||
+      uri.indexOf("http://")==0 || 
+      uri.indexOf("https://")==0) {
+    return uri;
+  }
   return url.resolve(cwd,uri);
 }
 
