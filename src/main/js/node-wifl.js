@@ -37,25 +37,87 @@ requirejs.config({
   }
 })
 
+var uris = [];
+var opts = {formatter: "node-txt-formatter"};
+for (var i=2; i<process.argv.length; i++) {
+  var arg = process.argv[i];
+  if (arg.indexOf("--") == 0) {
+    opts[arg] = process.argv[++i];
+  } else {
+    uris.push(arg);
+  }
+}
+
+var formatter = opts["--formatter"];
+
 // The main code, which gets the WIFL and validates each example.
-requirejs(["wifl","validator"],function(wifl,validator) {
-  for (var i=2; i<process.argv.length; i++) {
-    var arg = process.argv[i];
+requirejs(["wifl","validator","deferred",formatter],function(wifl,validator,deferred,formatter) {
+
+  function Collector(uri, api) {
+    this.uri = uri;
+    this.api = api;
+    this.remaining = api.examples.length; 
+    this.results = new Array(this.remaining);
+    this.promise = deferred.Deferred();
+    return this;
+  }
+
+  Collector.prototype.done = function(callback) {
+    this.promise.done(callback);
+    return this;
+  }
+
+  Collector.prototype.addResult = function(result) {
+    this.results[this.api.examples.indexOf(result.example)] = result;
+    if (--this.remaining <= 0) {
+      return this.promise.resolve(this);
+    }
+    return this;
+  }
+
+  function Result(example, status, error) {
+    this.example = example;
+    this.status = status;
+    this.error = error;
+    return this;
+  }
+
+  Result.Status = {
+    OK : "OK",
+    FAILED : "Failed",
+    NOT_FOUND : "Not Found"
+  }
+
+  Result.prototype.isOk = function() {
+    return this.status == Result.Status.OK;
+  }
+
+  Result.prototype.isFailed = function() {
+    return this.status == Result.Status.FAILED;
+  }
+
+  Result.prototype.isNotFound = function() {
+    return this.status == Result.Status.NOT_FOUND;
+  }
+  
+  for(var i=0; i<uris.length; i++) {
+    var arg = uris[i];
     wifl.get(arg).done(function(api) {
-      console.log("Found " + api.resources.length + " resources and " + api.examples.length + " examples.");
+      var collector = new Collector(arg,api).done(function(collector) {
+        console.log(formatter.stringify(opts,arg,api,collector.results));
+      });
       api.examples.forEach(function(example) {
         var method = example.request.method;
         var uri = example.request.uri;
         var request = api.lookup(method,uri);
         if (request) {
           validator.checkExample(example,request).done(function() {
-            console.log("Example " + method + " " + uri + " OK.");
+            collector.addResult(new Result(example, Result.Status.OK));
           }).fail(function(error) {
-            console.log("Example " + method + " " + uri + " Failed.");
-            console.log(error);
+            collector.addResult(new Result(example, Result.Status.FAILED, error));
           });
         } else {
-          console.log("Example " + method + " " + uri + " not found.");
+          collector.addResult(new Result(example, Result.Status.NOT_FOUND));
         }
       });
     });
