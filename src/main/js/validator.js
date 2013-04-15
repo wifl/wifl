@@ -81,7 +81,7 @@ define(["deferred","deferred-worker"],function(deferred,deferredWorker) {
 	);
       }
     }
-    return failure("Unrecognized status code ", message.status);
+    return failure("Unrecognized status code " + message.status);
   }
 
   function checkParams(values,params) {
@@ -129,7 +129,7 @@ define(["deferred","deferred-worker"],function(deferred,deferredWorker) {
 	  }).pipe(undefined,prepend("Representation is not of type ", contentType));
 	}
       }
-      return failure("Unrecongized content type " + contentType);
+      return failure("Unrecognized content type " + contentType);
     }
   }
 
