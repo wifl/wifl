@@ -420,7 +420,7 @@ define(["jquery","jquery-ui","wifl","validator"],function($,jqueryUI,wifl,valida
         $console.find(".wifl-console-body").replaceWith($body);
       });
     } else {
-      $node.addClass("wifl-example-invalid").title(example.request.uri + " not found");
+      $node.addClass("wifl-example-invalid").attr("title",example.request.method + " " + example.request.uri + " not found");
     }
   }
 
