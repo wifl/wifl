@@ -6,7 +6,7 @@ define(function() {
       s.push(result.isOk() ? passed(result.example) :
              result.isFailed() ? failed(result.example, result.error) :
              result.isNotFound() ? notFound(result.example) : 
-             "")
+             unsupported(result))
     })
     return s.join('\n');
   }
@@ -21,11 +21,21 @@ define(function() {
 
   function failed(example, error) {
     return "Failed. " + example.request.method + " " + example.request.uri +
-      "\n  " + error;
+      " " + buildError(error);
   }
 
   function notFound(example) {
     return "Not Found. " + example.request.method + " " + example.request.uri; 
+  }
+
+  function buildError(error) {
+    return error.message + " " + 
+      (error.value && error.value.message ? buildError(error.value) : 
+       error.value ? "'"+error.value+"'" : "");
+  }
+
+  function unsupported(result) {
+    throw new "Unsupported result: "+JSON.stringify(result);
   }
 
   return {

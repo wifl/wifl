@@ -1,7 +1,23 @@
 define(["deferred","deferred-worker"],function(deferred,deferredWorker) {
 
   var SUCCESS = deferred.Deferred().resolve();
-  var FAILURE = deferred.Deferred().reject();
+
+  function Failure(subject,property,message,value) {
+    this.subject = subject;
+    this.property = property;
+    this.message = message;
+    this.value = value;
+  }
+  
+  Failure.prototype.deepest = function(pname) {
+    var result = this[pname];
+    var v = this.value;
+    while (v instanceof Failure) {
+      result = v[pname] || result;
+      v = v.value;
+    }
+    return result;
+  }
 
   function success(value) {
     if (value === undefined) {
@@ -11,20 +27,20 @@ define(["deferred","deferred-worker"],function(deferred,deferredWorker) {
     }
   }
 
-  function failure(error) {
-    if (error === undefined) {
-      return FAILURE;
-    } else {
-      return deferred.Deferred().reject(error);
-    }
+  function failure(property,message,value) {
+    return deferred.Deferred().reject(new Failure(undefined,property,message,value));
   }
 
-  function prepend() {
-    var context = arguments;
-    return function(error) {
-      var result = Array.prototype.join.call(context,"");
-      if (error) { result = result + ": " + error; }
-      return result;
+  function prepend(contextSubject,contextProperty,contextMessage) {
+    return function(failure) {
+      return (failure.message != undefined || typeof failure == "string") ? 
+        new Failure(contextSubject,contextProperty,contextMessage,failure) :
+        (function() {
+          failure.subject = contextSubject; 
+          failure.property = contextProperty;
+          failure.message = contextMessage;
+          return failure;
+        })();
     };
   }
 
@@ -51,21 +67,21 @@ define(["deferred","deferred-worker"],function(deferred,deferredWorker) {
 
   function checkExample(example,request) {
     return all(
-      checkRequest(example.request,request).pipe(undefined,prepend("Request")),
-      checkResponse(example.response,request.responses).pipe(undefined,prepend("Response"))
+      checkRequest(example.request,request).pipe(undefined,prepend(example.request,undefined,"Request")),
+      checkResponse(example.response,request.responses).pipe(undefined,prepend(example.response,undefined,"Response"))
     );
   }
 
   function checkRequest(message,request) {
     var uriParams = request.uriTemplate.parse(message.uri);
     if (message.method !== request.method) {
-      return failure("Method " + message.method + " should be " + request.method);
+      return failure("method", "Method should be " + request.method, message.method);
     } else if (!uriParams) {
-      return failure("Failed to match " + message.uri + " against " + request.uriTemplate);
+      return failure("uri", "Failed to match uri against " + request.uriTemplate, message.uri);
     } else {
       return all(
-        checkParams(message.headers,request.headerParams),
-        checkParams(uriParams,request.uriParams),
+        checkHeaders(message.headerParams,request.headerParams),
+        checkParams(uriParams,request.uriParams).pipe(undefined,prepend(undefined,"uri","URI parameter")),
         checkRepr(message.body,message.headers["Content-Type"],request.representations)
       );
     }
@@ -76,12 +92,19 @@ define(["deferred","deferred-worker"],function(deferred,deferredWorker) {
       var response = responses[i];
       if (response.statuses.indexOf(message.status) !== -1) {
 	return all(
-	  checkParams(message.headers,response.headerParams),
+	  checkHeaders(message.headerParams,response.headerParams),
 	  checkRepr(message.body,message.headers["Content-Type"],response.representations)
 	);
       }
     }
-    return failure("Unrecognized status code " + message.status);
+    return failure("status", "Unrecognized status code", message.status);
+  }
+
+  function checkHeaders(headers,headerParams) {
+    return allMap(headerParams,function(headerParam) {
+      var header = headers.filter(function(h) { return h.name == headerParam.name; })[0];
+      return checkParam(header ? header.value : header,headerParam).pipe(undefined,prepend(header,undefined,"Header"));
+    });
   }
 
   function checkParams(values,params) {
@@ -92,9 +115,9 @@ define(["deferred","deferred-worker"],function(deferred,deferredWorker) {
 
   function checkParam(value,param) {
     if (value) {
-      return checkValue(value,param.type).pipe(undefined,prepend(param.name));
+      return checkValue(value,param.type).pipe(undefined,prepend(undefined,undefined,param.name));
     } else if (param.required) {
-      return failure(param.name + " is required");
+      return failure(undefined,param.name + " is required");
     } else {
       return success();
     }
@@ -116,20 +139,20 @@ define(["deferred","deferred-worker"],function(deferred,deferredWorker) {
     if (body === undefined) {
       return success();
     } else if (contentType === undefined) {
-      return failure("Missing content type.");
+      return failure(undefined,"Missing content type.");
     } else {
       for (var i=0; i<reprs.length; i++) {
 	var repr = reprs[i];
 	if (isSubtype(contentType,repr.contentType)) {
 	  return allMap(reprValidators,function(validator) {
 	    return validator.contentType(contentType).pipe(
-              function() { return validator.values(body,repr.type); },
+	      function() { return validator.values(body,repr.type); },
 	      function() { return success(); }
 	    );
-	  }).pipe(undefined,prepend("Representation is not of type ", contentType));
+	  }).pipe(undefined,prepend(undefined,"body","Representation must be of type " + contentType));
 	}
       }
-      return failure("Unrecognized content type " + contentType);
+      return failure("Content-Type","Unrecognized content type", contentType);
     }
   }
 
@@ -141,30 +164,26 @@ define(["deferred","deferred-worker"],function(deferred,deferredWorker) {
         function() { return validator.values(value); },
         function() { return success(); }
       );
-    }).pipe(undefined,prepend(value," should be of type ",type));
+    }).pipe(undefined,prepend(undefined,undefined,"Must be of type " + type));
   }
 
-  function checkBool(bool) {
-    return (bool? SUCCESS: FAILURE);
-  }
-
-  function constant(value) { 
-    return function() { return value; };
+  function checkBool(bool,value) {
+    return (bool? SUCCESS: failure(undefined,undefined,value));
   }
 
   function isMember(values) {
     switch (typeof values) {
     case "function": return function(value,type) {
       try { return values(value,type); }
-      catch (exn) { return failure(exn); }
+      catch (exn) { return failure(undefined,exn,value); }
     };
-    case "string": return function(value) { return checkBool(value === values); };
-    case "boolean": return constant(checkBool(values));
+    case "string": return function(value) { return checkBool(value === values,value); };
+    case "boolean": return function(value) { return checkBool(values,value); };
     case "object": 
       if (values instanceof Array) {
-        return function(value) { return checkBool(values.indexOf(value) !== -1); };
+        return function(value) { return checkBool(values.indexOf(value) !== -1,value); };
       } else {
-        return function(value) { return checkBool(values.test(value)); }
+        return function(value) { return checkBool(values.test(value),value); }
       }
     }
   }

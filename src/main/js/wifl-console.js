@@ -189,9 +189,9 @@ define(["jquery","jquery-ui","wifl","validator"],function($,jqueryUI,wifl,valida
           $result.attr("title","Valid");
           $result.removeClass("wifl-validating").addClass("wifl-valid"); 
         }
-      }).fail(function(err) { 
+      }).fail(function(failure) { 
         if (value === $pvalue.val()) {
-          $result.attr("title",err);
+          $result.attr("title",formatFailure(failure));
           $result.removeClass("wifl-validating").addClass("wifl-invalid");
         }
       });
@@ -272,10 +272,10 @@ define(["jquery","jquery-ui","wifl","validator"],function($,jqueryUI,wifl,valida
               } else {
         	update();
               }
-            }).fail(function(err) {
+            }).fail(function(failure) {
               updating = false;
               if (body === $ta.val() && contentType === $sel.val()) {
-        	$lab.attr("title",err);
+        	$lab.attr("title",formatFailure(failure));
         	$result.removeClass("wifl-validating").addClass("wifl-invalid");
               } else {
         	update();
@@ -410,8 +410,12 @@ define(["jquery","jquery-ui","wifl","validator"],function($,jqueryUI,wifl,valida
       $node.addClass("wifl-example-validating");
       validator.checkExample(example,request).done(function() {
         $node.removeClass("wifl-example-validating").addClass("wifl-example-valid");
-      }).fail(function(error) {
-        $node.removeClass("wifl-example-validating").addClass("wifl-example-invalid").attr("title",error);
+      }).fail(function(failure) {
+        $node.removeClass("wifl-example-validating").addClass("wifl-example-valid");
+        var s = $(document.getElementsBySubject(failure.deepest("subject").about));
+        var p = failure.deepest("property");
+        s = p ? s.find("[property='"+p+"']") : s;
+        s.addClass("wifl-example-invalid").attr("title",formatFailure(failure));
       });
       $node.click(function() {
         var $body = $request(request,uriParams,headerParams,contentType,body);
@@ -420,8 +424,15 @@ define(["jquery","jquery-ui","wifl","validator"],function($,jqueryUI,wifl,valida
         $console.find(".wifl-console-body").replaceWith($body);
       });
     } else {
-      $node.addClass("wifl-example-invalid").attr("title",example.request.method + " " + example.request.uri + " not found");
+      $node.addClass("wifl-example-invalid").attr("title",example.request.method + 
+        " " + example.request.uri + " not found");
     }
+  }
+  
+  function formatFailure(failure) {
+    return failure.message + " " +
+      (failure.value && failure.value.message ? formatFailure(failure.value) :
+      failure.value ? "'"+failure.value+"'" : "");
   }
 
   function main(api) {

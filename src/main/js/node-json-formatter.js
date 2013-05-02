@@ -18,7 +18,7 @@ define(function() {
             result.isOk() ?  passed(result) :
             result.isFailed() ? failed(result) :
             result.isNotFound() ? notFound(result) :
-            {} 
+            unsupported(result) 
         });
         return o;
       })()
@@ -34,9 +34,10 @@ define(function() {
   }
 
   function failed(result) {
+    result.error.message = stringEscape(result.error.message);
     return {
       status: result.status,
-      error: stringEscape(result.error),
+      error: buildError(result.error),
       method: result.example.request.method,
       uri: stringEscape(result.example.request.uri)
     }
@@ -48,6 +49,19 @@ define(function() {
       method: result.example.request.method,
       uri: stringEscape(result.example.request.uri)
     }
+  }
+
+  function buildError(error) {
+    return {
+      "location": error.subject ? error.subject.about : error.subject,
+      "property": error.property,
+      "message" : error.message,
+      "error"   : error.value && error.value.message ? buildError(error.value) : error.value
+   }
+  }
+
+  function unsupported(result) {
+    throw "Unsupported result: "+JSON.stringify(result);
   }
 
   function stringEscape(s) {
