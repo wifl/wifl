@@ -12,7 +12,7 @@ define(["deferred","deferred-worker"],function(deferred,deferredWorker) {
   Failure.prototype.deepest = function(pname) {
     var result = this[pname];
     var v = this.value;
-    while (v instanceof Failure) {
+    while (typeof v == "object" && ("message" in v || "subject" in v || "property" in v || "value" in v)) {
       result = v[pname] || result;
       v = v.value;
     }
