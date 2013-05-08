@@ -36,11 +36,17 @@
     <link rel="stylesheet" type="text/css" href="wifl/css/jquery-ui.css"></link>
     <style type="text/css">
       button.wifl-console-show { float: right }
+      .methodNameTd { cursor: pointer }
     </style>
     <script type="text/javascript" src="wifl/js/require-jquery.js"></script>
     <script type="text/javascript">
         require.config({ baseUrl: "wifl/js" });
         require(["wifl-console"]);
+        $(function() {
+          $(".methodNameTd").click(function() {
+            $(this).parents(".method").find(".wifl-console-show").click();
+          })
+        })
     </script>
   </xsl:copy>
 </xsl:template>
@@ -52,7 +58,7 @@
   </xsl:copy>
 </xsl:template>
 
-<xsl:template mode="console" match="html:td[@class='methodNameTd']|html:h3[@class='fullPath']">
+<xsl:template mode="console" match="html:table[@class='requestTable']|html:h3[@class='fullPath']">
   <xsl:copy>
     <xsl:variable name="classes" select="@class"/>
     <xsl:attribute name="class" select="concat($classes, ' ', 'wifl-console-show')"/>
