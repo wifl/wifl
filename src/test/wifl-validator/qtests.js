@@ -256,6 +256,18 @@ define(["qunit","uri-template","validator"],function(qunit,urit,validator) {
       "method": "GET",
       "path": "/bogus/dogs/3?apikey=abc123",
       "uri": "http://api.example.com/bogus/dogs/3?apikey=abc123",
+      "headerParams": [
+    	{
+          "about": "_:3",
+          "name": "Accept",
+          "value": "application/json"
+    	},
+    	{
+          "about": "_:4",
+          "name": "Host",
+          "value": "api.example.com"
+    	}
+      ],
       "headers": {
         "Accept": "application/json",
         "Host": "api.example.com"
@@ -265,6 +277,13 @@ define(["qunit","uri-template","validator"],function(qunit,urit,validator) {
     "response": {
       "descriptions": [],
       "status": 200,
+      "headerParams": [
+    	{
+          "about": "_:7",
+          "name": "Content-Type",
+          "value": "application/json"
+    	}
+      ],
       "headers": {
         "Content-Type": "application/json"
       },
@@ -279,6 +298,23 @@ define(["qunit","uri-template","validator"],function(qunit,urit,validator) {
       "method": "POST",
       "path": "/bogus/dogs?apikey=abc123",
       "uri": "http://api.example.com/bogus/dogs?apikey=abc123",
+      "headerParams": [
+      	{
+          "about": "_:3",
+          "name": "Accept",
+          "value": "application/json"
+      	},
+      	{
+          "about": "_:4",
+          "name": "Content-Type",
+          "value": "application/json"
+      	},
+      	{
+          "about": "_:5",
+          "name": "Host",
+          "value": "api.example.com"
+      	}
+      ],
       "headers": {
         "Accept": "application/json",
         "Content-Type": "application/json",
@@ -289,6 +325,18 @@ define(["qunit","uri-template","validator"],function(qunit,urit,validator) {
     "response": {
       "descriptions": [],
       "status": 201,
+      "headerParams": [
+      	{
+          "about": "_:7",
+          "name": "Content-Type",
+          "value": "application/json"
+      	},
+      	{
+      	  "about": "_:8",
+      	  "name": "Location",
+      	  "value": "http://api.example.com/bogus/dogs/52"
+      	}
+      ],
       "headers": {
         "Content-Type": "application/json",
         "Location": "http://api.example.com/bogus/dogs/52"
