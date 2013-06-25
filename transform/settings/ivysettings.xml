@@ -1,0 +1,15 @@
+<ivysettings>
+  <properties file="${ivy.settings.dir}/ivysettings.properties"/>
+  <settings defaultResolver="libraries" />
+  <caches defaultCacheDir="${ivy.cache.dir}" />
+  <resolvers>
+    <filesystem name="projects" changingPattern=".*-SNAPSHOT" checkmodified="true">
+      <artifact pattern="${ivy.repository.dir}/[organization]/[module]/[artifact]-[revision].[ext]" />
+      <ivy pattern="${ivy.repository.dir}/[organization]/[module]/[module]-[revision].xml" />
+    </filesystem>
+    <ibiblio name="libraries" m2compatible="true" usepoms="false" />
+  </resolvers>
+  <modules>
+    <module organisation="org.wifl" name="transform-wadl" resolver="projects"/>
+  </modules>
+</ivysettings>

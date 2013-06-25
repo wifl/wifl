@@ -1,4 +1,114 @@
-The Web InterFace Language (WIFL) sources.
+The project consists of the following modules, each with its own directory:
+- cli - the command-line tools
+- console - the JavaScript console
+- spec - the specification
+- transform - the XSLT to transform WADL into WIFL
+- uri-template - the JavaScript URI template processor
+- validator - the JavaScript WIFL validator
 
-Alan Jeffrey <ajeffrey@bell-labs.com>
-Peter Danielsen <pdanielsen@bell-labs.com>
+The project uses Apache Ant for building and Apache Ivy for dependency
+management.  
+- Apache Ant: http://ant.apache.org/
+- Apache Ivy: http://ant.apache.org/ivy/
+See http://ant.apache.org/ivy/history/latest-milestone/install.html 
+for instructions on installing Ivy.
+
+The build.xml in this directory invokes targets with the same names
+in each of the module directories.  To publish all module ivy artifacts, run
+  $ ant publish
+The artifacts will be published to 
+  ${ivy.repository.dir}/<organization>/<module>
+The 'ivy.repository.dir' is set in the top-level build.xml.
+The top-level build.xml also sets 'wifl.repository.url', which identifies
+the repository where this project's artifacts are published, to the file URL
+of ivy.repository.dir.  These may be overridden with an external properties 
+file or from the ant command line.
+ 
+By default, an error will occur when attempting to overwrite an existing
+artifact version.  To successfully overwrite an existing artifact version, run
+  $ ant -Divy.publish.overwrite=true publish
+
+The ant-common.xml in this directory contains properties, patternsets,
+filesets, and targets common to all the modules. 
+
+The module-specific build.xml files import ant-common.xml and override
+its items as needed.
+
+Items may also be overridden by supplying them to ant in a properties
+file specified with the '-propertyfile' option or with ant command line 
+options of the form '-D<property>=<value>'.
+
+When working on changes to a specific module, run ant from the 
+module's directory, setting these properties in a properties file or 
+from the command-line:
+- ivy.cache.dir
+- ivy.repository.dir
+- wifl.repository.url
+
+Module-specific build.xml 
+-------------------------
+Ivy properties:
+- module - the module name (e.g. "cli", "console")
+- version - the version number
+
+Targets are imported from ant-common.xml and overridden by defining a 
+target with the same name in module's build.xml, e.g. 'test' for 
+module-specific tests.
+
+Module-specific ivy.xml
+-----------------------
+Identifies this module's organization and name.
+For each dependency, it lists:
+- its organization, name, and revision
+- for each artifact, it lists:
+-- the name, type (extension), and location of the artifact
+The artifact's name and type determine the name of the
+file after it has been downloaded.  A URL is provided for those 
+artifacts that are not in an ivy or maven repository listed in ivysettings.xml.
+The common 'resolve' target downloads the artifacts to the ivy cache and 
+then copies them to the module's 'deps' directory.
+
+Module-specific ivysettings.properties
+--------------------------------------
+An optional file containing a list of name-value pairs to override 
+default ivy property values.
+
+Module-specific ivysettings.xml
+-------------------------------
+Identifies where ivy looks for the dependencies (resolvers), where
+to cache the downloaded dependencies (caches), what to do in response
+to various ivy events (triggers), and the modules that are published (modules).
+
+The resolvers are tried in order until a dependency is found.
+Generally, there are two resolvers: the first is on the local filesystem,
+the last is the ibiblio web site.
+
+Some wifl modules depend upon other wifl modules.  For development purposes, the
+dependent modules have a url resolver whose artifact and ivy patterns 
+include the value of the 'wifl.repository.url' property.  This allows
+a developer to use a private repository when testing changes.
+
+The default cache directory is generally in the settings directory and
+named 'ivy-cache'.  It is removed with the 'clean-cache' ant target.
+
+The modules include the organization, name of each module to be published
+and the resolver to be used to publish it to a repository.
+
+Ivy-generated directories
+-------------------------
+- settings/ivy-cache - contains the dependency artifacts downloaded by ivy.
+- settings/repository - contains the published ivy artifacts.  Each module's
+ant 'build' target produces a jar file.  ivy:publish copies the jar file
+to the repository, renames it by adding the version number, and generates
+an md5 and a sha1 file for the jar.
+
+Examples
+--------
+Two additional modules are provided as examples of the use of the above
+core modules.  One is a Grails (http://grails.org) plugin that packages
+the uri-template, validator, console, and transform modules to quickly
+add their functionality to a Grails application.  The other is a Grails
+application that demonstrates WIFL RDFa annotations and uses the plugin
+to provide the console and validator operating on the annotations.  
+
+See the README in each for details.

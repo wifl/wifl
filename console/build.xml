@@ -1,0 +1,11 @@
+<project name="Web InterFace Language Console" default="all" xmlns:ivy="antlib:org.apache.ivy.ant">
+
+  <!-- Ivy properties for this module -->
+  <property name="module" value="console"/>
+  <property name="version" value="0.3-SNAPSHOT"/>
+
+  <import file="../ant-common.xml"/>
+
+  <target name="build" depends="transitive-build" description="Copy source and dependencies to build directory"/>
+
+</project>

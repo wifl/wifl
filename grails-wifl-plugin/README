@@ -1,0 +1,41 @@
+This is a Grails (http://grails.org) plugin that
+ 
+1. Provides WIFL console and validation software to a Grails application
+by adding a 'wifl' directory under the application's 'web-app' directory.
+To use the functionality, the application developer
+  a. adds the following to the <head> element of API description pages (e.g 
+  .html or .gsp):
+    <link rel="stylesheet" type="text/css" href="wifl/css/wifl-console.css"></link>
+    <link rel="stylesheet" type="text/css" href="wifl/css/jquery-ui.css"></link>
+    <script type="text/javascript" src="wifl/js/require-jquery.js"></script>
+    <script type="text/javascript">
+      require.config({ baseUrl: "wifl/js" });
+      require(["wifl-console"]);
+    </script>
+  b. annotates the API description pages with WIFL RDFa.
+  
+2. Provides an additional URL that generates HTML+WIFL from a WADL URL.
+The URL is <baseURL>/application.wifl, where <baseURL> is the base URL
+for the application's deployment.  
+
+The generation is done by XSLT 2.0 that transforms the WADL URL's content.
+By default, the WADL URL is <baseURL>/application.wadl.  This works well
+for applications that include the Jersey plugin which generates WADL
+at that URL from JAX-RS annotations in the source code.  You may change it 
+in the application by setting the 'org.wifl.grails.wadl' property in the 
+application's grails-app/conf/Config.groovy file.
+
+The plugin supplies XSLT in the application's 'web-app/wifl/xsl' directory.
+You may use different XSLT by setting the 'org.wifl.grails.xslt' property
+in the application's grails-app/conf/Config.groovy file.
+
+Examples of the default values as they might appear in Config.groovy are:
+org.wifl.grails.wadl.resource.file='application.wadl'
+org.wifl.grails.wadl.resource.absolute=true
+org.wifl.grails.xslt.resource.dir="wifl/xsl"
+org.wifl.grails.xslt.resource.file="wadl-console.xsl"
+org.wifl.grails.xslt.resource.absolute=true
+These use the Grails 'resource' tag properties.
+
+It is also possible to specify a URL with just
+org.wifl.grails.wadl.url=http://www.example.com/wadl

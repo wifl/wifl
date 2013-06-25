@@ -1,0 +1,9 @@
+build
+build.properties
+dependencies.groovy
+ivy-repository-report.xml
+lib
+plugin.xml
+settings
+target
+web-app

@@ -1,0 +1,7 @@
+build
+deps
+ivy-build
+lib
+settings/ivy-cache
+settings/repository
+wadl/test/xspec/xspec

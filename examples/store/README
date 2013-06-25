@@ -1,0 +1,26 @@
+This is a Grails application that demonstrates: 
+1. HTML marked up with WIFL RDFa annotations.
+2. The WIFL console and validator software.
+3. The automatic generation of HTML+WIFL from WADL.
+
+The application uses the grails-wifl-plugin for the WIFL console, validator,
+and transformation software.
+
+The WIFL RDFa annotations are found in grails-app/views/index.gsp.
+
+The console and validator software is included in grails-app/views/index.gsp
+by these elements within <head>:
+  <link rel="stylesheet" type="text/css" href="wifl/css/wifl-console.css"></link>
+  <link rel="stylesheet" type="text/css" href="wifl/css/jquery-ui.css"></link>
+  <script type="text/javascript" src="wifl/js/require-jquery.js"></script>
+  <script type="text/javascript">
+    require.config({ baseUrl: "wifl/js" });
+    require(["wifl-console"]);
+  </script>
+
+The application may be run without an installation of Grails from the 
+command-line with the Grails wrapper (grailsw or grailsw.bat)
+$ ./grailsw -Dwifl.repository.url=file:///../../settings/repository run-app
+(proxy properties may be required).
+This assumes that the other WIFL Ivy artifacts have been built and are
+available at the URL specified by 'wifl.repository.url'

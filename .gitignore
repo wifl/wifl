@@ -1,11 +1,4 @@
-# Ignore the target directories
-dist/
-site/
-node_modules/
-
+settings
 # Ignore emacs backup files
 *~
-/build
 .project
-/zip
-/test

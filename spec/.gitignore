@@ -1,0 +1,4 @@
+build
+lib/*.jar
+settings/ivy-cache
+settings/repository

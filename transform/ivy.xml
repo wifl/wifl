@@ -1,0 +1,13 @@
+<ivy-module version="2.0">
+    <info organisation="org.wifl" module="transform-wadl"/>
+    <configurations>
+      <conf name="default" description="WIFL transforms"/>
+      <conf name="test" visibility="private" description="test WIFL transforms"/>
+    </configurations>
+    <publications>
+      <artifact name="transform-wadl" type="zip" conf="default" ext="zip"/>
+    </publications>
+    <dependencies>
+      <dependency org="net.sf.saxon" name="${saxon.edition}" rev="${saxon.version}" conf="test->default"/>
+    </dependencies>
+</ivy-module>

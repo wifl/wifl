@@ -1,0 +1,22 @@
+<ivysettings>
+  <properties file="${ivy.settings.dir}/ivysettings.properties"/>
+  <settings defaultResolver="libraries-plus" />
+  <caches defaultCacheDir="${ivy.cache.dir}" />
+  <resolvers>
+    <filesystem name="projects" changingPattern=".*-SNAPSHOT" checkmodified="true">
+      <artifact pattern="${ivy.repository.dir}/[organization]/[module]/[artifact]-[revision].[ext]" />
+      <ivy pattern="${ivy.repository.dir}/[organization]/[module]/[module]-[revision].xml" />
+    </filesystem>
+    <url name="wifl.org" changingPattern=".*-SNAPSHOT" checkmodified="true">
+      <artifact pattern="${wifl.repository.url}/[organization]/[module]/[artifact]-[revision].[ext]"/>
+      <ivy pattern="${wifl.repository.url}/[organization]/[module]/[module]-[revision].xml"/>
+    </url>
+    <chain name="libraries-plus" dual="true">
+      <ibiblio name="libraries" m2compatible="true" usepoms="false" />
+      <resolver ref="wifl.org"/>
+    </chain>
+  </resolvers>
+  <modules>
+    <module organisation="org.wifl" name="validator" resolver="projects"/>
+  </modules>
+</ivysettings>

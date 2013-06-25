@@ -1,0 +1,31 @@
+<project name="Web InterFace Language Validator" default="all" xmlns:ivy="antlib:org.apache.ivy.ant">
+
+  <!-- Ivy properties for this module -->
+  <property name="module" value="validator"/>
+  <property name="version" value="0.2-SNAPSHOT"/>
+
+  <import file="../ant-common.xml" as="common"/>
+
+  <target name="build" depends="common.build" description="Copy source code to build directory">
+    <copy todir="${build.dir}/js" flatten="true">
+      <fileset refid="lib.js"/>
+    </copy>
+  </target>
+
+  <target name="test" depends="wifl-test, wifl-validator-test"/>
+
+  <target name="wifl-test" depends="build" description="Create wifl test direcotry">
+    <antcall target="mktest">
+      <param name="dest.dir" value="${test.dir}/wifl"/>
+      <param name="src.dir" value="${src.dir}/test/wifl"/>
+    </antcall>
+  </target>
+
+  <target name="wifl-validator-test" depends="build" description="Create wifl-validator test directory">
+    <antcall target="mktest">
+      <param name="dest.dir" value="${test.dir}/wifl-validator"/>
+      <param name="src.dir" value="${src.dir}/test/wifl-validator"/>
+    </antcall>
+  </target>
+
+</project>

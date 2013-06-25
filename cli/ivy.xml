@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ivy-module version="2.0">
+    <info organisation="org.wifl" module="cli"/>
+    <configurations>
+      <conf name="build" description="WIFL validation command-line code and dependencies"/>
+      <conf name="default" description="WIFL validation command-line code"/>
+      <conf name="test" extends="build" description="test WIFL validation command-line code"/>
+    </configurations>
+    <publications>
+      <artifact name="cli" type="zip"/>
+    </publications>
+    <dependencies>
+      <dependency org="org.wifl" name="validator" rev="0.2-SNAPSHOT" conf="build->default">
+        <artifact name="validator" type="zip"/>
+      </dependency>
+    </dependencies>
+</ivy-module>

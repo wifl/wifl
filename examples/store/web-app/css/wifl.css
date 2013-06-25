@@ -1,0 +1,292 @@
+@CHARSET "ISO-8859-1";
+body, li, th, td {
+	background-color: white;
+	color: black;
+	font-family: Palatino, Arial, sans-serif;
+	font-size: 10pt;
+}
+
+body {
+	margin: 2em;
+}
+
+h1, h2, h3, h4 {
+	font-family: Georgia, Garamond, "Times New Roman", serif;
+}
+
+blockquote {
+	font-style: italic;
+}
+
+div.class {
+	margin-top: 3em;
+	margin-bottom: 3em;
+}
+
+.class h3 {
+	margin-bottom: 1em;
+}
+
+.intro {
+	margin-bottom: 2em;
+}
+
+.navbar {
+	width: 100%;
+	margin: 2em auto;
+}
+
+.navbar ul {
+	list-style-type: none;
+	text-align: center;
+	margin: 0 auto;
+	padding: 0px;
+	display: table;
+	overflow: hidden;
+}
+
+.navbar li {
+	float: left;
+	width: 10em;
+	margin-top: 0;
+	margin-bottom: 0;
+	margin-left: auto;
+	font-size: smaller;
+}
+
+.class > .desc {
+	margin-bottom: 1em;
+}
+
+.umlgraph {
+	margin: 1em 2em;
+	padding: 1em;
+	border: solid;
+	border-color: gray;
+	border-width: thin;
+	width: 90%;
+}
+
+.subclasses ol {
+  padding-left: 0;
+}
+
+.subclasses li {
+  margin: 0;
+  list-style-type: none;
+}
+
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+	width: 100%;
+}
+
+th {
+	background-color: lightblue;
+	font-size: smaller;
+}
+
+th, td {
+	vertical-align: top;
+	padding: 0.25em;
+}
+
+th.name, th.type {
+	width: 15%;
+}
+
+th.arity {
+	width: 5%;
+}
+
+td.arity {
+	text-align: center;
+}
+
+td.name {
+	font-family: monospace;
+}
+
+.associations, .attributes {
+	margin-bottom: 1em;
+}
+
+.assoc, .attr, .header, .elt, .attrValue {
+	font-family: monospace;
+}
+
+.placeholder {
+	font-style: italic;
+}
+
+.placeholder:before {
+	content: '<!-- '
+}
+
+.placeholder:after {
+	content: ' -->'
+}
+
+.elt:before {
+	content: '<'
+}
+
+.elt:after {
+	content: '>'
+}
+
+.attr:before {
+	content: '@'
+}
+
+td.attr:before {
+	content: none;
+}
+
+.rdfa {
+	text-decoration: underline;
+	color: green;
+}
+
+.uri {
+	font-family: monospace;
+}
+
+.pathParam, .queryParam, .headerParam {
+	font-family: monospace;
+}
+
+.status {
+	font-family: monospace;
+}
+
+.content-type {
+	font-family: monospace;
+}
+
+.instance {
+	font-family: monospace;
+}
+
+.value {
+	font-family: monospace;
+}
+
+.exchange {
+	font-family: monospace;
+	white-space: pre;
+	margin-left: 3em;
+	margin-right: 3em;
+	padding: 0 0.5em;
+}
+
+.exchange + .request {
+	margin-left: 3em;
+	margin-right: 3em;
+}
+
+*[typeof="Example"] {
+	font-weight: bold;
+}
+
+*[typeof="ExampleRequest"]:before {
+  content: 'C \2192  S: ';
+}
+
+*[typeof="ExampleResponse"]:before {
+  content: 'S \2192  C: ';
+}
+
+*[typeof="ExampleHeader"] {
+	font-weight: normal;
+	font-style: italic;
+}
+
+*[typeof="Parameter"] *[property="name"] {
+	font-family: monospace;
+}
+
+*[property="path"] {
+	font-family: monospace;
+}
+
+*[property="body"] {
+	font-weight: normal;
+}
+
+*[property="status"] {
+  font-family: monospace;
+}
+
+*[rel="representationType"] {
+  font-family: monospace;
+}
+
+.header {
+	font-style: italic;
+}
+
+.figure {
+	text-align: center;
+	font-weight: bold;
+	margin: 1em 1em;
+}
+
+.figure img {
+	display: block;
+}
+
+.figure + p, .figure + h1, .figure + h2, .figure + h3 {
+	clear: both;
+}
+
+.uri-template {
+	font-family: monospace;
+}
+
+.rclass, .rprop, .rvalue {
+	font-family: monospace;
+}
+
+.rclass {
+	text-transform: capitalize;
+}
+
+.rname {
+	font-family: monospace;
+}
+
+.appl .rname {
+	text-transform: capitalize;
+}
+
+.rvalue:before, .rvalue:after {
+    content: '"'
+}
+
+.appl {
+	background-color: #ffffdd;
+}
+
+.commentary {
+	margin-left: 3em;
+	margin-right: 3em;
+	padding: 0 0.5em;
+}
+
+.wifl-example {
+    color: white;
+}
+
+.wifl-example-validating {
+    background-color: orange;
+}
+
+.wifl-example-valid {
+    background-color: green;
+}
+
+.wifl-example-invalid {
+    background-color: red;
+}

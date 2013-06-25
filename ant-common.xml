@@ -1,0 +1,214 @@
+<project name="Web InterFace Language Common" xmlns:ivy="antlib:org.apache.ivy.ant">
+
+  <!-- This file contains properties, patternsets, filesets,
+       and targets common to all modules.  They are based on a
+       common module directory structure:
+    <module>/
+      build.xml - ant build file
+      ivy.xml - ivy module definition file, including dependencies
+      src/main/<ext>/ for code with file extension <ext>
+      src/test/ for tests
+      settings/ivysettings.xml - ivy settings file
+  -->
+
+  <!-- Ivy properties common across modules -->
+  <property name="organization" value="org.wifl"/>
+  <property name="ivy.settings.dir" value="settings"/>
+  <property file="${ivy.settings.dir}/ivysettings.properties"/>
+  <property name="ivy.cache.dir" value="${ivy.settings.dir}/ivy-cache"/>
+  <property name="ivy.publish.overwrite" value="false"/>
+
+  <!-- Ivy properties specific to module are defined in module's build.xml
+       e.g. 'module' and 'version' -->
+
+  <!-- Source directories -->
+  <property name="src.dir" location="src"/>
+  <property name="main.dir" value="${src.dir}/main"/>
+
+  <!-- Ivy dependency download directory -->
+  <property name="deps.dir" value="deps"/>
+
+  <!-- Library directory -->
+  <property name="lib.dir" location="lib"/>
+
+  <!-- Target directories -->
+  <property name="build.dir" location="build"/>
+  <property name="ivy.build.dir" location="ivy-build"/>
+  <property name="test.dir" location="test"/>
+
+  <!-- Module's Ivy artifact -->
+  <property name="module.zip" value="${ivy.build.dir}/${module}.zip"/>
+
+  <ivy:settings file="${ivy.settings.dir}/ivysettings.xml" />
+
+  <!-- JavaScript files -->
+  <patternset id="js.pattern">
+    <include name="**/*.js"/>
+  </patternset>
+
+  <!-- CSS files -->
+  <patternset id="css.pattern">
+    <include name="**/*.css"/>
+  </patternset>
+
+  <!-- Zip files -->
+  <patternset id="zip.pattern">
+    <include name="**/*.zip"/>
+  </patternset>
+  
+  <fileset id="lib.js" dir="${lib.dir}">
+    <patternset refid="js.pattern"/>
+  </fileset>
+
+  <fileset id="main.css" dir="${main.dir}">
+    <patternset refid="css.pattern"/>
+  </fileset>
+
+  <fileset id="main.js" dir="${main.dir}">
+    <patternset refid="js.pattern"/>
+  </fileset>
+
+  <!-- Ivy configuration-based filesets -->
+  <!-- Ivy configurations:
+   'default' - dependencies needed at run-time, not included in artifact.
+   'build' - dependencies needed at build-time, included in artifact,
+   'test' - dependencies needed at test-time only.
+    Each module has a default configuration.
+  -->
+  <fileset id="ivy-build.css" dir="${deps.dir}/build" erroronmissingdir="false">
+    <patternset refid="css.pattern"/>
+  </fileset>
+
+  <fileset id="ivy-build.js" dir="${deps.dir}/build" erroronmissingdir="false">
+    <patternset refid="js.pattern"/>
+  </fileset>
+
+  <fileset id="ivy-build.zip" dir="${deps.dir}/build" erroronmissingdir="false">
+    <patternset refid="zip.pattern"/>
+  </fileset>
+
+  <fileset id="ivy-default.css" dir="${deps.dir}/default">
+    <patternset refid="css.pattern"/>
+  </fileset>
+
+  <fileset id="ivy-default.js" dir="${deps.dir}/default">
+    <patternset refid="js.pattern"/>
+  </fileset>
+
+  <fileset id="ivy-default.zip" dir="${deps.dir}/default">
+    <patternset refid="zip.pattern"/>
+  </fileset>
+
+  <fileset id="ivy-test.css" dir="${deps.dir}/test">
+    <patternset refid="css.pattern"/>
+  </fileset>
+
+  <fileset id="ivy-test.js" dir="${deps.dir}/test">
+    <patternset refid="js.pattern"/>
+  </fileset>
+
+  <fileset id="ivy-test.zip" dir="${deps.dir}/test">
+    <patternset refid="zip.pattern"/>
+  </fileset>
+
+  <!-- Targets -->
+  <target name="init">
+    <tstamp>
+      <format property="rundate" pattern="yyyyMMdd" locale="en,US"/> 
+    </tstamp>
+  </target>
+
+  <target name="clean" description="Delete generated directories">
+    <delete dir="${build.dir}"/>
+    <delete dir="${ivy.build.dir}"/>
+    <delete dir="${test.dir}"/>
+    <delete dir="${deps.dir}"/>
+  </target>
+
+  <target name="clean-cache" description="Clean the ivy cache">
+    <ivy:cleancache/>
+  </target>
+
+  <target name="clean-repository" description="Clean the ivy repository of this module's artifacts">
+    <delete dir="${ivy.repository.dir}/${organization}/${module}" verbose="yes"/>
+  </target>
+  
+  <target name="resolve" description="Retrieve dependencies with ivy">
+    <mkdir dir="${deps.dir}"/>
+    <echo>Retrieving ivy dependencies to ${deps.dir}</echo>
+    <ivy:retrieve pattern="${deps.dir}/[conf]/[artifact].[ext]"/>
+  </target>
+  
+  <target name="module-build" depends="resolve" description="Copy source to build directory">
+    <copy todir="${build.dir}">
+      <fileset dir="${main.dir}"/>
+    </copy>
+  </target>
+
+  <target name="transitive-build" depends="module-build" description="Copy source and build dependencies to build directory">
+    <unzip dest="${build.dir}">
+      <fileset refid="ivy-build.zip"/>
+      <patternset refid="css.pattern"/>
+      <patternset refid="js.pattern"/>
+    </unzip>
+    <copy todir="${build.dir}/css" flatten="true">
+      <fileset refid="ivy-build.css"/>
+    </copy>
+    <copy todir="${build.dir}/js" flatten="true">
+      <fileset refid="ivy-build.js"/>
+    </copy>
+  </target>
+
+  <!-- Override in modules that require transitive-build instead of module-build -->
+  <target name="build" depends="module-build" description="Copy code to build directory"/>
+
+  <!-- Parameterized target to be called from other targets -->
+  <target name="mktest" description="Create a test directory with tests and dependencies">
+    <!-- param src.dir contains tests -->
+    <!-- param dest.dir is test directory to be created -->
+    <mkdir dir="${dest.dir}"/>
+    <copy todir="${dest.dir}" flatten="true">
+      <!-- source to be tested -->
+      <fileset dir="${build.dir}/js"/>
+      <!-- source dependencies -->
+      <fileset refid="ivy-build.css"/>
+      <fileset refid="ivy-build.js"/>
+      <fileset refid="ivy-default.css"/>
+      <fileset refid="ivy-default.js"/>
+      <!-- test files -->
+      <fileset dir="${src.dir}"/>
+      <!-- test dependencies -->
+      <fileset refid="ivy-test.css"/>
+      <fileset refid="ivy-test.js"/>
+    </copy>
+    <unzip dest="${dest.dir}">
+      <fileset refid="ivy-build.zip"/>
+      <fileset refid="ivy-default.zip"/>
+      <fileset refid="ivy-test.zip"/>
+      <patternset refid="css.pattern"/>
+      <patternset refid="js.pattern"/>
+      <mapper type="flatten"/>
+    </unzip>
+    <echo>Test JavaScript with a browser at ${dest.dir}/index.html</echo>
+  </target>
+
+  <!-- Override in modules for module-specific tests -->
+  <target name="test" description="Run tests"/>
+
+  <target name="all" depends="build, test" description="Build and run tests"/>
+
+  <target name="ivy-build" depends="build" description="Create ivy artifact">
+    <echo>Creating ivy artifact</echo>
+    <delete dir="${ivy.build.dir}"/>
+    <mkdir dir="${ivy.build.dir}"/>
+    <zip destfile="${module.zip}" basedir="${build.dir}"/>
+  </target>
+  
+  <target name="publish" depends="ivy-build" description="Publish ivy artifacts">
+    <echo>Publishing ivy artifacts to ${ivy.repository.dir}</echo>
+    <ivy:publish resolver="projects" pubrevision="${version}" 
+      overwrite="${ivy.publish.overwrite}"
+      artifactspattern="${ivy.build.dir}/[artifact].[ext]"/>
+  </target>
+
+</project>

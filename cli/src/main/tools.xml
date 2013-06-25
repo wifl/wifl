@@ -1,0 +1,82 @@
+<project name="wifl-cli-tools" default="node-install">
+
+  <!-- Provide access to environment variables to use external tools:
+    GRAPHVIZ_HOME - home of GraphViz
+    NPM_HOME - home of Node Package Manager
+    NODE_HOME - home of Node.js
+  -->
+  <property environment="env" />
+
+  <!-- Location of wifl cli tools root directory -->
+  <property name="dist" location="." />
+
+  <!-- Graphviz properties -->  
+  <condition property="graphviz.dot" value="${env.GRAPHVIZ_HOME}/bin/dot" else="dot">
+    <isset property="env.GRAPHVIZ_HOME" />
+  </condition>
+
+  <!-- Node properties -->
+  <property name="node.dependencies" value="jsdom@0.6.3 requirejs@2.1.5 xmlhttprequest@1.5.0" />
+  <property name="node.modules.dir" value="node_modules" />
+  <condition property="node.executable.name" value="node.exe" else="node">
+    <os family="windows"/>
+  </condition>
+  <condition property="npm.executable.name" value="npm.cmd" else="npm">
+    <os family="windows"/>
+  </condition>
+  <condition property="node.executable.path" value="." else="bin">
+    <os family="windows"/>
+  </condition>
+  <condition property="npm.executable.path" value="." else="bin">
+    <os family="windows"/>
+  </condition>
+  <condition property="node.program" value="${env.NODE_HOME}/${node.executable.path}/${node.executable.name}" 
+    else="${node.executable.name}">
+    <isset property="env.NODE_HOME" />
+  </condition>
+  <condition property="node.npm" value="${env.NPM_HOME}/${npm.executable.path}/${npm.executable.name}" 
+    else="${npm.executable.name}">
+    <isset property="env.NPM_HOME" />
+  </condition>
+  <available property="node.modules.available" file="${node.modules.dir}" />
+
+  <target name="node-install" unless="${node.modules.available}"
+    description="Install node modules required by tools.">
+    <exec executable="${node.npm}" >
+      <arg value="install" />
+      <arg line="${node.dependencies}" />
+    </exec>
+  </target>
+  
+  <target name="validate-examples" depends="node-install"
+    description="Validate WIFL examples at a given URL." >
+    <fail unless="srcuri" message="Must designate URI to be validated with 'srcuri' property"/>
+    <exec executable="${node.program}" logError="true">
+      <arg value="${dist}/js/node-wifl.js" />
+      <arg value="${srcuri}" />
+    </exec>
+  </target>
+
+  <target name="rdfa-graphviz" depends="node-install"
+    description="Create image representation of RDFa from a given URL." >
+    <fail unless="srcuri" message="Must designate URI to be represented with 'srcuri' property"/>
+    <!-- Override default values for dotargs and outfile as needed -->
+    <property name="dotargs" value="-Grankdir=LR -Nstyle=filled -Nfillcolor=#ffffdd -T png" />
+    <property name="outfile" value="rdfa.png" />
+    <property name="tmpdir" location="${java.io.tmpdir}" />
+    <tempfile property="dotfile" destdir="${tmpdir}" suffix=".dot" deleteonexit="true" />
+    <echo message ="Converting ${srcuri} to dot graph." />
+    <exec executable="${node.program}" output="${dotfile}" logError="true">
+      <arg value="${dist}/js/rdfa-graphviz.js" />
+      <arg value="${srcuri}" />
+    </exec>
+    <echo message ="Converting dot graph to ${outfile} with options '${dotargs}'." />
+    <exec executable="${graphviz.dot}" >
+      <arg line="${dotargs}" />
+      <arg value="-o" />
+      <arg value="${outfile}" />
+      <arg value="${dotfile}" />
+    </exec>
+  </target>
+
+</project>

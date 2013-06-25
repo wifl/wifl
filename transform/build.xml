@@ -1,0 +1,68 @@
+<project name="Web InterFace Language Transform" default="all" xmlns:ivy="antlib:org.apache.ivy.ant">
+
+  <!-- Ivy properties -->
+  <property name="module" value="transform"/>
+  <property name="version" value="0.3-SNAPSHOT"/>
+
+  <import file="../ant-common.xml" as="common"/>
+
+  <!-- Provide access to user's environment variables -->
+  <property environment="env" />
+
+  <!-- Source directories -->
+  <property name="wadl" location="wadl"/>
+  <property name="wadl-xsl" location="${wadl}/xsl"/>
+  <property name="wadl-test" location="${wadl}/test"/>
+  <property name="wadl-test-results" location="${wadl-test}/xspec/xspec"/>
+
+  <!-- XSpec -->
+  <!-- Set project-specific xspec properties first -->
+  <property name="xspec.project.dir" location="${env.XSPEC_HOME}" />
+  <property name="saxon.edition" value="Saxon-HE"/>
+  <property name="saxon.version" value="9.4"/>
+  <property name="saxon.jar" location="${deps.dir}/test/${saxon.edition}.jar" />
+
+  <!-- Then import its build.xml, which sets remaining properties -->
+  <import file="${xspec.project.dir}/build.xml" />
+
+  <!-- Targets -->
+  <target name="clean" depends="common.clean">
+    <delete dir="${wadl-test-results}"/>
+  </target>
+
+  <target name="clean-repository" description="Clean the ivy repository">
+    <delete dir="${ivy.repository.dir}/${organization}/${module}-wadl"/>
+  </target>
+
+  <target name="build" depends="transform-wadl-build" description="Create all artifacts"/>
+
+  <target name="transform-wadl-build" depends="resolve">
+    <copy todir="${build.dir}/wadl"> 
+      <fileset dir="${wadl}">
+        <include name="xsl/**"/>
+      </fileset>
+    </copy>
+  </target>
+
+  <target name="test" depends="wadl-test" description="Run tests"/>
+
+  <target name="wadl-test" depends="resolve" description="Test WADL transformations">
+    <fail unless="env.XSPEC_HOME" message="Must set environment variable XSPEC_HOME" />
+    <!-- requires ant 1.8 or later -->
+    <xspec xspec.xml="${wadl-test}/xspec/expand-wadl.xspec"/>
+    <xspec xspec.xml="${wadl-test}/xspec/wadl-html.xspec"/>
+    <xspec xspec.xml="${wadl-test}/xspec/wadl-wifl.xspec"/>
+  </target>
+
+  <target name="ivy-build" depends="build" description="Create ivy artifact">
+    <echo>Creating ivy artifact</echo>
+    <delete dir="${ivy.build.dir}"/>
+    <mkdir dir="${ivy.build.dir}"/>
+    <zip destfile="${ivy.build.dir}/${module}-wadl.zip" basedir="${build.dir}/wadl"/>
+  </target>
+
+  <!-- TODO:
+    Use ivy to add dependency on xspec?
+  -->
+
+</project>

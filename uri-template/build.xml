@@ -1,0 +1,16 @@
+<project name="Web InterFace Language URI Templates" default="all" xmlns:ivy="antlib:org.apache.ivy.ant">
+  
+  <!-- Ivy properties for this module -->
+  <property name="module" value="uri-template"/>
+  <property name="version" value="0.1-SNAPSHOT"/>
+
+  <import file="../ant-common.xml"/>
+
+  <target name="test" depends="build">
+    <antcall target="mktest">
+      <param name="dest.dir" value="${test.dir}"/>
+      <param name="src.dir" value="${src.dir}/test"/>
+    </antcall>
+  </target>
+
+</project>

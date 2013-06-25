@@ -1,396 +1,95 @@
-<project name="Web InterFace Language" default="all">
-  <target name="init">
-    <tstamp>
-      <format property="rundate" pattern="yyyyMMdd" locale="en,US"/> 
-    </tstamp>
-  </target>
+<project name="Web InterFace Language" default="all" xmlns:ivy="antlib:org.apache.ivy.ant">
 
-  <!-- Provide access to user's environment variables -->
-  <property environment="env" />
+  <property name="ivy.cache.dir" value="${basedir}/settings/ivy-cache"/>
+  <property name="ivy.repository.dir" value="${basedir}/settings/repository"/>
+  <property name="wifl.repository.url" value="file:///${basedir}/settings/repository"/>
 
-  <property name="specURI" value="http://wifl.org/spec/"/>
-  <property name="rdfsURI" value="${specURI}wifl.xml"/>
+  <property name="ivy.settings.dir" value="settings"/>
+  <property name="repository.dir" value="${ivy.settings.dir}/repository"/>
+  <property name="projects.dir" location="${basedir}"/>
+  <property name="organization" value="org.wifl"/>
+  <property name="to.resolver" value="publication"/>
 
-  <!-- Source directories -->
-  <property name="src" location="src"/>
-  <property name="doc" location="doc"/>
-  <property name="htmldoc" location="${doc}/html"/>
-  <property name="exampledoc" location="${htmldoc}/example"/>
-  <property name="umlgraph" location="${doc}/umlgraph"/>
-  <property name="specdoc" location="${htmldoc}/spec"/>
-  <property name="storedoc" location="${htmldoc}/store"/>
-  <property name="wadl" location="${doc}/wadl"/>
-  <property name="xsl" location="${doc}/xsl"/>
-  <property name="json" location="${doc}/json"/>
-  <property name="xsd" location="${doc}/xsd"/>
-
-  <!-- Library directories -->
-  <property name="lib" location="lib"/>
-  <property name="javalib" location="${lib}/java"/>
-  <property name="jslib" location="${lib}/js"/>
-  <property name="requirejs" location="${jslib}/requirejs"/>
-  <property name="jqueryui" location="${jslib}/jquery-ui"/>
-  <property name="rdfa" location="${jslib}/rdfa"/>
-  <property name="qunit" location="${jslib}/qunit"/>
-  <property name="jsonschema" location="${jslib}/json-schema"/>
-  <property name="xmljs" location="${jslib}/xml-js"/>
-	
-  <!-- XSpec properties -->
-  <property name="xspec.properties" location="xspec.properties" /> 
-  <property name="xspec.project.dir" location="${env.XSPEC_HOME}" />
-  <property name="saxon.jar" location="${javalib}/saxon9he.jar" />
-  <condition property="xspec.program" value="${env.XSPEC_HOME}/bin/xspec.bat" 
-  	else="${env.XSPEC_HOME}/bin/xspec.sh">
-		<os family="windows"/>
-  </condition>
-
-  <!-- Graphviz properties -->	
-  <condition property="graphviz.dot" value="${env.GRAPHVIZ_HOME}/bin/dot" else="dot">
-    <isset property="env.GRAPHVIZ_HOME" />
-  </condition>
-
-  <!-- Node properties -->
-  <property name="node.dependencies" value="jsdom requirejs xmlhttprequest" />
-  <property name="node.modules" value="node_modules" />
-	<condition property="node.executable.name" value="node.exe" else="node">
-		<os family="windows"/>
-	</condition>
-	<condition property="npm.executable.name" value="npm.cmd" else="npm">
-	  <os family="windows"/>
-	</condition>
-	<condition property="node.executable.path" value="." else="bin">
-		<os family="windows"/>
-	</condition>
-	<condition property="npm.executable.path" value="." else="bin">
-	  <os family="windows"/>
-	</condition>
-  <condition property="node.program" value="${env.NODE_HOME}/${node.executable.path}/${node.executable.name}" 
-  	else="${node.executable.name}">
-    <isset property="env.NODE_HOME" />
-  </condition>
-  <condition property="node.npm" value="${env.NPM_HOME}/${npm.executable.path}/${npm.executable.name}" 
-  	else="${npm.executable.name}">
-    <isset property="env.NPM_HOME" />
-  </condition>
-
-  <!-- Target directories -->
-  <property name="build" location="build"/>
-  <property name="htmlbuild" value="${build}/html" />
-  <property name="imgbuild" value="${htmlbuild}/images" />
-  <property name="specbuild" value="${htmlbuild}/spec" />
-  <property name="dist" location="dist"/>
-  <property name="site" location="site"/>
-  <property name="test" location="test"/>
-  <property name="zip" location="zip"/>
-
-  <path id="rdfsgen-docletpath">
-    <fileset dir="${javalib}">
-      <include name="*.jar" />
-    </fileset>
-  </path>
-
-  <path id="umlgraph-docletpath">
-    <fileset dir="${env.UMLGRAPH_HOME}/lib" >
-      <include name="*.jar" />
-    </fileset>
-  </path>
+  <property name="cli.dir" location="cli"/>
+  <property name="cli.revision" value="0.1"/>
+  <property name="cli.resolver" value="projects"/>
+  <property name="console.dir" location="console"/>
+  <property name="console.revision" value="0.1"/>
+  <property name="console.resolver" value="projects"/>
+  <property name="spec.dir" location="spec"/>
+  <property name="spec.revision" value="0.1"/>
+  <property name="spec.resolver" value="projects"/>
+  <property name="transform.dir" location="transform"/>
+  <property name="transform.revision" value="0.1"/>
+  <property name="transform.resolver" value="transform-wadl"/>
+  <property name="uri-template.dir" location="uri-template"/>
+  <property name="uri-template.revision" value="0.1"/>
+  <property name="uri-template.resolver" value="projects"/>
+  <property name="validator.dir" location="validator"/>
+  <property name="validator.revision" value="0.1"/>
+  <property name="validator.resolver" value="projects"/>
   
-  <target name="umlgraph-file"
-    description="Create PNG representation of UMLGraph source file" >
-    <fail unless="env.UMLGRAPH_HOME" message="Must set environment variable UMLGRAPH_HOME" />
-    <tempfile property="dotfile" destdir="${build}" suffix=".dot" deleteonexit="true" />
-    <javadoc
-      access="package"
-      sourcefiles="${srcfile}"
-      docletpathref="umlgraph-docletpath" >
-      <doclet name="org.umlgraph.doclet.UmlGraph" >
-        <param name="-output" value="${dotfile}" />
-      </doclet>
-    </javadoc>
-    <exec executable="${graphviz.dot}" >
-      <arg value="-T" />
-      <arg value="${outformat}" />
-      <arg value="-o" />
-      <arg value="${outfile}" />
-      <arg value="${dotfile}" />
-    </exec>
-  </target>
-  
-  <target name="umlgraph-views"
-    description="Create PNG representation of views in UMLGraph source file" >
-    <fail unless="env.UMLGRAPH_HOME" message="Must set environment variable UMLGRAPH_HOME" />
-    <javadoc
-      access="package"
-      sourcefiles="${srcfile}"
-      docletpathref="umlgraph-docletpath" >
-      <doclet name="org.umlgraph.doclet.UmlGraph" >
-        <param name="-d" value="${outdir}" />
-        <param name="-views" />
-      </doclet>
-    </javadoc>
-    <apply executable="${graphviz.dot}" dest="${outdir}" parallel="false">
-      <arg value="-T" />
-      <arg value="${outformat}"/>
-      <arg value="-o"/>
-      <targetfile/>
-      <srcfile/>
-      <fileset dir="${outdir}" includes="*.dot"/>
-      <mapper type="glob" from="*.dot" to="*.${outformat}"/>
-    </apply>
-    <delete>
-      <fileset dir="${outdir}" includes="*.dot" />
-    </delete>
+  <property name="build.target" value="build"/>
+  <property name="test.target" value="test"/>
+  <property name="clean.target" value="clean"/>
+  <property name="clean-cache.target" value="clean-cache"/>
+  <property name="clean-repository.target" value="clean-repository"/>
+  <property name="publish.target" value="publish"/>
+  <property name="all.target" value="all"/>
+
+  <target name="init-ivy">
+    <ivy:settings file="${ivy.settings.dir}/ivysettings.xml"/>
   </target>
 
-  <available property="node.modules.available" file="${node.modules}" />
-  <target name="node.install" unless="${node.modules.available}">
-    <exec executable="${node.npm}" >
-      <arg value="install" />
-      <arg line="${node.dependencies}" />
-    </exec>
-  </target>
-  
-  <target name="validate-examples" depends="dist, node.install"
-    description="Validate WIFL examples at a given URL" >
-    <exec executable="${node.program}" logError="true">
-      <arg value="${dist}/js/node-wifl.js" />
-      <arg value="${srcuri}" />
-    </exec>
+  <target name="each-module">
+    <ant dir="${spec.dir}" target="${each.target}"/>
+    <ant dir="${uri-template.dir}" target="${each.target}"/>
+    <ant dir="${validator.dir}" target="${each.target}"/>
+    <ant dir="${cli.dir}" target="${each.target}"/>
+    <ant dir="${console.dir}" target="${each.target}"/>
+    <ant dir="${transform.dir}" target="${each.target}"/>
   </target>
 
-  <target name="rdfa-graphviz" depends="dist, node.install"
-    description="Create PNG representation of RDFa from a given URL" >
-    <tempfile property="dotfile" destdir="${build}" suffix=".dot" deleteonexit="true" />
-    <property name="dotargs" value="" />
-    <echo message ="Converting ${srcuri} to dot graph." />
-    <exec executable="${node.program}" output="${dotfile}" logError="true">
-      <arg value="${dist}/js/rdfa-graphviz.js" />
-      <arg value="${srcuri}" />
-    </exec>
-    <echo message ="Converting dot graph to ${outfile}." />
-    <exec executable="${graphviz.dot}" >
-      <arg line="${dotargs}" />
-      <arg value="-o" />
-      <arg value="${outfile}" />
-      <arg value="${dotfile}" />
-    </exec>
-  </target>
-
-  <target name="store.png" depends="dist, store.html"
-    description="Create PNG representation of Store RDFa" >
-    <antcall target="rdfa-graphviz">
-      <param name="srcuri" value="${htmlbuild}/store.html#Product" />
-      <param name="dotargs" value="-Grankdir=LR -Nstyle=filled -Nfillcolor=#ffffdd -T png" />
-      <param name="outfile" value="${imgbuild}/Store.png" />
+  <target name="build">
+    <antcall target="each-module">
+      <param name="each.target" value="${build.target}"/>
     </antcall>
   </target>
-  
-  <target name="wifl.pngs"
-    description="Create PNG representation of WIFL UMLGraph source file" >
-    <antcall target="umlgraph-views">
-      <param name="srcfile" value="${umlgraph}/wifl/Wifl.java" />
-      <param name="outformat" value="png" />
-      <param name="outdir" value="${imgbuild}" />
+
+  <target name="test">
+    <antcall target="each-module">
+      <param name="each.target" value="${test.target}"/>
     </antcall>
   </target>
-  
-  <target name="wadl.png"
-    description="Create PNG representation of WADL UMLGraph source file" >
-    <antcall target="umlgraph-file">
-      <param name="srcfile" value="${umlgraph}/wadl/Wadl.java" />
-      <param name="outformat" value="png" />
-      <param name="outfile" value="${imgbuild}/Wadl.png" />
-    </antcall>
-  </target>
-    
-  <target name="wifl.xml" 
-    description="Create RDF schema from WIFL UMLGraph source file" >
-    <javadoc 
-      access="package"
-      docletpathref="rdfsgen-docletpath" >
-      <doclet name="com.alu.bl.umlgraph.rdfsgen.RdfsDoclet" >
-        <param name="-xml-base" value="${rdfsURI}" />
-        <param name="-rdf-namespace" value="${rdfsURI}#" />
-        <param name="-rdf-prefix" value="wifl" />
-        <param name="-format" value="rdfXml" />
-        <param name="-output" value="${specbuild}/wifl.xml" />
-      </doclet>
-      <fileset dir="${umlgraph}">
-        <filename name="wifl/Wifl.java" />
-      </fileset>
-    </javadoc>
-  </target>
-
-  <target name="wiflxml.xml" 
-    description="Create XML representation of WIFL UMLGraph source file" >
-    <javadoc 
-      access="package"
-      docletpathref="rdfsgen-docletpath" >
-      <doclet name="com.alu.bl.umlgraph.rdfsgen.XmlDoclet" >
-        <param name="-xml-base" value="${specURI}" />
-        <param name="-rdf-namespace" value="${specURI}#" />
-        <param name="-rdf-prefix" value="wifl" />
-        <param name="-format" value="xml" />
-        <param name="-output" value="${build}/WiflXml.xml" />
-      </doclet>
-      <fileset dir="${umlgraph}">
-        <filename name="wifl/Wifl.java" />
-      </fileset>
-    </javadoc>
-  </target>
-  
-  <target name="store.html" depends="wiflxml.xml, wifl.pngs"
-    description="Create HTML documentation of Store example" >
-    <xslt
-      in="${build}/WiflXml.xml"
-      style="${xsl}/store.xsl"
-      out="${htmlbuild}/store.html">
-      <param name="docdir" expression="${storedoc}"/>
-      <classpath location="${javalib}/saxon9he.jar"/>
-    </xslt>
-    <copy file="${specdoc}/spec.css" todir="${specbuild}" />
-  </target>
-	
-  <target name="xslt-test" depends="init"
-    description="Test XSLT stylesheets">
-    <exec executable="${xspec.program}">
-      <arg value="${src}/test/xsl/expand-wadl.xspec"/>
-    </exec>
-    <exec executable="${xspec.program}">
-  	  <arg value="${src}/test/xsl/wadl-html.xspec"/>
-  	</exec>
-    <exec executable="${xspec.program}">
-      <arg value="${src}/test/xsl/wadl-wifl.xspec"/>
-    </exec>
-  </target>
-	
-  <target name="store-wadl.html" depends="init"
-    description="Create HTML documentation of Store example from its WADL" >
-    <xslt
-      in="${wadl}/store.wadl"
-      style="${xsl}/wadl-wifl.xsl"
-      out="${htmlbuild}/store-wadl.html">
-    	<classpath location="${javalib}/saxon9he.jar"/>
-    </xslt>
-    <copy file="${specdoc}/spec.css" todir="${specbuild}" />
-  </target>
-  
-  <target name="spec.html" depends="wiflxml.xml, wifl.pngs, wadl.png"
-    description="Create HTML documentation of WIFL model" >
-    <xslt
-      in="${build}/WiflXml.xml"
-      style="${xsl}/spec.xsl"
-      out="${specbuild}/index.html">
-      <param name="docdir" expression="${specdoc}"/>
-    </xslt>
-    <copy file="${specdoc}/spec.css" todir="${specbuild}" />
-  </target>
-
-  <target name="builddir" >
-    <mkdir dir="${htmlbuild}"/>
-  </target>
-	
-  <target name="doc" depends="builddir, spec.html, store.html, store.png, store-wadl.html, wifl.xml"
-    description="Build documentation" >
-    <mkdir dir="${htmlbuild}"/>
-    <copy todir="${htmlbuild}">
-      <fileset dir="${htmldoc}">
-        <include name="*.html"/>
-        <include name="*.css"/>
-      </fileset>
-    </copy>
-  </target>
-	
-  <target name="dist">
-    <mkdir dir="${dist}"/>
-    <copy todir="${dist}">
-      <fileset dir="${src}/main"/>
-    </copy>
-    <copy todir="${dist}/js">
-      <fileset file="${requirejs}/require.js"/>
-      <fileset file="${requirejs}/require-jquery.js"/>
-      <fileset file="${rdfa}/rdfa.js"/>
-      <fileset file="${jqueryui}/jquery-ui.js"/>
-      <fileset file="${jsonschema}/json-schema-validate.js"/>
-      <fileset file="${xmljs}/xmllint.js"/>
-    </copy>
-  </target>
-
-  <target name="site" depends="doc">
-    <mkdir dir="${site}"/>
-    <copy todir="${site}">
-      <fileset dir="${htmlbuild}"/>
-      <fileset dir="${json}"/>
-      <fileset dir="${xsd}"/>
-      <fileset dir="${src}/main"/>
-    </copy>
-    <copy todir="${site}/js">
-      <fileset file="${requirejs}/require.js"/>
-      <fileset file="${requirejs}/require-jquery.js"/>
-      <fileset file="${rdfa}/rdfa.js"/>
-      <fileset file="${jqueryui}/jquery-ui.js"/>
-      <fileset file="${jsonschema}/json-schema-validate.js"/>
-      <fileset file="${xmljs}/xmllint.js"/>
-    </copy>
-  </target>
-
-  <target name="uri-template-test">
-    <mkdir dir="${test}/uriTemplate"/>
-    <copy todir="${test}/uriTemplate">
-      <fileset dir="${src}/test/uriTemplate"/>
-      <fileset dir="${qunit}"/>
-      <fileset dir="${requirejs}"/>
-      <fileset file="${src}/main/js/nfa.js"/>
-      <fileset file="${src}/main/js/uri-template.js"/>
-    </copy>
-  </target>
-	
-  <target name="wifl-test">
-    <mkdir dir="${test}/wifl"/>
-    <copy todir="${test}/wifl">
-      <fileset dir="${src}/test/wifl"/>
-      <fileset dir="${qunit}"/>
-      <fileset dir="${requirejs}"/>
-      <fileset dir="${rdfa}"/>
-      <fileset dir="${src}/main/js"/>
-    </copy>
-  </target>
-	
-  <target name="wifl-validator-test">
-    <mkdir dir="${test}/wifl-validator"/>
-    <copy todir="${test}/wifl-validator">
-      <fileset dir="${src}/test/wifl-validator"/>
-      <fileset dir="${qunit}"/>
-      <fileset dir="${requirejs}"/>
-      <fileset dir="${rdfa}"/>
-      <fileset dir="${jsonschema}"/>
-      <fileset dir="${xmljs}"/>
-      <fileset dir="${src}/main/js"/>
-    </copy>
-  </target>
-	
-  <target name="test" depends="uri-template-test, wifl-test, wifl-validator-test">
-  </target>
-	
-  <target name="zip" depends="init, dist, site, test">
-		<mkdir dir="${zip}"/>
-    <zip destfile="${zip}/wifl-dist-${rundate}.zip" 
-       basedir="${dist}" />
-    <zip destfile="${zip}/wifl-site-${rundate}.zip" 
-       basedir="${site}" />
-    <zip destfile="${zip}/wifl-test-${rundate}.zip"
-       basedir="${test}" />
-  </target>
-	
-  <target name="all" depends="zip"/>
 
   <target name="clean">
-    <delete dir="${build}"/>
-    <delete dir="${dist}"/>
-    <delete dir="${site}"/>
-    <delete dir="${test}"/>
-    <delete dir="${zip}"/>
-    <delete dir="${node.modules}"/>
+    <antcall target="each-module">
+      <param name="each.target" value="${clean.target}"/>
+    </antcall>
+  </target>
+
+  <target name="clean-cache">
+    <antcall target="each-module">
+      <param name="each.target" value="${clean-cache.target}"/>
+    </antcall>
+  </target>
+
+  <target name="clean-repository">
+    <antcall target="each-module">
+      <param name="each.target" value="${clean-repository.target}"/>
+    </antcall>
+  </target>
+
+  <target name="publish">
+    <antcall target="each-module">
+      <param name="each.target" value="${publish.target}"/>
+    </antcall>
+  </target>
+
+  <target name="all">
+    <antcall target="each-module">
+      <param name="each.target" value="${all.target}"/>
+    </antcall>
   </target>
 
 </project>

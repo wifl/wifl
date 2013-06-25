@@ -1,0 +1,210 @@
+<project name="Web InterFace Language Spec" default="all" xmlns:ivy="antlib:org.apache.ivy.ant">
+  <target name="init">
+    <tstamp>
+      <format property="rundate" pattern="yyyyMMdd" locale="en,US"/> 
+    </tstamp>
+  </target>
+
+  <!-- Ivy properties -->
+  <property name="organization" value="org.wifl"/>
+  <property name="module" value="spec"/>
+  <property name="version" value="0.1"/>
+  <property name="ivy.settings.dir" value="settings"/>
+  <property file="${ivy.settings.dir}/ivysettings.properties"/>
+  <property name="ivy.cache.dir" value="${ivy.settings.dir}/ivy-cache"/>
+  <property name="ivy.publish.overwrite" value="false"/>
+
+  <!-- Provide access to user's environment variables -->
+  <property environment="env" />
+
+  <property name="specURI" value="http://wifl.org/spec/"/>
+  <property name="rdfsURI" value="${specURI}wifl.xml"/>
+
+  <!-- Source directories -->
+  <property name="htmldoc" location="html"/>
+  <property name="umlgraph" location="umlgraph"/>
+  <property name="specdoc" location="${htmldoc}/spec"/>
+  <property name="xsl" location="xsl"/>
+
+  <!-- Library directories -->
+  <property name="lib" location="lib"/>
+  <property name="javalib" location="${lib}/java"/>
+
+  <!-- Target directories -->
+  <property name="build" location="build"/>
+  <property name="htmlbuild" value="${build}/html" />
+  <property name="imgbuild" value="${htmlbuild}/images" />
+  <property name="specbuild" value="${htmlbuild}/spec" />
+
+  <ivy:settings file="${ivy.settings.dir}/ivysettings.xml"/>
+
+  <path id="rdfsgen-docletpath">
+    <fileset dir="${lib}">
+      <include name="**/*.jar" />
+    </fileset>
+  </path>
+
+  <path id="umlgraph-docletpath">
+    <fileset dir="${lib}" >
+      <include name="*.jar" />
+    </fileset>
+  </path>
+ 
+  <target name="resolve" description="retrieve dependencies with ivy">
+    <ivy:retrieve/>
+  </target>
+ 
+  <target name="umlgraph-file"
+    description="Create PNG representation of UMLGraph source file" >
+    <fail unless="env.GRAPHVIZ_HOME" message="Must set environment variable GRAPHVIZ_HOME" />
+    <tempfile property="dotfile" destdir="${build}" suffix=".dot" deleteonexit="true" />
+    <javadoc
+      access="package"
+      sourcefiles="${srcfile}"
+      docletpathref="umlgraph-docletpath" >
+      <doclet name="org.umlgraph.doclet.UmlGraph" >
+        <param name="-output" value="${dotfile}" />
+      </doclet>
+    </javadoc>
+    <exec executable="${env.GRAPHVIZ_HOME}/bin/dot" >
+      <arg value="-T" />
+      <arg value="${outformat}" />
+      <arg value="-o" />
+      <arg value="${outfile}" />
+      <arg value="${dotfile}" />
+    </exec>
+  </target>
+  
+  <target name="umlgraph-views"
+    description="Create PNG representation of views in UMLGraph source file" >
+    <fail unless="env.GRAPHVIZ_HOME" message="Must set environment variable GRAPHVIZ_HOME" />
+    <javadoc
+      access="package"
+      sourcefiles="${srcfile}"
+      docletpathref="umlgraph-docletpath" >
+      <doclet name="org.umlgraph.doclet.UmlGraph" >
+        <param name="-d" value="${outdir}" />
+        <param name="-views" />
+      </doclet>
+    </javadoc>
+    <apply executable="${env.GRAPHVIZ_HOME}/bin/dot" dest="${outdir}" parallel="false">
+      <arg value="-T" />
+      <arg value="${outformat}"/>
+      <arg value="-o"/>
+      <targetfile/>
+      <srcfile/>
+      <fileset dir="${outdir}" includes="*.dot"/>
+      <mapper type="glob" from="*.dot" to="*.${outformat}"/>
+    </apply>
+    <delete>
+      <fileset dir="${outdir}" includes="*.dot" />
+    </delete>
+  </target>
+  
+  <target name="wifl.pngs"
+    description="Create PNG representation of WIFL UMLGraph source file" >
+    <antcall target="umlgraph-views">
+      <param name="srcfile" value="${umlgraph}/wifl/Wifl.java" />
+      <param name="outformat" value="png" />
+      <param name="outdir" value="${imgbuild}" />
+    </antcall>
+  </target>
+  
+  <target name="wadl.png"
+    description="Create PNG representation of WADL UMLGraph source file" >
+    <antcall target="umlgraph-file">
+      <param name="srcfile" value="${umlgraph}/wadl/Wadl.java" />
+      <param name="outformat" value="png" />
+      <param name="outfile" value="${imgbuild}/Wadl.png" />
+    </antcall>
+  </target>
+    
+  <target name="wifl.xml" 
+    description="Create RDF schema from WIFL UMLGraph source file" >
+    <javadoc 
+      access="package"
+      docletpathref="rdfsgen-docletpath" >
+      <doclet name="com.alu.bl.umlgraph.rdfsgen.RdfsDoclet" >
+        <param name="-xml-base" value="${rdfsURI}" />
+        <param name="-rdf-namespace" value="${rdfsURI}#" />
+        <param name="-rdf-prefix" value="wifl" />
+        <param name="-format" value="rdfXml" />
+        <param name="-output" value="${specbuild}/wifl.xml" />
+      </doclet>
+      <fileset dir="${umlgraph}">
+        <filename name="wifl/Wifl.java" />
+      </fileset>
+    </javadoc>
+  </target>
+
+  <target name="wiflxml.xml" 
+    description="Create XML representation of WIFL UMLGraph source file" >
+    <javadoc 
+      access="package"
+      docletpathref="rdfsgen-docletpath" >
+      <doclet name="com.alu.bl.umlgraph.rdfsgen.XmlDoclet" >
+        <param name="-xml-base" value="${specURI}" />
+        <param name="-rdf-namespace" value="${specURI}#" />
+        <param name="-rdf-prefix" value="wifl" />
+        <param name="-format" value="xml" />
+        <param name="-output" value="${build}/WiflXml.xml" />
+      </doclet>
+      <fileset dir="${umlgraph}">
+        <filename name="wifl/Wifl.java" />
+      </fileset>
+    </javadoc>
+  </target>
+  
+  <target name="spec.html" depends="resolve, wiflxml.xml, wifl.pngs, wadl.png"
+    description="Create HTML documentation of WIFL model" >
+    <xslt
+      in="${build}/WiflXml.xml"
+      style="${xsl}/spec.xsl"
+      out="${specbuild}/index.html">
+      <param name="docdir" expression="${specdoc}"/>
+    </xslt>
+    <copy file="${specdoc}/spec.css" todir="${specbuild}" />
+  </target>
+
+  <target name="builddir" >
+    <mkdir dir="${htmlbuild}"/>
+  </target>
+	
+  <target name="build" depends="builddir, spec.html, wifl.xml"
+    description="Build documentation" >
+    <mkdir dir="${htmlbuild}"/>
+    <copy todir="${htmlbuild}">
+      <fileset dir="${htmldoc}">
+        <include name="*.html"/>
+        <include name="*.css"/>
+      </fileset>
+    </copy>
+    <zip destfile="${build}/${module}.zip" basedir="${htmlbuild}"/>
+  </target>
+
+  <target name="publish" depends="build">
+    <delete file="${build}/ivy.xml"/>
+    <ivy:publish resolver="projects" pubrevision="${version}"
+      overwrite="${ivy.publish.overwrite}"
+      artifactspattern="${build}/[artifact].[ext]"/>
+  </target>
+
+  <target name="test">
+    <echo>Nothing to test</echo>
+  </target>
+
+  <target name="all" depends="build"/>
+
+  <target name="clean">
+    <delete dir="${build}"/>
+  </target>
+
+  <target name="clean-cache">
+    <ivy:cleancache/>
+  </target>
+
+  <target name="clean-repository" description="clean the ivy repository">
+    <delete dir="${ivy.repository.dir}/${organization}/${module}"/>
+  </target>
+
+</project>

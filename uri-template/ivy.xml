@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ivy-module version="2.0">
+    <info organisation="org.wifl" module="uri-template"/>
+    <configurations>
+      <conf name="default" description="URI template code"/>
+      <conf name="test" extends="default" description="test URI template code"/>
+    </configurations>
+    <publications>
+      <artifact name="uri-template" type="zip" ext="zip" conf="default"/>
+    </publications>
+    <dependencies>
+      <dependency org="org.requirejs" name="requirejs" rev="2.1.4" conf="default->*">
+        <artifact name="require" type="js" url="http://requirejs.org/docs/release/2.1.4/minified/require.js"/>
+      </dependency>
+
+      <dependency org="org.requirejs" name="require-jquery" rev="2.1.4" conf="test->*">
+        <artifact name="require-jquery" type="js" url="https://raw.github.com/jrburke/require-jquery/65028741e5a0303d06fb0136928608dc6b3a6f83/jquery-require-sample/webapp/scripts/require-jquery.js"/>
+      </dependency>
+      <dependency org="org.requirejs" name="text" rev="2.0.3" conf="test->*">
+        <artifact name="text" type="js" url="https://raw.github.com/requirejs/text/2.0.3/text.js"/>
+      </dependency>
+      <dependency org="com.github.millermedeiros.requirejs-plugins" name="json" rev="bb049e937441994ea566d863ddb9d32d0bb227ac" conf="test->*">
+        <artifact name="json" type="js" url="https://raw.github.com/millermedeiros/requirejs-plugins/bb049e937441994ea566d863ddb9d32d0bb227ac/src/json.js"/>
+      </dependency>
+      <dependency org="com.qunitjs" name="qunit" rev="1.11.0" conf="test->*">
+        <artifact name="qunit" type="js" url="http://code.jquery.com/qunit/qunit-1.11.0.js"/>
+        <artifact name="qunit" type="css" url="http://code.jquery.com/qunit/qunit-1.11.0.css"/>
+      </dependency>
+    </dependencies>
+</ivy-module>

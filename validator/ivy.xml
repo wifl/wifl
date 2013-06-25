@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ivy-module version="2.0">
+    <info organisation="org.wifl" module="validator"/>
+    <configurations>
+      <conf name="default" description="WIFL validation code"/>
+      <conf name="test" extends="default" description="test WIFL validation code"/>
+    </configurations>
+    <publications>
+      <artifact name="validator" type="zip"/>
+    </publications>
+    <dependencies>
+      <dependency org="org.wifl" name="uri-template" rev="0.1-SNAPSHOT" conf="default">
+        <artifact name="uri-template" type="zip"/>
+      </dependency>
+      <dependency org="com.github.kriszyp.json-schema" name="validate" rev="v0.2.1" conf="default">
+        <artifact name="json-schema-validate" type="js" url="https://raw.github.com/kriszyp/json-schema/v0.2.1/lib/validate.js"/>
+      </dependency>
+      <!-- No tags, so using commit id -->
+      <dependency org="com.github.syssgx" name="xmllint" rev="dc5df54720020318082cb3b93526f9ce4030111e" conf="default">
+        <artifact name="xmllint" type="js" url="https://raw.github.com/kripken/xml.js/dc5df54720020318082cb3b93526f9ce4030111e/xmllint.js"/>
+      </dependency>
+
+      <dependency org="org.wifl" name="uri-template" rev="0.1-SNAPSHOT" conf="test"/>
+    </dependencies>
+</ivy-module>
