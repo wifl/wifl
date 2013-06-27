@@ -23,7 +23,7 @@
   <property name="saxon.jar" location="${deps.dir}/test/${saxon.edition}.jar" />
 
   <!-- Then import its build.xml, which sets remaining properties -->
-  <import file="${xspec.project.dir}/build.xml" />
+  <import file="${wadl-test}/build.xml" />
 
   <!-- Targets -->
   <target name="clean" depends="common.clean">
