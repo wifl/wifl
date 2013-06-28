@@ -1,6 +1,6 @@
 h1 {
     text-align: center;
-    padding: 10ex 0em 5ex 0em;
+    padding: 10ex 0em 3ex 0em;
 }
 
 h1 span {
@@ -11,6 +11,22 @@ h1 span {
     padding: 3ex 3em 3ex 3em;
     border: solid 3px #4466AA;
     border-radius: 2ex;
+}
+
+.links {
+    font-family: "Lucida Sans Unicode", sans-serif;
+    text-align: center;
+    padding: 0ex 0em 5ex 0em;
+}
+
+.links a {
+    font-weight: bold;
+    text-decoration: none;
+    color: #4466AA;
+}
+
+.links a:hover {
+    color: #88AAEE;
 }
 
 .validated {
