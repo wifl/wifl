@@ -1,13 +1,175 @@
-h1 {
+.header {
     text-align: center;
     font-family: "Lucida Sans Unicode", sans-serif;
     font-style: italic;
-    color: white;
     background: #88AAEE;
-    margin: 5ex 5em 3ex 5em;
-    padding: 2ex 1em 2ex 1em;
+    margin: 3ex 4em 3ex 4em;
+    padding: 1ex 1em 1ex 1em;
     border: solid 3px #4466AA;
     border-radius: 2ex;
+}
+
+.header h1 {
+  color: white;
+	margin-bottom: 0.25em;
+}
+
+.header h2 {
+	margin-top: 0.25em;
+  color: #4466AA;
+}
+
+.footer {
+	text-align: center;
+	font-family: "lucida Sans Unicode", sans-serif;
+	font-style: italic;
+	font-size: smaller;
+	color: grey;
+}
+
+#sections {
+	margin: 2ex 2em 2ex 2em;
+}
+
+.language {
+	display: block;
+  font-size: smaller;
+  color: grey;
+}
+
+.questions {
+	font-style: italic;
+}
+
+.intro {
+	font-size: smaller;
+}
+
+.reasons {
+	font-size: smaller;
+}
+
+.features {
+	font-size: smaller;
+}
+
+.formats {
+	font-size: smaller;
+}
+
+.benefits {
+	font-size: smaller;
+}
+
+#intro img {
+	height: 150px;
+	border: 0px solid black;
+}
+
+#vocab img {
+	height: 250px;
+	border: 0px solid black;
+}
+
+.logolink {
+	float: right;
+}
+
+#nodejs {
+	background-color: #46483E;
+  border-radius: 4px;
+  padding: 0.5em;
+}
+
+#beneficiaries th {
+	width: 25%;
+}
+
+#rdfa th {
+	width: 50%;
+}
+
+td {
+	vertical-align: top;
+}
+
+#uri-template table {
+	border-spacing: 2em 1em;
+}
+
+#uri-template td {
+	padding: 10px;
+}
+
+.operand {
+	display: block;
+	font-family: monospace;
+	text-align: right;
+}
+
+.operator {
+	font-family: monospace;
+	text-align: left;
+	float: left;
+}
+
+.result {
+	display: block;
+	font-family: monospace;
+	text-align: right;
+}
+
+.footnote-id {
+	vertical-align: super;
+	font-size: 0.83em;
+	text-decoration: none;
+	color: grey;
+}
+
+.footnote {
+	font-style: italic;
+	font-size: smaller;
+	padding: 1em;
+	color: grey;
+}
+
+.snippets td {
+	width: 50%;
+}
+
+.snippet-line {
+  font-style: italic;
+}
+
+.rdfa {
+  background-color: #eeeeee;
+  font-family: monospace;
+}
+
+.screenshot {
+	width: 90%;
+	border-style: solid;
+	border-width: 1px;
+	margin: 5px 5px 10px 5px;
+  -moz-box-shadow: 5px 5px 2.5px #888;
+  -webkit-box-shadow: 5px 5px 2.5px #888;
+  box-shadow: 5px 5px 2.5px #888;
+}
+
+.htmlAnnotations {
+	font-size: smaller;
+}
+
+.htmlAnnotations h2:after {
+	content: "Annotated lines"
+}
+
+.htmlAnnotations ol {
+	list-style-type: decimal-leading-zero;
+}
+
+.attrname:before {
+	content: '@';
 }
 
 .links {

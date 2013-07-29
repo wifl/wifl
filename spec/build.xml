@@ -22,6 +22,7 @@
 
   <!-- Source directories -->
   <property name="htmldoc" location="html"/>
+	<property name="imgdoc" location="${htmldoc}/images"/>
   <property name="umlgraph" location="umlgraph"/>
   <property name="specdoc" location="${htmldoc}/spec"/>
   <property name="xsl" location="xsl"/>
@@ -179,6 +180,9 @@
         <include name="*.css"/>
       </fileset>
     </copy>
+  	<copy todir="${imgbuild}">
+  	  <fileset dir="${imgdoc}"/>
+  	</copy>
     <zip destfile="${build}/${module}.zip" basedir="${htmlbuild}"/>
   </target>
 

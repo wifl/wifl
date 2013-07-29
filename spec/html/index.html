@@ -5,17 +5,522 @@
 <head>
 <title>Web Interface Language</title>
 <link rel="stylesheet" type="text/css" href="wifl.css"/>
+<link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+<link rel="stylesheet" type="text/css" href="http://www.steamdev.com/snippet/css/jquery.snippet.min.css"/>
+<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+<script src="http://www.steamdev.com/snippet/js/jquery.snippet.js"></script>
+<script>
+  $(function() {
+    $("#sections").tabs();
+    $("#sw").tabs();
+    $("#snippets").tabs();
+    $("pre.htmlCode").snippet("html",{style:"emacs"});
+    $(document).tooltip({
+    	items: ".snippet-num li", 
+    	tooltipClass: "snippet-line",
+    	content: function(callback) {
+    		var linenum = $(this).index()+1;
+    		var match = $(this).closest(".snippet-container").next(".htmlAnnotations").find("li[value="+linenum+"]");
+    		if (match) {
+    			callback(match.html());
+    		}
+    	} 
+    });
+  });
+</script>
+
 </head>
 <body>
+<div class="header">
 <h1 property="dc:title">Web Interface Language</h1>
+<h2>an RDFa vocabulary for web APIs &amp; their examples</h2>
+</div>
+
+<div id="sections">
+<ul>
+<li><a href="#intro">Why WIFL?</a></li>
+<li><a href="#beneficiaries">Who Benefits?</a></li>
+<li><a href="#rdfa">Why RDFa?</a></li>
+<li><a href="#vocab">Vocabulary</a></li>
+<li><a href="#required">What's Required?</a></li>
+<li><a href="#oss">Open Source</a></li>
+</ul>
+
+<div id="intro">
+<table>
+<tr>
+<td><img src="images/pw-formats.png" alt="API Documentation Formats"/></td>
+<td>
+<ul class="reasons">
+<li>In June 2013, 90% of the APIs listed in the
+<a href="http://www.programmableweb.com">ProgrammableWeb</a>
+directory did not have a formal description in 
+<a href="http://www.w3.org/Submission/wadl/">WADL</a> or 
+WSDL (<a href="http://www.w3.org/TR/wsdl">1.1</a> or
+<a href="http://www.w3.org/TR/wsdl20">2.0</a>), 
+but they were documented with HTML or something else.</li>
+<li>2010 paper<a href="#investigating-web-apis" class="footnote-id">*</a>
+found 75% of surveyed APIs provided examples.</li>
+<li>Key questions of documentation readers:
+<ul class="questions">
+<li>"Are the examples correct?"</li>
+<li>"Is there an easy way to try the API?"</li>
+</ul>
+<li>If an API is documented in HTML, why not include
+a machine-readable description?</li>
+<li>If the HTML included a machine-readable API description, it could also:
+<ul>
+<li>validate the example requests and responses</li>
+<li>include a dynamically-generated API console</li>
+<li>provide useful information to API search engines</li>
+</ul>
+</li>
+<li><a href="spec/">WIFL</a> is an <a href="http://www.w3.org/TR/xhtml-rdfa-primer/">RDFa</a>
+vocabulary for embedding API descriptions in HTML.</li>
+</ul>
+</td></tr></table>
+<p id="investigating-web-apis" class="footnote"><span class="footnote-id">*</span>
+M. Maleshkova, C. Pedrinaci, and J. Domingue, "Investigating web
+APIs on the world wide web," in Proc. European Conf. Web Services,
+2010, pp. 107-114.</p> 
+</div>
+
+<div id="beneficiaries">
+<table>
+<tr>
+<th>Technical Writers</th>
+<th>API Users</th>
+<th>API Developers</th>
+<th>Search Engines</th>
+</tr>
+<tr>
+<td>
+<ul class="benefits">
+<li>Freed from assessing example validity as they're added to the documentation.</li>
+<li>Improve documentation build process by including batch validation.</li>
+</ul>
+</td>
+<td>
+<ul class="benefits">
+<li>Learn API by reading documentation with validated examples.</li>
+<li>Learn API by exploring it, as they read it, using dynamically-generated console.</li>
+</ul>
+</td>
+<td>
+<ul class="benefits">
+<li>Use console to test implementation as they develop it.</li>
+</ul>
+</td>
+<td>
+<ul class="benefits">
+<li>Discover APIs that may not yet be listed in online directories.</li>
+</ul>
+</td>
+</tr>
+</table>
+</div>
+
+<div id="rdfa">
+<p class="intro"><a href="http://www.w3.org/TR/rdfa-syntax/">RDFa</a>
+is well-suited to the way providers use HTML to document APIs today.</p>
+<table>
+<tr>
+<th>Observations</th>
+<th>Relevant RDFa Features</th>
+</tr>
+<tr>
+<td><ul class="reasons">
+<li>Diversity of HTML creation methods
+<ul>
+<li>Machine-generated HTML</li>
+<li>Hand-edited HTML</li>
+</ul></li>
+<li>Diversity of hyperlinking usage
+<ul>
+<li>Overview page with:
+<ul>
+<li>links to resource-specific pages and</li>
+<li>resource-independent parameters
+linked to from resource-specific pages.</li>
+</ul></li>
+<li>All resources and GET methods on one page, POSTs on another.</li>
+</ul></li>
+<li>Example requests &amp; responses
+<ul>
+<li>2010 study found 75% of surveyed APIs provided examples.</li>
+</ul></li>
+</ul></td>
+<td>
+<ul class="features">
+<li>RDFa adds attributes to HTML, effectively embedding a machine-readable
+description in the existing document.</li>
+<li>RDF subjects, predicates, objects identified by URIs, not local names.</li>
+<li>Leverages, but not tied to, HTML document structure
+so it supports API descriptions distributed across documents using hyperlinking.</li>
+</ul>
+</td>
+</table>
+</div>
+
+<div id="vocab">
+<table width="100%">
+<tr>
+<th width="50%">For APIs</th>
+<th>For Examples</th>
+</tr>
+<tr>
+<th><img src="images/wifl-model.png" alt="WIFL Model"/></th>
+<th><img src="images/wifl-example-model.png" alt="WIFL Example Model"/></th>
+</tr>
+</table>
+</div>
+
+<div id="required">
+<p class="intro">Using WIFL requires adding RDFa to the HTML.
+The snippets below are taken from the 
+<a href = "https://github.com/wifl/wifl/blob/master/examples/store/grails-app/views/index.gsp">store</a> 
+sample <a href="http://grails.org">Grails</a> application on GitHub.
+<span class="rdfa">Additions for WIFL are shown like this</span>.
+For an introduction to RDFa, see the 
+<a href="http://www.w3.org/TR/xhtml-rdfa-primer/">Primer</a>.
+</p>
+<div id="snippets">
+<ul>
+<li><a href="#doctype">Set DOCTYPE</a></li>
+<li><a href="#prefix">Set prefix &amp; vocabulary</a></li>
+<li><a href="#resources">Annotate API</a></li>
+<li><a href="#examples">Annotate examples</a></li>
+</ul>
+
+<div id="doctype">
+<pre class="htmlCode">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE html
+<span class="rdfa">PUBLIC "-//W3C//DTD XHTML+RDFa 1.1//EN" "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-2.dtd"</span>&gt;
+&lt;html&gt;
+...
+&lt;/html&gt;
+</pre>
+
+<div class="htmlAnnotations">
+<h2></h2>
+<ol>
+<li value="03">The public and system identifiers are for XHTML1+RDFa1.1, 
+as specified
+in <a href="http://www.w3.org/TR/rdfa-in-html/#additional-rdfa-processing-rules">
+HTML + RDFa 1.1</a>.</li>
+</ol>
+</div>
+</div>
+ 
+<div id="prefix">
+<pre class="htmlCode">
+&lt;div <span class="rdfa">prefix="wifl: http://wifl.org/spec/#" vocab="http://wifl.org/spec/#"</span>&gt;
+...
+&lt;/div&gt;
+</pre>
+
+<div class="htmlAnnotations">
+<h2></h2>
+<ol>
+<li value="01">The <span class="rdfa attrname">prefix</span> attribute 
+maps the prefix <span class="rdfa attrvalue">wifl</span> 
+to the vocabulary <span class="rdfa attrvalue">http://wifl.org/spec/#</span>.
+The <span class="rdfa attrname">vocab</span> attribute sets
+the default RDFa vocabulary for an element and its descendants to
+<span class="rdfa attrvalue">http://wifl.org/spec/#</span>.
+</li></ol>
+</div>
+</div>
+
+<div id="resources">
+<pre class="htmlCode">
+<span class="rdfa">&lt;div about="#Products" typeof="Resource"&gt;</span>
+&lt;h3&gt;Products Resource&lt;/h3&gt;
+&lt;p&gt;The <span class="rdfa">&lt;span rel="parent super" resource="#Store"&gt;</span>store's<span class="rdfa">&lt;/span&gt;</span> container resource at the 
+&lt;span class="uri"&gt;${appPath}/${apiPath}<span class="rdfa">&lt;span property="path"&gt;</span>/${productsPath}<span class="rdfa">&lt;/span&gt;</span>&lt;/span&gt; URI
+supports the GET and POST methods.&lt;/p&gt;
+<span class="rdfa">&lt;div rel="request" resource="#Products_GET" typeof="Request"&gt;</span>
+&lt;p&gt;To get a listing of all the products in the store, a client sends a 
+<span class="rdfa">&lt;span property="method"&gt;</span>GET<span class="rdfa">&lt;/span&gt;</span> request to the resource.
+<span class="rdfa">&lt;span rel="response" resource="#Products_GET_200" typeof="Response"&gt;</span>
+The application returns an HTTP response with a status code of 
+<span class="rdfa">&lt;span property="status"&gt;</span>200<span class="rdfa">&lt;/span&gt;</span> and 
+<span class="rdfa">&lt;span rel="representation" resource="#Product_List" typeof="Representation"&gt;</span>
+a listing of all the products' URIs in the form of a
+<span class="rdfa">&lt;span property="contentType"&gt;</span>text/uri-list<span class="rdfa">&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;</span>.&lt;/p&gt;
+...
+&lt;p&gt;Because the returned list could be quite long, the application offers
+the ability to paginate the results using the 
+<span class="rdfa">&lt;span rel="queryParam" resource="#Start_index" typeof="Parameter"&gt;&lt;span property="name"&gt;</span>start-index<span class="rdfa">&lt;/span&gt;&lt;/span&gt;</span> and 
+<span class="rdfa">&lt;span rel="queryParam" resource="#Max_results" typeof="Parameter"&gt;&lt;span property="name"&gt;</span>max-results<span class="rdfa">&lt;/span&gt;&lt;/span&gt;</span> 
+query parameters, which are both integers
+<span class="rdfa">&lt;span about="#Start_index" rel="type" resource="xsd:nonNegativeInteger"&gt;&lt;/span&gt;</span>
+<span class="rdfa">&lt;span about="#Max_results" rel="type" resource="xsd:nonNegativeInteger"&gt;&lt;/span&gt;</span>
+and default to 
+<span class="rdfa">&lt;span about="#Start_index" property="default"&gt;</span>1<span class="rdfa">&lt;/span&gt;</span> and
+<span class="rdfa">&lt;span about="#Max_results" property="default"&gt;</span>100<span class="rdfa">&lt;/span&gt;</span>, respectively.
+<span class="rdfa">&lt;/div&gt;</span>
+</pre>
+
+<div class="htmlAnnotations">
+<h2></h2>
+<ol>
+<li value="01"><p>Declares a WIFL <span class="rdfa attrvalue">Resource</span>
+whose URI is the concatenation of the document's URI and the 
+<span class="rdfa attrname">about</span> attribute.  
+We'll use a shortened version of the URI, <span class="rdfa resource">Products</span>,
+throughout these annotations.</p>
+<p>The default RDFa vocabulary is assumed to have been set to 
+http://wifl.org/spec/# by an ancestor element.</p>
+</li>
+
+<li value="03"><p>Identifies the 
+<span class="rdfa resource">Store</span> resource as the
+<span class="rdfa predicate">parent</span> and 
+<span class="rdfa predicate">super</span> of <span class="rdfa resource">Products</span>.</p>
+<p><span class="rdfa resource">Products</span> inherits <span class="rdfa resource">Store</span>'s
+URI path template and path parameters because of the <span class="rdfa predicate">parent</span>.
+It inherits <span class="rdfa resource">Store</span>'s requests, responses,
+query parameters and header parameters because of the <span class="rdfa predicate">super</span>.</p>
+</li>
+
+<li value="04"><p>Sets <span class="rdfa resource">Products</span> URI path template 
+property to <span class="rdfa">/${productsPath}</span>.</p>
+<p>Its full URI path template is created by prepending that of its 
+<span class="rdfa predicate">parent</span>.</p>
+</li>
+
+<li value="06"><p>Declares <span class="rdfa resource">Products</span>' GET request.</p>
+<p>The declaration changes the current subject to 
+<span class="rdfa resource">Products_GET</span> for predicates within this 
+<span class="rdfa elt">div</span>.</p>
+</li>
+
+<li value="08">Sets 
+<span class="rdfa resource">Products_GET</span>'s 
+<span class="rdfa attrValue">method</span> property to GET.
+</li>
+
+<li value="09"><p>Declares the 200 response to the GET request as
+<span class="rdfa resource">Products_GET_200</span>.</p>
+<p>It becomes the current subject.</p>
+</li>
+
+<li value="11">Sets
+<span class="rdfa resource">Products_GET_200</span>'s 
+<span class="rdfa predicate">status</span> property to 200.
+</li>
+
+<li value="12"><p>Declares <span class="rdfa resource">Product_List</span> for the
+representation in the 200 response to the GET request.</p>
+<p>It becomes the new subject.</p>
+</li>
+
+<li value="14"><p>Sets
+<span class="rdfa resource">Product_List</span>'s
+<span class="rdfa predicate">contentType</span> property to
+text/uri-list.</p>
+<p>The last two <span class="rdfa elt">&lt;/span&gt;</span>s
+close the <span class="rdfa resource">Product_List</span> and 
+<span class="rdfa resource">Products_GET_200</span> subjects, so the 
+current subject is again <span class="rdfa resource">Products_GET</span>.</p>
+</li>
+
+<li value="18">The outer <span class="rdfa elt">span</span> declares the
+start-index query parameter of <span class="rdfa resource">Products_GET</span>.
+The inner <span class="rdfa elt">span</span> sets its 
+<span class="rdfa property">name</span> property to
+<span class="rdfa attrValue">start-index</span>.
+</li>
+
+<li value="19">The outer <span class="rdfa elt">span</span> declares the
+max-results query parameter of <span class="rdfa resource">Products_GET</span>.
+The inner <span class="rdfa elt">span</span> sets its 
+<span class="rdfa property">name</span> property to
+<span class="rdfa attrValue">max-results</span>.
+</li>
+
+<li value="21"><p>Declares the type of
+<span class="rdfa resource">Start_index</span> to be a non-negative integer.</p>
+<p>This is an example of explicitly setting the subject of a statement with
+<span class="rdfa attrName">about</span>, instead of relying on the current
+subject as in the previous lines.  
+It also demonstrates WIFL's ability to use types from XML schema.</p>
+</li>
+
+<li value="22"><p>Declares the type of 
+<span class="rdfa resource">Max_results</span> to be a non-negative integer.</p>
+<p>This is another example of explicitly setting the subject of a statement with
+<span class="rdfa attrName">about</span>, instead of relying on the current
+subject.
+It also demonstrates WIFL's ability to use types from XML schema.</p>
+</li>
+
+<li value="24">Declares the default value of 
+<span class="rdfa resource">Start_index</span> to be 1.
+</li>
+
+<li value="25">Declares the default value of
+<span class="rdfa resource">Max_results</span> to be 100.
+</li>
+
+<li value="26">Closes the <span class="rdfa elt">div</span> from line 01.</li>
+</ol>
+</div>
+</div>
+
+<div id="examples">
+<pre class="htmlCode">
+&lt;div class="appl exchange" <span class="rdfa">typeof="Example"</span>&gt;<span class="rdfa">&lt;span rel="exampleRequest" typeof="ExampleRequest"&gt;&lt;span property="method"&gt;</span>GET<span class="rdfa">&lt;/span&gt; &lt;span property="uri"&gt;</span>${appPath}/${apiPath}/${productsPath}?apikey=${apikeyValue}<span class="rdfa">&lt;/span&gt;</span>
+<span class="rdfa">&lt;span rel="exampleHeader" typeof="ExampleHeader"&gt;&lt;span property="name"&gt;</span>Host<span class="rdfa">&lt;/span&gt;</span>: <span class="rdfa">&lt;span property="value"&gt;</span>${host}<span class="rdfa">&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;</span>
+<span class="rdfa">&lt;span rel="exampleResponse" typeof="ExampleResponse"&gt;&lt;span property="status"&gt;</span>200<span class="rdfa">&lt;/span&gt;</span> OK
+<span class="rdfa">&lt;span rel="exampleHeader" typeof="ExampleHeader"&gt;&lt;span property="name"&gt;</span>Content-Type<span class="rdfa">&lt;/span&gt;</span>: <span class="rdfa">&lt;span property="value"&gt;</span>text/uri-list<span class="rdfa">&lt;/span&gt;</span><span class="rdfa">&lt;/span&gt;</span>
+<span class="rdfa">&lt;span property="body"&gt;</span>${productsURL}/1
+..
+${productsURL}/10
+<span class="rdfa">&lt;/span&gt;</span><span class="rdfa">&lt;/span&gt;</span><span class="rdfa">&lt;/div&gt;</span></pre>
+
+<div class="htmlAnnotations">
+<h2></h2>
+<ol>
+<li value="01"><p>The <span class="rdfa elt">div</span> declares an
+anonymous subject of type <span class="rdfa attrValue">Example</span>.
+It is assumed that an ancestor element has set the default vocabulary to
+http://wifl.org/spec/#.</p>
+<p>The outer <span class="rdfa elt">span</span> declares an anonymous
+subject of type <span class="rdfa attrValue">ExampleRequest</span> that is
+an <span class="rdfa attrValue">exampleRequest</span> of its containing 
+<span class="rdfa elt">div</span>'s Example.</p>
+<p>The two inner <span class="rdfa elt">span</span>s declare the 
+<span class="rdfa attrValue">method</span> and <span class="rdfa attrValue">uri</span>
+of the example request.</p>
+</li>
+
+<li value="02">Identifies the request's Host header, its name and 
+value, and ends the <span class="rdfa attrValue">ExampleRequest</span>.
+</li>
+
+<li value="03">Begins the example's response and sets its
+status to 200.
+</li>
+
+<li value="04">Identifies the response's Content-Type header and its name and value.
+</li>
+
+<li value="05">Begins the response's body.
+</li>
+
+<li value="08">Ends the response's body, the response, and the
+example.
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+
+<div id="oss">
+<a class="logolink" href="https://github.com/wifl/wifl"><img src="images/GitHub-Mark-32px.png" alt="GitHub"/></a>
+<p class="intro">Find software on <a href="https://github.com/wifl/wifl">GitHub</a>.
+</p>
+<div id="sw">
+<ul>
+<li><a href="#cli">CLI <span class="language">JavaScript</span></a></li>
+<li><a href="#console">Console <span class="language">JavaScript</span></a></li>
+<li><a href="#transforms">Transform <span class="language">XSLT</span></a></li>
+<li><a href="#uri-template">URI Template <span class="language">JavaScript</span></a></li>
+<li><a href="#validator">Validator <span class="language">JavaScript</span></a></li>
+</ul>
+<div id="cli">
+<a class="logolink" href="http://nodejs.org"><img id="nodejs" src="http://nodejs.org/images/logo.png" alt="nodejs"/></a>
+<p class="intro">Command line tools run within <a href="http://nodejs.org">node.js</a>.</p>
+<ul class="features">
+<li>API description validation with text, JSON, or XML output.</li>
+<li>RDFa graph extraction to <a href="http://www.graphviz.org/"><code>dot</code></a> format.
+<img class="screenshot" src="images/store-model.png" alt="WIFL model of store application"/>
+</li>
+</ul>
+</div>
+
+<div id="console">
+<p class="intro">Add the console's JavaScript to an HTML page with WIFL and the
+browser will:</p>
+<ul class="features">
+<li>Visually flag invalid API examples.
+<img class="screenshot" src="images/invalid-start-index.png" alt="Example with invalid request URI parameter and error message"/></li>
+<li>Dynamically generate a console to explore the API.
+<img class="screenshot" src="images/console-get.png" alt="Console displaying GET request and response"/></li>
+</ul>
+</div>
+
+<div id="transforms">
+<p class="intro"><a href="http://www.w3.org/TR/xslt20/">XSLT</a> stylesheets 
+to transform other formats to HTML with WIFL, including console.</p>
+<ul class="formats">
+<li><a href="http://www.w3.org/Submission/wadl/">Web Application Description Language (WADL)</a></li>
+</ul>
+</div>
+
+<div id="uri-template">
+<p class="intro">Two-way processing of 
+<a href="http://tools.ietf.org/html/rfc6570">RFC 6570</a>
+URI templates.<a href="#uri-template-exception" class="footnote-id">*</a></p>
+<table>
+<tr>
+<th>Expand template using variable binding</th>
+<th>Extract variable binding from full URI</th>
+</tr>
+<tr>
+<td>
+<span class="operand">http://example.com/store/products/{id}</span>
+<span class="operator">+</span>
+<span class="operand">{"id": 662}</span>
+<hr/>
+<span class="operator">=</span>
+<span class="result">http://example.com/store/products/662</span>
+</td>
+<td>
+<span class="operand">http://example.com/store/products/662</span>
+<span class="operator">-</span>
+<span class="operand">http://example.com/store/products/{id}</span>
+<hr/>
+<span class="operator">=</span>
+<span class="result">{"id": 662}</span>
+</td>
+</tr>
+</table>
+<p id="uri-template-exception" class="footnote"><span class="footnote-id">*</span>
+To implement template matching, the implementation is restricted to URI
+templates with no repeated variables.</p> 
+</div>
+
+<div id="validator">
+<p class="intro">Common code used by the command-line tools and the console.</p>
+<ul class="features">
+<li>Extracts WIFL model from HTML, following links to other URIs within same domain.
+</li>
+<li>Validates example requests and responses against API description.</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
 <p class="links">
   <a href="http://wifl.org/spec/">Specification</a> |
   <a href="http://ect.bell-labs.com/who/ajeffrey/papers/icws13.pdf">ICWS Paper</a> |
-  <a href="http://github.com/wifl/wifl/">Github Repository</a>
+  <a href="http://github.com/wifl/wifl/">GitHub Repository</a>
 </p>
+
 <p class="validated">
   <a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-xhtml-rdfa-blue" alt="Valid XHTML + RDFa"/></a>
   <a href="http://jigsaw.w3.org/css-validator/check/referer"><img src="http://jigsaw.w3.org/css-validator/images/vcss-blue" alt="Valid CSS"/></a>
+</p>
+
+<p class="footer">
+Copyright &copy; 2013 Alcatel-Lucent, All Rights Reserved.
 </p>
 </body>
 </html>
