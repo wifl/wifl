@@ -7,10 +7,10 @@
 <link rel="stylesheet" type="text/css" href="wifl.css"/>
 <link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
 <link rel="stylesheet" type="text/css" href="http://www.steamdev.com/snippet/css/jquery.snippet.min.css"/>
-<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
-<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
-<script src="http://www.steamdev.com/snippet/js/jquery.snippet.js"></script>
-<script>
+<script src="http://code.jquery.com/jquery-1.9.1.js" type="text/javascript"></script>
+<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js" type="text/javascript"></script>
+<script src="http://www.steamdev.com/snippet/js/jquery.snippet.js" type="text/javascript"></script>
+<script type="text/javascript">
   $(function() {
     $("#sections").tabs();
     $("#sw").tabs();
@@ -67,7 +67,7 @@ found 75% of surveyed APIs provided examples.</li>
 <ul class="questions">
 <li>"Are the examples correct?"</li>
 <li>"Is there an easy way to try the API?"</li>
-</ul>
+</ul></li>
 <li>If an API is documented in HTML, why not include
 a machine-readable description?</li>
 <li>If the HTML included a machine-readable API description, it could also:
@@ -160,14 +160,14 @@ description in the existing document.</li>
 <li>Leverages, but not tied to, HTML document structure
 so it supports API descriptions distributed across documents using hyperlinking.</li>
 </ul>
-</td>
+</td></tr>
 </table>
 </div>
 
 <div id="vocab">
 <table width="100%">
 <tr>
-<th width="50%">For APIs</th>
+<th>For APIs</th>
 <th>For Examples</th>
 </tr>
 <tr>
@@ -510,7 +510,7 @@ templates with no repeated variables.</p>
 
 <div id="discussion">
 <p class="intro">Have questions?  
-Try the <a href="https://groups.google.com/forum/#!forum/wifl-discussion">WIFL Google Group</a></p>
+Try the <a href="https://groups.google.com/forum/#!forum/wifl-discussion">WIFL Google Group</a>.</p>
 
 <iframe id="forum_embed"
  src="javascript:void(0)"
@@ -523,7 +523,7 @@ Try the <a href="https://groups.google.com/forum/#!forum/wifl-discussion">WIFL G
 <script type="text/javascript">
  document.getElementById("forum_embed").src =
   "https://groups.google.com/forum/embed/?place=forum/wifl-discussion" +
-  "&showsearch=true&showpopout=true&parenturl=" +
+  "&amp;showsearch=true&amp;showpopout=true&amp;parenturl=" +
   encodeURIComponent(window.location.href);
 </script> 
 </div>
@@ -535,11 +535,6 @@ Try the <a href="https://groups.google.com/forum/#!forum/wifl-discussion">WIFL G
   <a href="http://ect.bell-labs.com/who/ajeffrey/papers/icws13.pdf">ICWS Paper</a> |
   <a href="http://github.com/wifl/wifl/">GitHub Repository</a> |
   <a href="https://groups.google.com/forum/#!forum/wifl-discussion">Google Group</a>
-</p>
-
-<p class="validated">
-  <a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-xhtml-rdfa-blue" alt="Valid XHTML + RDFa"/></a>
-  <a href="http://jigsaw.w3.org/css-validator/check/referer"><img src="http://jigsaw.w3.org/css-validator/images/vcss-blue" alt="Valid CSS"/></a>
 </p>
 
 <p class="footer">
