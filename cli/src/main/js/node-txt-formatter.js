@@ -8,7 +8,7 @@ define(function() {
              result.isNotFound() ? notFound(result.example) : 
              unsupported(result))
     })
-    return s.join('\n');
+    return s.join('\n' + (opts["--indent"] || ""));
   }
 
   function header(uri,api) {

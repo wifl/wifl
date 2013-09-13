@@ -10,6 +10,10 @@
   <!-- Location of wifl cli tools root directory -->
   <property name="dist" location="." />
 
+  <!-- Default validation options -->
+  <property name="formatter" value="node-txt-formatter" />
+  <property name="indent" value="  " />
+
   <!-- Graphviz properties -->  
   <condition property="graphviz.dot" value="${env.GRAPHVIZ_HOME}/bin/dot" else="dot">
     <isset property="env.GRAPHVIZ_HOME" />
@@ -53,6 +57,10 @@
     <fail unless="srcuri" message="Must designate URI to be validated with 'srcuri' property"/>
     <exec executable="${node.program}" logError="true">
       <arg value="${dist}/js/node-wifl.js" />
+      <arg value="--formatter" />
+      <arg value="${formatter}"/>
+      <arg value="--indent" />
+      <arg value="${indent}"/>
       <arg value="${srcuri}" />
     </exec>
   </target>

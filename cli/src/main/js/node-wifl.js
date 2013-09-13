@@ -37,8 +37,10 @@ requirejs.config({
   }
 })
 
+// Partition command-line arguments between options (prefixed with "--")
+// and URIs to be visited.
 var uris = [];
-var opts = {formatter: "node-txt-formatter"};
+var opts = {"--formatter": "node-txt-formatter"};
 for (var i=2; i<process.argv.length; i++) {
   var arg = process.argv[i];
   if (arg.indexOf("--") == 0) {

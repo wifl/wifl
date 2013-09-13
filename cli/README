@@ -1,0 +1,54 @@
+This module provides command-line tools for processing documents marked up with
+the WIFL RDFa vocabulary.
+
+Validate Examples
+-----------------
+
+Node.js (http://nodejs.org) must be installed.
+Some node.js modules must be installed.  The included "tools.xml" ant build 
+file's "node-install" target will download the required modules.
+
+To run the validation, use either
+$ ant -f tools.xml -Dsrcuri=<URI> [<options>] validate-examples
+or
+$ node js/node-wifl.js [<options>] <URI>
+
+The code does not follow redirects, so you may need to add a trailing '/', 
+e.g. http://127.0.0.1:8080/store/
+
+Several output formatters are available:
+  node-json-formatter
+  node-txt-formatter (default)
+  node-xml-formatter
+
+For ant, select the formatter by adding a command-line option,
+  -Dformatter=node-json-formatter
+For node, add a command-line option pair,
+  --formatter node-json-formatter
+ 
+The formatters accept the "--indent" option to change the indentation of the 
+output.
+
+For ant, change the indentation by adding a command-line option,
+  -Dindent="  "
+For node, add a command-line option pair,
+  --indent "  "
+
+Create an Image File
+--------------------
+
+Node.js (http://nodejs.org) and GraphViz (http://graphviz.org) must be 
+installed.
+Some node.js modules must be installed.  The included "tools.xml" ant build 
+file's "node-install" target will download the required modules.
+
+To create an image file, use
+$ ant -f tools.xml -Dsrcuri=<resource URI> rdfa-graphviz
+
+The resource URI must specify a valid RDFa resource, 
+e.g. http://127.0.0.1:8080/store/#Store
+
+The tools.xml file has ant properties containing default values for arguments 
+to GraphViz's "dot" command:
+  dotargs - control the image rendering (format, style, colors, etc.)
+  outfile - is the name of the output file
