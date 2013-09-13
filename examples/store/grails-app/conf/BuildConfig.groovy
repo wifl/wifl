@@ -31,9 +31,6 @@ grails.project.dependency.resolution = {
         //mavenRepo "http://download.java.net/maven/2/"
         //mavenRepo "http://repository.jboss.com/maven2/"
 
-        // add repo for jaxrs plugin
-        mavenRepo "http://repo.jfrog.org/artifactory/libs-releases"
- 
         // add repo for wifl plugin
         def wiflBase = System.properties["wifl.repository.url"]
         def wiflResolver = new org.apache.ivy.plugins.resolver.URLResolver()
@@ -73,6 +70,7 @@ grails.project.dependency.resolution = {
         runtime ":database-migration:1.1"
 
         compile ':cache:1.0.0'
+        test ":spock:0.7"
     }
 }
 //grails.plugin.location.wifl = "../grails-wifl-plugin"
