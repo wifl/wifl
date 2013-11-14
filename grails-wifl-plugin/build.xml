@@ -5,8 +5,9 @@
     <!-- Ivy properties for this module -->
     <property name="organization" value="org.wifl"/>
     <property name="module" value="grails-wifl"/>
-    <property name="version" value="0.3-SNAPSHOT"/>
+    <property name="version" value="0.3"/>
     <property name="wifl.dir" value="${basedir}/web-app/wifl"/>
+    <property name="wifl.repository.url" value="http://wifl.org/ivy"/>
 
     <condition property="grails.home" value="${env.GRAILS_HOME}">
       <isset property="env.GRAILS_HOME"/>

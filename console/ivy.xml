@@ -16,7 +16,7 @@
       <dependency org="org.requirejs" name="require-jquery" rev="2.1.4" conf="build->default">
         <artifact name="require-jquery" type="js" url="https://raw.github.com/jrburke/require-jquery/65028741e5a0303d06fb0136928608dc6b3a6f83/jquery-require-sample/webapp/scripts/require-jquery.js"/>
       </dependency>
-      <dependency org="org.wifl" name="validator" rev="0.2-SNAPSHOT" conf="build->default">
+      <dependency org="org.wifl" name="validator" rev="0.2" conf="build->default">
         <artifact name="validator" type="zip"/>
       </dependency>
     </dependencies>

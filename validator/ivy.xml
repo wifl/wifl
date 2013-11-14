@@ -9,7 +9,7 @@
       <artifact name="validator" type="zip"/>
     </publications>
     <dependencies>
-      <dependency org="org.wifl" name="uri-template" rev="0.1-SNAPSHOT" conf="default">
+      <dependency org="org.wifl" name="uri-template" rev="0.1" conf="default">
         <artifact name="uri-template" type="zip"/>
       </dependency>
       <dependency org="com.github.kriszyp.json-schema" name="validate" rev="v0.2.1" conf="default">
@@ -20,6 +20,6 @@
         <artifact name="xmllint" type="js" url="https://raw.github.com/kripken/xml.js/dc5df54720020318082cb3b93526f9ce4030111e/xmllint.js"/>
       </dependency>
 
-      <dependency org="org.wifl" name="uri-template" rev="0.1-SNAPSHOT" conf="test"/>
+      <dependency org="org.wifl" name="uri-template" rev="0.1" conf="test"/>
     </dependencies>
 </ivy-module>

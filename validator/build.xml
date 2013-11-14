@@ -2,7 +2,7 @@
 
   <!-- Ivy properties for this module -->
   <property name="module" value="validator"/>
-  <property name="version" value="0.2-SNAPSHOT"/>
+  <property name="version" value="0.2"/>
 
   <import file="../ant-common.xml" as="common"/>
 

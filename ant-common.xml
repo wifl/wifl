@@ -17,6 +17,7 @@
   <property file="${ivy.settings.dir}/ivysettings.properties"/>
   <property name="ivy.cache.dir" value="${ivy.settings.dir}/ivy-cache"/>
   <property name="ivy.publish.overwrite" value="false"/>
+  <property name="wifl.repository.url" value="http://wifl.org/ivy"/>
 
   <!-- Ivy properties specific to module are defined in module's build.xml
        e.g. 'module' and 'version' -->

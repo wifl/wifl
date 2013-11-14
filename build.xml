@@ -1,8 +1,9 @@
 <project name="Web InterFace Language" default="all" xmlns:ivy="antlib:org.apache.ivy.ant">
 
+  <property file="build.properties"/>
   <property name="ivy.cache.dir" value="${basedir}/settings/ivy-cache"/>
   <property name="ivy.repository.dir" value="${basedir}/settings/repository"/>
-  <property name="wifl.repository.url" value="file:///${basedir}/settings/repository"/>
+  <property name="wifl.repository.url" value="http://wifl.org/ivy"/>
 
   <property name="ivy.settings.dir" value="settings"/>
   <property name="repository.dir" value="${ivy.settings.dir}/repository"/>
@@ -11,23 +12,11 @@
   <property name="to.resolver" value="publication"/>
 
   <property name="cli.dir" location="cli"/>
-  <property name="cli.revision" value="0.1"/>
-  <property name="cli.resolver" value="projects"/>
   <property name="console.dir" location="console"/>
-  <property name="console.revision" value="0.1"/>
-  <property name="console.resolver" value="projects"/>
   <property name="spec.dir" location="spec"/>
-  <property name="spec.revision" value="0.1"/>
-  <property name="spec.resolver" value="projects"/>
   <property name="transform.dir" location="transform"/>
-  <property name="transform.revision" value="0.1"/>
-  <property name="transform.resolver" value="transform-wadl"/>
   <property name="uri-template.dir" location="uri-template"/>
-  <property name="uri-template.revision" value="0.1"/>
-  <property name="uri-template.resolver" value="projects"/>
   <property name="validator.dir" location="validator"/>
-  <property name="validator.revision" value="0.1"/>
-  <property name="validator.resolver" value="projects"/>
   
   <property name="build.target" value="build"/>
   <property name="test.target" value="test"/>

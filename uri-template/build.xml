@@ -2,7 +2,7 @@
   
   <!-- Ivy properties for this module -->
   <property name="module" value="uri-template"/>
-  <property name="version" value="0.1-SNAPSHOT"/>
+  <property name="version" value="0.1"/>
 
   <import file="../ant-common.xml"/>
 

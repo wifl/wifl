@@ -5,10 +5,10 @@
         <artifact name="grails-wifl" type="zip"/>
     </publications>
     <dependencies>
-        <dependency org="org.wifl" name="console" rev="0.3-SNAPSHOT" transitive="false">
+        <dependency org="org.wifl" name="console" rev="0.3" transitive="false">
             <artifact name="console" type="zip"/>
         </dependency>
-        <dependency org="org.wifl" name="transform-wadl" rev="0.3-SNAPSHOT" transitive="false">
+        <dependency org="org.wifl" name="transform-wadl" rev="0.3" transitive="false">
             <artifact name="transform-wadl" type="zip"/>
         </dependency>
     </dependencies>
