@@ -20,7 +20,8 @@ by these elements within <head>:
 
 The application may be run without an installation of Grails from the 
 command-line with the Grails wrapper (grailsw or grailsw.bat)
-$ ./grailsw -Dwifl.repository.url=file:///../../settings/repository run-app
+$ ./grailsw run-app
 (proxy properties may be required).
 This assumes that the other WIFL Ivy artifacts have been built and are
-available at the URL specified by 'wifl.repository.url'
+available at the URL specified by the 'wifl.repository.url' system property,
+which defaults to "http://wifl.org/ivy".
